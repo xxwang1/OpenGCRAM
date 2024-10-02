@@ -1,0 +1,581 @@
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_bitcell_array        Geometries: 6588        Checks: 2285    Errors: 10747
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING:  Stamping conflict in SCONNECT - Multiple source nets stamp one target net.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_bitcell_array        Summary: 8      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_replica_column       Geometries: 3525        Checks: 2285    Errors: 5772
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_replica_column       Summary: 8      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_dummy_array  Geometries: 419 Checks: 2285    Errors: 706
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING:  Stamping conflict in SCONNECT - Multiple source nets stamp one target net.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_dummy_array  Summary: 8      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_replica_bitcell_array        Geometries: 10907       Checks: 2285    Errors: 17140
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING:  Stamping conflict in SCONNECT - Multiple source nets stamp one target net.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_replica_bitcell_array        Summary: 8      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_dummy_array_0        Geometries: 627 Checks: 2285    Errors: 1041
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING:  Stamping conflict in SCONNECT - Multiple source nets stamp one target net.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_dummy_array_0        Summary: 8      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_dummy_array_1        Geometries: 627 Checks: 2285    Errors: 1041
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING:  Stamping conflict in SCONNECT - Multiple source nets stamp one target net.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_dummy_array_1        Summary: 8      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_dummy_array_2        Geometries: 3901        Checks: 2285    Errors: 6275
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_dummy_array_2        Summary: 8      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_dummy_array_3        Geometries: 3901        Checks: 2285    Errors: 6275
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_dummy_array_3        Summary: 8      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_capped_replica_bitcell_array Geometries: 21600       Checks: 2285    Errors: 32129
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_capped_replica_bitcell_array Summary: 6      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pnand2       Geometries: 137 Checks: 2285    Errors: 159
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pnand2       Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pinv Geometries: 83  Checks: 2285    Errors: 131
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pinv Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_and2_dec     Geometries: 241 Checks: 2285    Errors: 246
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_and2_dec     Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pnand3       Geometries: 175 Checks: 2285    Errors: 184
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pnand3       Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_and3_dec     Geometries: 282 Checks: 2285    Errors: 267
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_and3_dec     Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_hierarchical_predecode2x4    Geometries: 1384        Checks: 2285    Errors: 1106
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING:  Stamping conflict in SCONNECT - Multiple source nets stamp one target net.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_hierarchical_predecode2x4    Summary: 8      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_hierarchical_predecode3x8    Geometries: 3026        Checks: 2285    Errors: 2222
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING:  Stamping conflict in SCONNECT - Multiple source nets stamp one target net.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_hierarchical_predecode3x8    Summary: 8      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pnand4       Geometries: 215 Checks: 2285    Errors: 238
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pnand4       Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_and4_dec     Geometries: 325 Checks: 2285    Errors: 319
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_and4_dec     Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_hierarchical_predecode4x16   Geometries: 6612        Checks: 2285    Errors: 5074
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING:  Stamping conflict in SCONNECT - Multiple source nets stamp one target net.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_hierarchical_predecode4x16   Summary: 8      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_hierarchical_decoder Geometries: 7483        Checks: 2285    Errors: 5747
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING:  Stamping conflict in SCONNECT - Multiple source nets stamp one target net.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_hierarchical_decoder Summary: 8      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_wordline_driver      Geometries: 241 Checks: 2285    Errors: 246
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_wordline_driver      Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_wordline_driver_array        Geometries: 4294        Checks: 2285    Errors: 3605
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_wordline_driver_array        Summary: 6      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_and2_dec_0   Geometries: 241 Checks: 2285    Errors: 246
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_and2_dec_0   Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_port_address Geometries: 12383       Checks: 2285    Errors: 9581
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING:  Stamping conflict in SCONNECT - Multiple source nets stamp one target net.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_port_address Summary: 8      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_precharge    Geometries: 136 Checks: 2285    Errors: 153
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_precharge    Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_precharge_0  Geometries: 136 Checks: 2285    Errors: 153
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_precharge_0  Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_precharge_array      Geometries: 473 Checks: 2285    Errors: 416
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_precharge_array      Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_sense_amp_array      Geometries: 755 Checks: 2285    Errors: 1277
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING:  Stamping conflict in SCONNECT - Multiple source nets stamp one target net.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_sense_amp_array      Summary: 8      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_write_driver_array   Geometries: 803 Checks: 2285    Errors: 1380
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_write_driver_array   Summary: 6      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_port_data    Geometries: 2172        Checks: 2285    Errors: 3007
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING:  Stamping conflict in SCONNECT - Multiple source nets stamp one target net.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_port_data    Summary: 8      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_bank Geometries: 36497       Checks: 2285    Errors: 44494
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING:  Stamping conflict in SCONNECT - Multiple source nets stamp one target net.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_bank Summary: 8      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_row_addr_dff Geometries: 2461        Checks: 2285    Errors: 3693
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_row_addr_dff Summary: 6      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_data_dff     Geometries: 1204        Checks: 2285    Errors: 1841
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING:  Stamping conflict in SCONNECT - Multiple source nets stamp one target net.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_data_dff     Summary: 8      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pinv_0       Geometries: 83  Checks: 2285    Errors: 121
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pinv_0       Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pinv_1       Geometries: 106 Checks: 2285    Errors: 145
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pinv_1       Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_dff_buf      Geometries: 816 Checks: 2285    Errors: 1131
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_dff_buf      Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_dff_buf_0    Geometries: 816 Checks: 2285    Errors: 1131
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_dff_buf_0    Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_dff_buf_array        Geometries: 1725        Checks: 2285    Errors: 2313
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_dff_buf_array        Summary: 6      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pnand2_0     Geometries: 122 Checks: 2285    Errors: 135
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pnand2_0     Summary: 8      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pinv_2       Geometries: 190 Checks: 2285    Errors: 242
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pinv_2       Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pdriver      Geometries: 203 Checks: 2285    Errors: 242
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pdriver      Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pand2        Geometries: 346 Checks: 2285    Errors: 313
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pand2        Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pand2        Geometries: 346 Checks: 2285    Errors: 313
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pand2        Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pinv_3       Geometries: 83  Checks: 2285    Errors: 128
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pinv_3       Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pinv_4       Geometries: 68  Checks: 2285    Errors: 95
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pinv_4       Summary: 8      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pbuf Geometries: 173 Checks: 2285    Errors: 173
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pbuf Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pinv_5       Geometries: 83  Checks: 2285    Errors: 128
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pinv_5       Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pinv_6       Geometries: 83  Checks: 2285    Errors: 121
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pinv_6       Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pinv_7       Geometries: 127 Checks: 2285    Errors: 173
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pinv_7       Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pinv_8       Geometries: 207 Checks: 2285    Errors: 271
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pinv_8       Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pdriver_0    Geometries: 531 Checks: 2285    Errors: 555
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pdriver_0    Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pdriver_1    Geometries: 229 Checks: 2285    Errors: 256
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pdriver_1    Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pnand3_0     Geometries: 160 Checks: 2285    Errors: 165
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pnand3_0     Summary: 8      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pinv_9       Geometries: 167 Checks: 2285    Errors: 219
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pinv_9       Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pdriver_2    Geometries: 180 Checks: 2285    Errors: 219
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pdriver_2    Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pand3        Geometries: 364 Checks: 2285    Errors: 319
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pand3        Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pand3        Geometries: 364 Checks: 2285    Errors: 319
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pand3        Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pdriver_3    Geometries: 96  Checks: 2285    Errors: 121
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pdriver_3    Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pand3_0      Geometries: 280 Checks: 2285    Errors: 226
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pand3_0      Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pand3_0      Geometries: 280 Checks: 2285    Errors: 226
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pand3_0      Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pdriver_4    Geometries: 181 Checks: 2285    Errors: 217
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pdriver_4    Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pnand2_1     Geometries: 137 Checks: 2285    Errors: 159
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pnand2_1     Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_pinv_10      Geometries: 83  Checks: 2285    Errors: 128
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_pinv_10      Summary: 4      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_delay_chain  Geometries: 4497        Checks: 2285    Errors: 4542
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_delay_chain  Summary: 6      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16_control_logic_rw     Geometries: 9355        Checks: 2285    Errors: 9663
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING:  Stamping conflict in SCONNECT - Multiple source nets stamp one target net.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16_control_logic_rw     Summary: 8      Output: 0       Extraction: 0
+WARNING: file calibre.py: line 296: tsmc_sram_2x16      Geometries: 51017       Checks: 2285    Errors: 58656
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of instances.
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+ERROR: file calibre.py: line 333:   Error:    Different numbers of nets (see below).
+ERROR: file calibre.py: line 333:   Error:    Different numbers of instances (see below).
+ERROR: file calibre.py: line 333:   Error:    Connectivity errors.
+ERROR: file calibre.py: line 333:   Error:    Instances of different types or subtypes were matched.
+WARNING: file calibre.py: line 350: WARNING:  Stamping conflict in SCONNECT - Multiple source nets stamp one target net.
+WARNING: file calibre.py: line 350: WARNING:  Stamping conflict in SCONNECT - Multiple source nets stamp one target net.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! POWER": no POWER nets present, operation aborted.
+WARNING: file calibre.py: line 350: WARNING: Invalid PATHCHK request "! GROUND": no GROUND nets present, operation aborted.
+WARNING: file calibre.py: line 377: tsmc_sram_2x16      Summary: 10     Output: 0       Extraction: 0

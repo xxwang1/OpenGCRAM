@@ -1,0 +1,20 @@
+\o Program:		@(#)$CDS: libManager version 6.1.8 - CAT37 02/10/2023 14:05 (cpgsrv13) $
+\o Sub version:		sub-version  s312 
+\o Arguments:		-unmapped -mpssession virtuoso788541 -mpshost r8cad-tsmc40 
+\o Working Directory:	r8cad-tsmc40:/home/xxwang1/OpenRAM
+\o 64-bit offsets
+\o Qt version: 		5.9.1
+\o changeWorkingDir("/home/xxwang1/OpenRAM") unnecessary.
+\o ddSetForcedLib("") unnecessary.
+\o Log file is "/home/xxwang1/OpenRAM/libManager.log".
+\o Opening libManager window.
+\a nrSetWindowVisibility(cdsLibManager "show")
+\o MPS service: map window
+\o Library Manager customization server connected.
+\a nrResizeWindow(cdsLibManager list(1920 31 1920 1009))
+\a nrSetCurrentWindow(cdsLibManager)
+\a nrSetWindowVisibility(cdsLibManager "hide")
+\a _lmgrCloseIconify("cdsLibManager" 1)
+\a cdsLibManager->fileExitButton->value = t
+\o libManager is exiting.
+\a exit(0)
