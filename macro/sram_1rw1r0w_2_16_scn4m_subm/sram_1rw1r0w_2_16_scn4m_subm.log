@@ -1,0 +1,59 @@
+[2024-06-12 16:44:31.535496] |==============================================================================|
+[2024-06-12 16:44:31.545726] |=========                      OpenRAM v1.2.48                       =========|
+[2024-06-12 16:44:31.549306] |=========                                                            =========|
+[2024-06-12 16:44:31.551766] |=========               VLSI Design and Automation Lab               =========|
+[2024-06-12 16:44:31.554031] |=========        Computer Science and Engineering Department         =========|
+[2024-06-12 16:44:31.557988] |=========            University of California Santa Cruz             =========|
+[2024-06-12 16:44:31.561770] |=========                                                            =========|
+[2024-06-12 16:44:31.568615] |=========          Usage help: openram-user-group@ucsc.edu           =========|
+[2024-06-12 16:44:31.572471] |=========        Development help: openram-dev-group@ucsc.edu        =========|
+[2024-06-12 16:44:31.575999] |=========                See LICENSE for license info                =========|
+[2024-06-12 16:44:31.580101] |==============================================================================|
+[2024-06-12 16:44:31.583907] ** Start: 06/12/2024 16:44:31
+[2024-06-12 16:44:31.586250] Technology: scn4m_subm
+[2024-06-12 16:44:31.589984] Total size: 32 bits
+[2024-06-12 16:44:31.592912] Word size: 2
+Words: 16
+Banks: 1
+[2024-06-12 16:44:31.595708] RW ports: 1
+R-only ports: 1
+W-only ports: 0
+[2024-06-12 16:44:31.600027] Design supply routing skipped. Supplies will have multiple must-connect pins. (route_supplies=True to enable supply routing).
+[2024-06-12 16:44:31.603946] DRC/LVS/PEX is only run on the top-level design to save run-time (inline_lvsdrc=True to do inline checking).
+[2024-06-12 16:44:31.607946] DRC/LVS/PEX is disabled (check_lvsdrc=True to enable).
+[2024-06-12 16:44:31.610729] Characterization is disabled (using analytical delay models) (analytical_delay=False to simulate).
+[2024-06-12 16:44:31.614942] Words per row: None
+[2024-06-12 16:44:31.618498] Output files are: 
+[2024-06-12 16:44:31.621585] /home/xxwang1/OpenRAM/macro/sram_1rw1r0w_2_16_scn4m_subm/sram_1rw1r0w_2_16_scn4m_subm.lvs
+[2024-06-12 16:44:31.625877] /home/xxwang1/OpenRAM/macro/sram_1rw1r0w_2_16_scn4m_subm/sram_1rw1r0w_2_16_scn4m_subm.sp
+[2024-06-12 16:44:31.629186] /home/xxwang1/OpenRAM/macro/sram_1rw1r0w_2_16_scn4m_subm/sram_1rw1r0w_2_16_scn4m_subm.v
+[2024-06-12 16:44:31.632165] /home/xxwang1/OpenRAM/macro/sram_1rw1r0w_2_16_scn4m_subm/sram_1rw1r0w_2_16_scn4m_subm.lib
+[2024-06-12 16:44:31.634826] /home/xxwang1/OpenRAM/macro/sram_1rw1r0w_2_16_scn4m_subm/sram_1rw1r0w_2_16_scn4m_subm.py
+[2024-06-12 16:44:31.637830] /home/xxwang1/OpenRAM/macro/sram_1rw1r0w_2_16_scn4m_subm/sram_1rw1r0w_2_16_scn4m_subm.html
+[2024-06-12 16:44:31.640413] /home/xxwang1/OpenRAM/macro/sram_1rw1r0w_2_16_scn4m_subm/sram_1rw1r0w_2_16_scn4m_subm.log
+[2024-06-12 16:44:31.648302] /home/xxwang1/OpenRAM/macro/sram_1rw1r0w_2_16_scn4m_subm/sram_1rw1r0w_2_16_scn4m_subm.lef
+[2024-06-12 16:44:31.651412] /home/xxwang1/OpenRAM/macro/sram_1rw1r0w_2_16_scn4m_subm/sram_1rw1r0w_2_16_scn4m_subm.gds
+[2024-06-12 16:44:32.459645] ** Submodules: 0.8 seconds
+[2024-06-12 16:44:32.591914] ** Placement: 0.0 seconds
+[2024-06-12 16:44:39.407404] ** Routing: 6.8 seconds
+[2024-06-12 16:44:39.629603] ** Verification: 0.0 seconds
+[2024-06-12 16:44:39.633587] ** SRAM creation: 8.0 seconds
+[2024-06-12 16:44:39.702664] SP: Writing to /home/xxwang1/OpenRAM/macro/sram_1rw1r0w_2_16_scn4m_subm/sram_1rw1r0w_2_16_scn4m_subm.sp
+[2024-06-12 16:44:40.509823] ** Spice writing: 0.8 seconds
+[2024-06-12 16:44:40.517985] DELAY: Writing stimulus...
+[2024-06-12 16:44:41.171104] ** DELAY: 0.7 seconds
+[2024-06-12 16:44:41.222326] GDS: Writing to /home/xxwang1/OpenRAM/macro/sram_1rw1r0w_2_16_scn4m_subm/sram_1rw1r0w_2_16_scn4m_subm.gds
+[2024-06-12 16:44:41.337744] ** GDS: 0.1 seconds
+[2024-06-12 16:44:41.667199] LEF: Writing to /home/xxwang1/OpenRAM/macro/sram_1rw1r0w_2_16_scn4m_subm/sram_1rw1r0w_2_16_scn4m_subm.lef
+[2024-06-12 16:44:41.880001] ** LEF: 0.2 seconds
+[2024-06-12 16:44:41.888887] LVS: Writing to /home/xxwang1/OpenRAM/macro/sram_1rw1r0w_2_16_scn4m_subm/sram_1rw1r0w_2_16_scn4m_subm.lvs.sp
+[2024-06-12 16:44:41.929852] ** LVS writing: 0.0 seconds
+[2024-06-12 16:44:41.934432] LIB: Characterizing... 
+[2024-06-12 16:44:42.663721] ** Characterization: 0.7 seconds
+[2024-06-12 16:44:42.708623] Config: Writing to /home/xxwang1/OpenRAM/macro/sram_1rw1r0w_2_16_scn4m_subm/sram_1rw1r0w_2_16_scn4m_subm.py
+[2024-06-12 16:44:42.717320] ** Config: 0.0 seconds
+[2024-06-12 16:44:42.793684] Datasheet: Writing to /home/xxwang1/OpenRAM/macro/sram_1rw1r0w_2_16_scn4m_subm/sram_1rw1r0w_2_16_scn4m_subm.html
+[2024-06-12 16:44:42.875507] ** Datasheet: 0.1 seconds
+[2024-06-12 16:44:42.887302] Verilog: Writing to /home/xxwang1/OpenRAM/macro/sram_1rw1r0w_2_16_scn4m_subm/sram_1rw1r0w_2_16_scn4m_subm.v
+[2024-06-12 16:44:42.913760] ** Verilog: 0.0 seconds
+[2024-06-12 16:44:42.945968] ** End: 11.4 seconds

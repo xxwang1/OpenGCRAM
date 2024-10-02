@@ -1,0 +1,204 @@
+VERSION 5.4 ;
+NAMESCASESENSITIVE ON ;
+BUSBITCHARS "[]" ;
+DIVIDERCHAR "/" ;
+UNITS
+  DATABASE MICRONS 2000 ;
+END UNITS
+MACRO sram_1rw1r0w_2_16_scn4m_subm
+   CLASS BLOCK ;
+   SIZE 496.0 BY 602.6 ;
+   SYMMETRY X Y R90 ;
+   PIN din0[0]
+      DIRECTION INPUT ;
+      PORT
+         LAYER metal4 ;
+         RECT  141.0 0.0 142.2 1.2 ;
+      END
+   END din0[0]
+   PIN din0[1]
+      DIRECTION INPUT ;
+      PORT
+         LAYER metal4 ;
+         RECT  162.8 0.0 164.0 1.2 ;
+      END
+   END din0[1]
+   PIN addr0[0]
+      DIRECTION INPUT ;
+      PORT
+         LAYER metal3 ;
+         RECT  0.0 356.4 1.2 357.6 ;
+      END
+   END addr0[0]
+   PIN addr0[1]
+      DIRECTION INPUT ;
+      PORT
+         LAYER metal3 ;
+         RECT  0.0 378.4 1.2 379.6 ;
+      END
+   END addr0[1]
+   PIN addr0[2]
+      DIRECTION INPUT ;
+      PORT
+         LAYER metal3 ;
+         RECT  0.0 396.4 1.2 397.6 ;
+      END
+   END addr0[2]
+   PIN addr0[3]
+      DIRECTION INPUT ;
+      PORT
+         LAYER metal3 ;
+         RECT  0.0 418.4 1.2 419.6 ;
+      END
+   END addr0[3]
+   PIN addr1[0]
+      DIRECTION INPUT ;
+      PORT
+         LAYER metal3 ;
+         RECT  494.8 206.4 496.0 207.6 ;
+      END
+   END addr1[0]
+   PIN addr1[1]
+      DIRECTION INPUT ;
+      PORT
+         LAYER metal3 ;
+         RECT  494.8 184.4 496.0 185.6 ;
+      END
+   END addr1[1]
+   PIN addr1[2]
+      DIRECTION INPUT ;
+      PORT
+         LAYER metal3 ;
+         RECT  494.8 166.4 496.0 167.6 ;
+      END
+   END addr1[2]
+   PIN addr1[3]
+      DIRECTION INPUT ;
+      PORT
+         LAYER metal3 ;
+         RECT  494.8 144.4 496.0 145.6 ;
+      END
+   END addr1[3]
+   PIN csb0
+      DIRECTION INPUT ;
+      PORT
+         LAYER metal3 ;
+         RECT  0.0 36.0 1.2 37.2 ;
+      END
+   END csb0
+   PIN csb1
+      DIRECTION INPUT ;
+      PORT
+         LAYER metal3 ;
+         RECT  494.8 566.0 496.0 567.2 ;
+      END
+   END csb1
+   PIN web0
+      DIRECTION INPUT ;
+      PORT
+         LAYER metal3 ;
+         RECT  0.0 58.0 1.2 59.2 ;
+      END
+   END web0
+   PIN clk0
+      DIRECTION INPUT ;
+      PORT
+         LAYER metal4 ;
+         RECT  84.2 0.0 85.4 1.2 ;
+      END
+   END clk0
+   PIN clk1
+      DIRECTION INPUT ;
+      PORT
+         LAYER metal4 ;
+         RECT  413.4 601.4 414.6 602.6 ;
+      END
+   END clk1
+   PIN dout0[0]
+      DIRECTION OUTPUT ;
+      PORT
+         LAYER metal4 ;
+         RECT  237.9 0.0 239.1 1.2 ;
+      END
+   END dout0[0]
+   PIN dout0[1]
+      DIRECTION OUTPUT ;
+      PORT
+         LAYER metal4 ;
+         RECT  248.7 0.0 249.9 1.2 ;
+      END
+   END dout0[1]
+   PIN dout1[0]
+      DIRECTION OUTPUT ;
+      PORT
+         LAYER metal4 ;
+         RECT  238.1 601.4 239.3 602.6 ;
+      END
+   END dout1[0]
+   PIN dout1[1]
+      DIRECTION OUTPUT ;
+      PORT
+         LAYER metal4 ;
+         RECT  248.9 601.4 250.1 602.6 ;
+      END
+   END dout1[1]
+   PIN vdd
+      DIRECTION INOUT ;
+      USE POWER ; 
+      SHAPE ABUTMENT ; 
+      PORT
+      END
+   END vdd
+   PIN gnd
+      DIRECTION INOUT ;
+      USE GROUND ; 
+      SHAPE ABUTMENT ; 
+      PORT
+      END
+   END gnd
+   OBS
+   LAYER  metal1 ;
+      RECT  1.4 1.4 494.6 601.2 ;
+   LAYER  metal2 ;
+      RECT  1.4 1.4 494.6 601.2 ;
+   LAYER  metal3 ;
+      RECT  2.4 355.2 494.6 358.8 ;
+      RECT  1.4 358.8 2.4 377.2 ;
+      RECT  1.4 380.8 2.4 395.2 ;
+      RECT  1.4 398.8 2.4 417.2 ;
+      RECT  1.4 420.8 2.4 601.2 ;
+      RECT  2.4 1.4 493.6 205.2 ;
+      RECT  2.4 205.2 493.6 208.8 ;
+      RECT  2.4 208.8 493.6 355.2 ;
+      RECT  493.6 208.8 494.6 355.2 ;
+      RECT  493.6 186.8 494.6 205.2 ;
+      RECT  493.6 168.8 494.6 183.2 ;
+      RECT  493.6 1.4 494.6 143.2 ;
+      RECT  493.6 146.8 494.6 165.2 ;
+      RECT  1.4 1.4 2.4 34.8 ;
+      RECT  2.4 358.8 493.6 564.8 ;
+      RECT  2.4 564.8 493.6 568.4 ;
+      RECT  2.4 568.4 493.6 601.2 ;
+      RECT  493.6 358.8 494.6 564.8 ;
+      RECT  493.6 568.4 494.6 601.2 ;
+      RECT  1.4 38.4 2.4 56.8 ;
+      RECT  1.4 60.4 2.4 355.2 ;
+   LAYER  metal4 ;
+      RECT  1.4 3.6 138.6 601.2 ;
+      RECT  138.6 3.6 144.6 601.2 ;
+      RECT  144.6 1.4 160.4 3.6 ;
+      RECT  1.4 1.4 81.8 3.6 ;
+      RECT  87.8 1.4 138.6 3.6 ;
+      RECT  144.6 3.6 411.0 599.0 ;
+      RECT  411.0 3.6 417.0 599.0 ;
+      RECT  417.0 3.6 494.6 599.0 ;
+      RECT  417.0 599.0 494.6 601.2 ;
+      RECT  166.4 1.4 235.5 3.6 ;
+      RECT  241.5 1.4 246.3 3.6 ;
+      RECT  252.3 1.4 494.6 3.6 ;
+      RECT  144.6 599.0 235.7 601.2 ;
+      RECT  241.7 599.0 246.5 601.2 ;
+      RECT  252.5 599.0 411.0 601.2 ;
+   END
+END    sram_1rw1r0w_2_16_scn4m_subm
+END    LIBRARY
