@@ -138,3 +138,13 @@ class sram_op(Enum):
     DISABLED_READ_ONE = 5
     DISABLED_WRITE_ZERO = 6
     DISABLED_WRITE_ONE = 7
+
+class gain_cell_op(Enum):
+    READ_ZERO = 0
+    READ_ONE = 1
+    WRITE_ZERO = 2
+    WRITE_ONE = 3
+    DISABLED_READ_ZERO = 4
+    DISABLED_READ_ONE = 5
+    DISABLED_WRITE_ZERO = 6
+    DISABLED_WRITE_ONE = 7

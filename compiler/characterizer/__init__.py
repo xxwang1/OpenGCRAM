@@ -9,7 +9,9 @@ import os
 from openram import debug
 from openram import OPTS, find_exe, get_tool
 from .lib import *
+from .gain_cell_lib import *
 from .delay import *
+from .gain_cell_delay import *
 from .elmore import *
 from .linear_regression import *
 from .neural_network import *
