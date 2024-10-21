@@ -115,115 +115,124 @@ class supply_router(router):
                 # Find the shortest path from source to target
                 path = g.find_shortest_path()
                 print("path = ", path)
+                if path == None:
+                    source_cp = source
+                    source = target
+                    target = source_cp
+                    g.create_graph(source, target)
+                    path = g.find_shortest_path()
 
                 sub_via_list_from = []
                 sub_via_list_to = []
                 sub_via_index = []
-                for i in range(len(path) - 1):
-                    direction = path[i].get_direction(path[i+1])
-                    if direction == (1, 1):
-                        sub_via_list_from.append(path[i])
-                        sub_via_list_to.append(path[i+1])
-                        sub_via_index.append(i)
-                via_list_from.append(sub_via_list_from)
-                via_list_to.append(sub_via_list_to)
+                if path:
+                    for i in range(len(path) - 1):
+                        direction = path[i].get_direction(path[i+1])
+                        if direction == (1, 1):
+                            sub_via_list_from.append(path[i])
+                            sub_via_list_to.append(path[i+1])
+                            sub_via_index.append(i)
+                    via_list_from.append(sub_via_list_from)
+                    via_list_to.append(sub_via_list_to)
                 # If no path is found, throw an error
                 if path is None:
                     self.write_debug_gds(gds_name="{}error.gds".format(OPTS.openram_temp), g=g, source=source, target=target)
-                    debug.error("Couldn't route from {} to {}.".format(source, target), -1)
+                    pass
+                    # debug.error("Couldn't route from {} to {}.".format(source, target), -1)
                 # Create the path shapes on layout
-                source_ll, source_ur = source.rect
-                target_ll, target_ur = target.rect
-                # if (source_ur.x - source_ll.x >=18 or source_ur.y - source_ll.y >= 18) or (target_ur.x - target_ll.x >=18 or target_ur.y - target_ll.y >= 18):
-                    # if (source_ur.x - source_ll.x >=18 or source_ur.y - source_ll.y >= 18):
-                # if source in self.new_pins[vdd_name] or source in self.new_pins[gnd_name]:
-                if source in source_list:
-                    index = source_list.index(source)
-                    target_to_compare = target_list[index]
-                    if target.layer == target_to_compare.layer:
-                        # target_ll, target_ur = target.rect
-                        target_c_ll, target_c_ur = target_to_compare.rect
-                        if (target_ll.x == target_c_ll.x and target.layer == "m6") or (target_ll.y == target_c_ll.y and target.layer == "m5"):
-                            if len(sub_via_list_from) == 1:
-                            # for i in range(len(sub_via_list_from)):
-                                if sub_via_list_from[0].center != via_list_from[index][0].center:
-                                    path[sub_via_index[0]] = via_list_from[index][0]
-                                    path[sub_via_index[0] + 1] = via_list_to[index][0]
-                # elif source in target_list:
-                #     index = target_list.index(source)
-                #     source_to_compare = source_list[index]
-                #     if target.layer == source_to_compare.layer:
-                #         # target_ll, target_ur = target.rect
-                #         source_c_ll, source_c_ur = source_to_compare.rect
-                #         if target_ll.x == source_c_ll.x or target_ll.y == source_c_ll.y:
-                #             pass
-                # elif target in source_list:
-                #     index = source_list.index(target)
-                #     target_to_compare = target_list[index]
-                #     if source.layer == target_to_compare.layer:
-                #         # source_ll, source_ur = source.rect
-                #         target_c_ll, target_c_ur = target_to_compare.rect
-                #         if source_ll.x == target_c_ll.x or source_ll.y == target_c_ll.y:
-                #             pass
-                # elif target in target_list:
-                #     index = target_list.index(target)
-                #     source_to_compare = source_list[index]
-                #     if source.layer == source_to_compare.layer:
-                #         # source_ll, source_ur = source.rect
-                #         source_c_ll, source_c_ur = source_to_compare.rect
-                #         if (source_ll.x == source_c_ll.x and source.layer == "m6") or (source_ll.y == source_c_ll.y and source.layer == "m5"):
-                #             pass
+                if path:
+                    source_ll, source_ur = source.rect
+                    target_ll, target_ur = target.rect
+                    # if (source_ur.x - source_ll.x >=18 or source_ur.y - source_ll.y >= 18) or (target_ur.x - target_ll.x >=18 or target_ur.y - target_ll.y >= 18):
+                        # if (source_ur.x - source_ll.x >=18 or source_ur.y - source_ll.y >= 18):
+                    # if source in self.new_pins[vdd_name] or source in self.new_pins[gnd_name]:
+                    if source in source_list:
+                        index = source_list.index(source)
+                        target_to_compare = target_list[index]
+                        if target.layer == target_to_compare.layer:
+                            # target_ll, target_ur = target.rect
+                            target_c_ll, target_c_ur = target_to_compare.rect
+                            if (target_ll.x == target_c_ll.x and target.layer == "m6") or (target_ll.y == target_c_ll.y and target.layer == "m5"):
+                                if len(sub_via_list_from) == 1:
+                                # for i in range(len(sub_via_list_from)):
+                                    if sub_via_list_from[0].center != via_list_from[index][0].center:
+                                        path[sub_via_index[0]] = via_list_from[index][0]
+                                        path[sub_via_index[0] + 1] = via_list_to[index][0]
+                    # elif source in target_list:
+                    #     index = target_list.index(source)
+                    #     source_to_compare = source_list[index]
+                    #     if target.layer == source_to_compare.layer:
+                    #         # target_ll, target_ur = target.rect
+                    #         source_c_ll, source_c_ur = source_to_compare.rect
+                    #         if target_ll.x == source_c_ll.x or target_ll.y == source_c_ll.y:
+                    #             pass
+                    # elif target in source_list:
+                    #     index = source_list.index(target)
+                    #     target_to_compare = target_list[index]
+                    #     if source.layer == target_to_compare.layer:
+                    #         # source_ll, source_ur = source.rect
+                    #         target_c_ll, target_c_ur = target_to_compare.rect
+                    #         if source_ll.x == target_c_ll.x or source_ll.y == target_c_ll.y:
+                    #             pass
+                    # elif target in target_list:
+                    #     index = target_list.index(target)
+                    #     source_to_compare = source_list[index]
+                    #     if source.layer == source_to_compare.layer:
+                    #         # source_ll, source_ur = source.rect
+                    #         source_c_ll, source_c_ur = source_to_compare.rect
+                    #         if (source_ll.x == source_c_ll.x and source.layer == "m6") or (source_ll.y == source_c_ll.y and source.layer == "m5"):
+                    #             pass
 
-                # else: 
-                if source.layer == "m5" and target.layer == "m6":
-                    if source_ll.y in fake_pins_ll_y_m5 and (target_ll.x not in fake_pins_ll_x_m6): 
-                        print("source_ll.y in fake_pins_ll_y_m5")
-                        multiple_via5="SV"
-                    elif target_ll.x in fake_pins_ll_x_m6 and (source_ll.y not in fake_pins_ll_y_m5): 
-                        print("target_ll.x in fake_pins_ll_x_m6")
-                        multiple_via5="TH"
-                    else: multiple_via5 = False
-                elif source.layer == "m6"and target.layer == "m5":
-                    if source_ll.x in fake_pins_ll_x_m6 and (target_ll.y not in fake_pins_ll_y_m5): 
-                        print("source_ll.x in fake_pins_ll_x_m6")
-                        multiple_via5="SH"
-                    elif target_ll.y in fake_pins_ll_y_m5 and (source_ll.x not in fake_pins_ll_x_m6): 
-                        print("target_ll.y in fake_pins_ll_y_m5")
-                        multiple_via5="TV"
-                    else: multiple_via5 = False
-                elif source.layer == "m5" and target.layer == "m5":
-                    if source_ll.y in fake_pins_ll_y_m5 and (target_ll.y not in fake_pins_ll_y_m5): 
-                        print("source_ll.y in fake_pins_ll_y_m5")
-                        multiple_via5="SV"
-                    elif target_ll.y in fake_pins_ll_y_m5 and (source_ll.y not in fake_pins_ll_y_m5): 
-                        print("target_ll.y in fake_pins_ll_y_m5")
-                        multiple_via5="TV"
-                    else: multiple_via5 = False
-                elif source.layer == "m6" and target.layer == "m6":
-                    if source_ll.x in fake_pins_ll_x_m6 and (target_ll.x not in fake_pins_ll_x_m6): 
-                        print("source_ll.x in fake_pins_ll_x_m6")
-                        multiple_via5="SH"
-                    elif target_ll.x in fake_pins_ll_x_m6 and (source_ll.x not in fake_pins_ll_x_m6): 
-                        print("target_ll.x in fake_pins_ll_x_m6")
-                        multiple_via5="TH"
-                    else: multiple_via5 = False
+                    # else: 
+                    if source.layer == "m5" and target.layer == "m6":
+                        if source_ll.y in fake_pins_ll_y_m5 and (target_ll.x not in fake_pins_ll_x_m6): 
+                            print("source_ll.y in fake_pins_ll_y_m5")
+                            multiple_via5="SV"
+                        elif target_ll.x in fake_pins_ll_x_m6 and (source_ll.y not in fake_pins_ll_y_m5): 
+                            print("target_ll.x in fake_pins_ll_x_m6")
+                            multiple_via5="TH"
+                        else: multiple_via5 = False
+                    elif source.layer == "m6"and target.layer == "m5":
+                        if source_ll.x in fake_pins_ll_x_m6 and (target_ll.y not in fake_pins_ll_y_m5): 
+                            print("source_ll.x in fake_pins_ll_x_m6")
+                            multiple_via5="SH"
+                        elif target_ll.y in fake_pins_ll_y_m5 and (source_ll.x not in fake_pins_ll_x_m6): 
+                            print("target_ll.y in fake_pins_ll_y_m5")
+                            multiple_via5="TV"
+                        else: multiple_via5 = False
+                    elif source.layer == "m5" and target.layer == "m5":
+                        if source_ll.y in fake_pins_ll_y_m5 and (target_ll.y not in fake_pins_ll_y_m5): 
+                            print("source_ll.y in fake_pins_ll_y_m5")
+                            multiple_via5="SV"
+                        elif target_ll.y in fake_pins_ll_y_m5 and (source_ll.y not in fake_pins_ll_y_m5): 
+                            print("target_ll.y in fake_pins_ll_y_m5")
+                            multiple_via5="TV"
+                        else: multiple_via5 = False
+                    elif source.layer == "m6" and target.layer == "m6":
+                        if source_ll.x in fake_pins_ll_x_m6 and (target_ll.x not in fake_pins_ll_x_m6): 
+                            print("source_ll.x in fake_pins_ll_x_m6")
+                            multiple_via5="SH"
+                        elif target_ll.x in fake_pins_ll_x_m6 and (source_ll.x not in fake_pins_ll_x_m6): 
+                            print("target_ll.x in fake_pins_ll_x_m6")
+                            multiple_via5="TH"
+                        else: multiple_via5 = False
 
-                    #     elif source.layer=="m6": multiple_via5="SH"
-                    #     # elif (target_ur.x - target_ll.x >=18 or target_ur.y - target_ll.y >= 18):
-                    # elif target in self.new_pins[vdd_name] or target in self.new_pins[gnd_name]: 
-                    #     if target.layer=="m5": multiple_via5="TV"
-                    #     elif target.layer=="m6": multiple_via5="TH"
-                else: multiple_via5=False
-                # multiple_via5=False
-                new_wires, new_vias = self.add_path(path, multiple_via5=multiple_via5)
-                # Find the recently added shapes
-                self.find_blockages(pin_name, new_wires)
-                self.find_vias(new_vias)
-                # Report routed count
-                routed_count += 1
-                source_list.append(source)
-                target_list.append(target)
-                debug.info(2, "Routed {} of {} supply pins".format(routed_count, routed_max))
+                        #     elif source.layer=="m6": multiple_via5="SH"
+                        #     # elif (target_ur.x - target_ll.x >=18 or target_ur.y - target_ll.y >= 18):
+                        # elif target in self.new_pins[vdd_name] or target in self.new_pins[gnd_name]: 
+                        #     if target.layer=="m5": multiple_via5="TV"
+                        #     elif target.layer=="m6": multiple_via5="TH"
+                    else: multiple_via5=False
+                    # multiple_via5=False
+                    new_wires, new_vias = self.add_path(path, multiple_via5=multiple_via5)
+                    # Find the recently added shapes
+                    self.find_blockages(pin_name, new_wires)
+                    self.find_vias(new_vias)
+                    # Report routed count
+                    routed_count += 1
+                    source_list.append(source)
+                    target_list.append(target)
+                    debug.info(2, "Routed {} of {} supply pins".format(routed_count, routed_max))
 
 
     def add_side_pin(self, pin_name, side, num_vias=3, num_fake_pins=4):
