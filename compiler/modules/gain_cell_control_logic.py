@@ -10,17 +10,17 @@ from openram import debug
 from openram.base import vector
 from openram.sram_factory import factory
 from openram import OPTS
-from .control_logic_base import control_logic_base
+from .gain_cell_control_logic_base import gain_cell_control_logic_base
 
 
-class control_logic(control_logic_base):
+class gain_cell_control_logic(gain_cell_control_logic_base):
     """
-    Dynamically generated Control logic for the total SRAM circuit.
+    Dynamically generated Control logic for the total gain_cell circuit.
     """
 
-    def __init__(self, num_rows, words_per_row, word_size, spare_columns=None, sram=None, port_type="rw", name=""):
+    def __init__(self, num_rows, words_per_row, word_size, spare_columns=None, gain_cell=None, port_type="rw", name=""):
         """ Constructor """
-        super().__init__(num_rows, words_per_row, word_size, spare_columns, sram, port_type, name)
+        super().__init__(num_rows, words_per_row, word_size, spare_columns, gain_cell, port_type, name)
 
     def add_pins(self):
         """ Add the pins to the control logic module. """
@@ -65,12 +65,10 @@ class control_logic(control_logic_base):
         # wl_en drives every row in the bank
         # MRG 9/3/2021: Ensure that this is two stages to prevent race conditions with the write driver
         size_list = [max(int(self.num_rows / 9), 1), max(int(self.num_rows / 3), 1)]
-        self.wwl_en_driver = factory.create(module_type="pdriver",
+        self.wl_en_driver = factory.create(module_type="pdriver",
                                            size_list=size_list,
                                            height=dff_height)
-        self.rwl_en_driver = factory.create(module_type="pdriver",
-                                           size_list=size_list,
-                                           height=dff_height)
+
         # w_en drives every write driver
         self.wen_and = factory.create(module_type="pand3",
                                       size=self.word_size + 8,
@@ -107,21 +105,31 @@ class control_logic(control_logic_base):
         # List of input control signals
         if self.port_type == "rw":
             self.input_list = ["csb", "web"]
-            self.rbl_list = ["rbl_rbl"]
+            self.rbl_list = ["rbl_bl"]
         else:
-            self.input_list = ["csb"]
-            self.rbl_list = ["rbl_rbl"]
+            if self.port_type == "r":
+                self.input_list = ["csb"]
+                self.rbl_list = ["rbl_rbl"]
+            if self.port_type == "w":
+                self.input_list = ["web"]
+                self.rbl_list = ["rbl_wbl"]
 
         if self.port_type == "rw":
             self.dff_output_list = ["cs_bar", "cs", "we_bar", "we"]
         else:
-            self.dff_output_list = ["cs_bar", "cs"]
+            if self.port_type == "r":
+                self.dff_output_list = ["cs_bar", "cs"]
+            if self.port_type == "w":
+                self.dff_output_list = ["we_bar", "we"]
 
         # list of output control signals (for making a vertical bus)
         if self.port_type == "rw":
-            self.internal_bus_list = ["rbl_rbl_delay_bar", "rbl_rbl_delay", "gated_clk_bar", "gated_clk_buf", "we", "we_bar", "clk_buf", "cs"]
+            self.internal_bus_list = ["rbl_bl_delay_bar", "rbl_bl_delay", "gated_clk_bar", "gated_clk_buf", "we", "we_bar", "clk_buf", "cs"]
         else:
-            self.internal_bus_list = ["rbl_rbl_delay_bar", "rbl_rbl_delay", "gated_clk_bar", "gated_clk_buf", "clk_buf", "cs"]
+            if self.port_type == "r":
+                self.internal_bus_list = ["rbl_rbl_delay_bar", "rbl_rbl_delay", "gated_clk_bar", "gated_clk_buf", "clk_buf", "cs"]
+            if self.port_type == "w":
+                self.internal_bus_list = ["rbl_wbl_delay_bar", "rbl_wbl_delay", "gated_clk_bar", "gated_clk_buf", "clk_buf", "we", "we_bar"]
         # leave space for the bus plus one extra space
         self.internal_bus_width = (len(self.internal_bus_list) + 1) * self.m2_pitch
 
@@ -133,8 +141,8 @@ class control_logic(control_logic_base):
         else:
             self.output_list = ["w_en"]
         self.output_list.append("p_en_bar")
-        self.output_list.append("wwl_en")
-        self.output_list.append("rwl_en")
+        if self.port_type == "r": self.output_list.append("rwl_en")
+        if self.port_type == "w": self.output_list.append("wwl_en")
         self.output_list.append("clk_buf")
 
         self.supply_list = ["vdd", "gnd"]
@@ -145,8 +153,7 @@ class control_logic(control_logic_base):
         self.create_clk_buf_row()
         self.create_gated_clk_bar_row()
         self.create_gated_clk_buf_row()
-        self.create_wwlen_row()
-        self.create_rwlen_row()
+        self.create_wlen_row()
         if (self.port_type == "rw") or (self.port_type == "w"):
             self.create_rbl_delay_row()
             self.create_wen_row()
@@ -174,16 +181,15 @@ class control_logic(control_logic_base):
         if (self.port_type == "rw") or (self.port_type == "w"):
             self.place_rbl_delay_row(row)
             row += 1
-        self.place_wwlen_row(row)
-        self.place_rwlen_row(row)
-        self.control_center_y = self.rwl_en_inst.uy() + self.m3_pitch
+        self.place_wlen_row(row)
+
+        self.control_center_y = self.wl_en_inst.uy() + self.m3_pitch
 
     def route_all(self):
         """ Routing between modules """
         self.route_rails()
         self.route_dffs()
-        self.route_wwlen()
-        self.route_rwlen()
+        self.route_wlen()
         if (self.port_type == "rw") or (self.port_type == "w"):
             self.route_rbl_delay()
             self.route_wen()
@@ -201,7 +207,10 @@ class control_logic(control_logic_base):
         self.delay_inst=self.add_inst(name="delay_chain",
                                       mod=self.delay_chain)
         # rbl_bl_delay is asserted (1) when the bitline has been discharged
-        self.connect_inst(["rbl_rbl", "rbl_rbl_delay", "vdd", "gnd"])
+        if self.port_type == "r":
+            self.connect_inst(["rbl_rbl", "rbl_rbl_delay", "vdd", "gnd"])
+        if self.port_type == "w":
+            self.connect_inst(["rbl_wbl", "rbl_wbl_delay", "vdd", "gnd"])
 
     def route_delay(self):
 
@@ -209,51 +218,46 @@ class control_logic(control_logic_base):
         # Connect to the rail level with the vdd rail
         # Use gated clock since it is in every type of control logic
         vdd_ypos = self.gated_clk_buf_inst.get_pin("vdd").cy() + self.m1_pitch
-        in_pos = vector(self.input_bus["rbl_rbl_delay"].cx(), vdd_ypos)
+        if self.port_type == "r":
+            in_pos = vector(self.input_bus["rbl_rbl_delay"].cx(), vdd_ypos)
+        if self.port_type == "w":
+            in_pos = vector(self.input_bus["rbl_wbl_delay"].cx(), vdd_ypos)
         mid1 = vector(out_pos.x, in_pos.y)
         self.add_wire(self.m1_stack, [out_pos, mid1, in_pos])
         self.add_via_center(layers=self.m1_stack,
                             offset=in_pos)
 
         # Input from RBL goes to the delay line for futher delay
-        self.copy_layout_pin(self.delay_inst, "in", "rbl_rbl")
+        if self.port_type == "r":
+            self.copy_layout_pin(self.delay_inst, "in", "rbl_rbl")
+        if self.port_type == "w":
+            self.copy_layout_pin(self.delay_inst, "in", "rbl_wbl")
 
-    def create_wwlen_row(self):
+    def create_wlen_row(self):
         # input pre_p_en, output: wl_en
-        self.wwl_en_inst=self.add_inst(name="buf_wwl_en",
-                                      mod=self.wwl_en_driver)
-        self.connect_inst(["gated_clk_bar", "wwl_en", "vdd", "gnd"])
-    def create_rwlen_row(self):
-        # input pre_p_en, output: wl_en
-        self.rwl_en_inst=self.add_inst(name="buf_rwl_en",
-                                      mod=self.rwl_en_driver)
-        self.connect_inst(["gated_clk_bar", "rwl_en", "vdd", "gnd"])
+        if self.port_type == "r":
+            self.wl_en_inst=self.add_inst(name="buf_rwl_en",
+                                        mod=self.wl_en_driver)
+            self.connect_inst(["gated_clk_bar", "rwl_en", "vdd", "gnd"])
+        if self.port_type == "w":
+            self.wl_en_inst=self.add_inst(name="buf_wwl_en",
+                                        mod=self.wl_en_driver)
+            self.connect_inst(["gated_clk_bar", "wwl_en", "vdd", "gnd"])
 
-    def place_wwlen_row(self, row):
+    def place_wlen_row(self, row):
         x_offset = self.control_x_offset
 
-        x_offset = self.place_util(self.wwl_en_inst, x_offset, row)
+        x_offset = self.place_util(self.wl_en_inst, x_offset, row)
 
-        self.row_end_inst.append(self.wwl_en_inst)
-    
-    def place_rwlen_row(self, row):
-        x_offset = self.control_x_offset
+        self.row_end_inst.append(self.wl_en_inst)
 
-        x_offset = self.place_util(self.rwl_en_inst, x_offset, row)
-
-        self.row_end_inst.append(self.rwl_en_inst)
-
-    def route_wwlen(self):
-        wwlen_map = zip(["A"], ["gated_clk_bar"])
-        self.connect_vertical_bus(wwlen_map, self.wwl_en_inst, self.input_bus)
-
-        self.connect_output(self.wwl_en_inst, "Z", "wwl_en")
-    
-    def route_rwlen(self):
-        rwlen_map = zip(["A"], ["gated_clk_bar"])
-        self.connect_vertical_bus(rwlen_map, self.rwl_en_inst, self.input_bus)
-
-        self.connect_output(self.rwl_en_inst, "Z", "rwl_en")
+    def route_wlen(self):
+        wlen_map = zip(["A"], ["gated_clk_bar"])
+        self.connect_vertical_bus(wlen_map, self.wl_en_inst, self.input_bus)
+        if self.port_type == "r":
+            self.connect_output(self.wl_en_inst, "Z", "rwl_en")
+        if self.port_type == "w":
+            self.connect_output(self.wl_en_inst, "Z", "wwl_en")
 
     def create_pen_row(self):
         # nand2_1
@@ -261,7 +265,10 @@ class control_logic(control_logic_base):
                                               mod=self.nand2)
         # We use the rbl_bl_delay here to ensure that the p_en is only asserted when the
         # bitlines have already been discharged. Otherwise, it is a combination loop.
-        self.connect_inst(["gated_clk_buf", "rbl_rbl_delay", "p_en_bar_unbuf", "vdd", "gnd"])
+        if self.port_type == "r": 
+            self.connect_inst(["gated_clk_buf", "rbl_rbl_delay", "p_en_bar_unbuf", "vdd", "gnd"])
+        if self.port_type == "w": 
+            self.connect_inst(["gated_clk_buf", "rbl_wbl_delay", "p_en_bar_unbuf", "vdd", "gnd"])
         # pdirver_4
         self.p_en_bar_driver_inst=self.add_inst(name="buf_p_en_bar",
                                                 mod=self.p_en_bar_driver)
@@ -271,13 +278,16 @@ class control_logic(control_logic_base):
         x_offset = self.control_x_offset
 
         x_offset = self.place_util(self.p_en_bar_nand_inst, x_offset, row, pp_space = True)
-        print("place_pen_row x_offset, control_x_offset, nwell_enclose_implant, nwell_space, w_en_gate_inst.width = ", x_offset, self.control_x_offset, self.nwell_enclose_implant, self.nwell_space, self.w_en_gate_inst.width)
-        x_offset = self.place_util(self.p_en_bar_driver_inst, self.control_x_offset + 2 * self.nwell_enclose_implant + self.nwell_space + self.w_en_gate_inst.width, row, pp_space = True) 
-
+        # print("place_pen_row x_offset, control_x_offset, nwell_enclose_implant, nwell_space, w_en_gate_inst.width = ", x_offset, self.control_x_offset, self.nwell_enclose_implant, self.nwell_space, self.w_en_gate_inst.width)
+        if self.port_type == "w": x_offset = self.place_util(self.p_en_bar_driver_inst, self.control_x_offset + 2 * self.nwell_enclose_implant + self.nwell_space + self.w_en_gate_inst.width, row, pp_space = True) 
+        if self.port_type == "r": x_offset = self.place_util(self.p_en_bar_driver_inst, self.control_x_offset + 2 * self.nwell_enclose_implant + self.nwell_space + self.s_en_gate_inst.width, row, pp_space = True)
         self.row_end_inst.append(self.p_en_bar_driver_inst)
 
     def route_pen(self):
-        in_map = zip(["A", "B"], ["gated_clk_buf", "rbl_rbl_delay"])
+        if self.port_type == "r": 
+            in_map = zip(["A", "B"], ["gated_clk_buf", "rbl_rbl_delay"])
+        if self.port_type == "w": 
+            in_map = zip(["A", "B"], ["gated_clk_buf", "rbl_wbl_delay"])
         self.connect_vertical_bus(in_map, self.p_en_bar_nand_inst, self.input_bus)
 
         out_pin = self.p_en_bar_nand_inst.get_pin("Z")
@@ -326,27 +336,36 @@ class control_logic(control_logic_base):
         self.connect_output(self.s_en_gate_inst, "Z", "s_en")
 
     def create_rbl_delay_row(self):
-
-        self.rbl_rbl_delay_inv_inst = self.add_inst(name="rbl_rbl_delay_inv",
-                                                   mod=self.inv)
-        self.connect_inst(["rbl_rbl_delay", "rbl_rbl_delay_bar", "vdd", "gnd"])
+        if self.port_type == "r":
+            self.rbl_bl_delay_inv_inst = self.add_inst(name="rbl_rbl_delay_inv",
+                                                    mod=self.inv)
+            self.connect_inst(["rbl_rbl_delay", "rbl_rbl_delay_bar", "vdd", "gnd"])
+        if self.port_type == "w":
+            self.rbl_bl_delay_inv_inst = self.add_inst(name="rbl_wbl_delay_inv",
+                                                    mod=self.inv)
+            self.connect_inst(["rbl_wbl_delay", "rbl_wbl_delay_bar", "vdd", "gnd"])
 
     def place_rbl_delay_row(self, row):
         x_offset = self.control_x_offset
 
-        x_offset = self.place_util(self.rbl_rbl_delay_inv_inst, x_offset, row)
+        x_offset = self.place_util(self.rbl_bl_delay_inv_inst, x_offset, row)
 
-        self.row_end_inst.append(self.rbl_rbl_delay_inv_inst)
+        self.row_end_inst.append(self.rbl_bl_delay_inv_inst)
 
     def route_rbl_delay(self):
         # Connect from delay line
         # Connect to rail
         print("Running route_rbl_delay")
-        print("self.rbl_rbl_delay_inv_inst = ", self.rbl_rbl_delay_inv_inst)
-        self.route_output_to_bus_jogged(self.rbl_rbl_delay_inv_inst, "rbl_rbl_delay_bar")
+        print("self.rbl_bl_delay_inv_inst = ", self.rbl_bl_delay_inv_inst)
+        if self.port_type == "r":
+            self.route_output_to_bus_jogged(self.rbl_bl_delay_inv_inst, "rbl_rbl_delay_bar")
 
-        rbl_map = zip(["A"], ["rbl_rbl_delay"])
-        self.connect_vertical_bus(rbl_map, self.rbl_rbl_delay_inv_inst, self.input_bus)
+            bl_map = zip(["A"], ["rbl_rbl_delay"])
+        if self.port_type == "w":
+            self.route_output_to_bus_jogged(self.rbl_bl_delay_inv_inst, "rbl_wbl_delay_bar")
+
+            bl_map = zip(["A"], ["rbl_wbl_delay"])
+        self.connect_vertical_bus(bl_map, self.rbl_bl_delay_inv_inst, self.input_bus)
 
     def create_wen_row(self):
 
@@ -355,13 +374,13 @@ class control_logic(control_logic_base):
             input_name = "we"
         else:
             # No we for write-only reports, so use cs
-            input_name = "cs"
+            input_name = "we"
 
         # GATE THE W_EN
         self.w_en_gate_inst = self.add_inst(name="w_en_and",
                                             mod=self.wen_and)
         # Only drive the writes in the second half of the clock cycle during a write operation.
-        self.connect_inst([input_name, "rbl_rbl_delay_bar", "gated_clk_bar", "w_en", "vdd", "gnd"])
+        self.connect_inst([input_name, "rbl_wbl_delay_bar", "gated_clk_bar", "w_en", "vdd", "gnd"])
 
     def place_wen_row(self, row):
         x_offset = self.control_x_offset
@@ -371,13 +390,13 @@ class control_logic(control_logic_base):
         self.row_end_inst.append(self.w_en_gate_inst)
 
     def route_wen(self):
-        if self.port_type == "rw":
+        if (self.port_type == "rw") or (self.port_type == "w"):
             input_name = "we"
         else:
             # No we for write-only reports, so use cs
-            input_name = "cs"
+            input_name = "we"
 
-        wen_map = zip(["A", "B", "C"], [input_name, "rbl_rbl_delay_bar", "gated_clk_bar"])
+        wen_map = zip(["A", "B", "C"], [input_name, "rbl_wbl_delay_bar", "gated_clk_bar"])
         self.connect_vertical_bus(wen_map, self.w_en_gate_inst, self.input_bus)
 
         self.connect_output(self.w_en_gate_inst, "Z", "w_en")

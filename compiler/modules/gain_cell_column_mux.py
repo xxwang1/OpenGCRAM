@@ -15,7 +15,7 @@ from .pgate import *
 from openram.base.utils import ceil
 
 
-class column_mux(pgate):
+class gain_cell_column_mux(pgate):
     """
     This module implements the columnmux bitline cell used in the design.
     Creates a single column mux cell with the given integer size relative
@@ -23,14 +23,14 @@ class column_mux(pgate):
     Column-mux transistors driven by the decoder must be sized
     for optimal speed
     """
-    def __init__(self, name, tx_size=8, bitcell_bl="bl", bitcell_br="br"):
+    def __init__(self, name, tx_size=8, gain_cell_bl="bl", gain_cell_br="br"):
         self.implant_enclose = max(self.implant_enclose_active, self.poly_extend_active + self.implant_enclose_poly)
         # self.implant_enclose = self.implant_enclose_active
         debug.info(2, "creating single column mux cell: {0}".format(name))
 
         self.tx_size = int(tx_size)
-        self.bitcell_bl = bitcell_bl
-        self.bitcell_br = bitcell_br
+        self.gain_cell_bl = gain_cell_bl
+        self.gain_cell_br = gain_cell_br
 
         super().__init__(name)
 
@@ -51,14 +51,14 @@ class column_mux(pgate):
             self.col_mux_stack = self.li_stack
         else:
             self.col_mux_stack = self.m1_stack
-        self.pin_layer = self.bitcell.get_pin(self.bitcell_bl).layer
+        self.pin_layer = self.gain_cell.get_pin(self.gain_cell_bl).layer
         self.pin_pitch = getattr(self, "{}_pitch".format(self.pin_layer))
         self.pin_width = getattr(self, "{}_width".format(self.pin_layer))
         self.pin_height = 2 * self.pin_width
 
         self.place_ptx()
 
-        cell = factory.create(module_type=OPTS.bitcell)
+        cell = factory.create(module_type=OPTS.gain_cell)
         if(cell_props.use_strap == True and OPTS.num_ports == 1):
             strap = factory.create(module_type=cell_props.strap_module, version=cell_props.strap_version)
             precharge_width = cell.width + strap.width
@@ -73,7 +73,7 @@ class column_mux(pgate):
         self.add_pn_wells()
 
     def add_ptx(self):
-        self.bitcell = factory.create(module_type=OPTS.bitcell)
+        self.gain_cell = factory.create(module_type=OPTS.gain_cell)
 
         # Adds nmos_lower,nmos_upper to the module
         self.ptx_width = self.tx_size * drc("minwidth_tx")
@@ -124,7 +124,7 @@ class column_mux(pgate):
 
         # Space it in the center
         nmos_lower_position = self.nmos.active_offset.scale(0, 1) \
-                              + vector(0.5 * self.bitcell.width- 0.5 * self.nmos.active_width, 0)
+                              + vector(0.5 * self.gain_cell.width- 0.5 * self.nmos.active_width, 0)
         self.nmos_lower.place(nmos_lower_position)
 
         # This aligns it directly above the other tx with gates abutting
@@ -239,9 +239,9 @@ class column_mux(pgate):
         """
         if(cell_props.use_strap == True and OPTS.num_ports == 1):
             strap = factory.create(module_type=cell_props.strap_module, version=cell_props.strap_version)
-            rbc_width = self.bitcell.width + strap.width
+            rbc_width = self.gain_cell.width + strap.width
         else:
-            rbc_width = self.bitcell.width
+            rbc_width = self.gain_cell.width
         # Add it to the right, aligned in between the two tx
         active_pos = vector(rbc_width,
                             self.nmos_upper.by() - 0.5 * self.poly_space - self.m2_space)

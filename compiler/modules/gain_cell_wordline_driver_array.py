@@ -14,7 +14,7 @@ from openram.tech import layer_properties as layer_props
 from openram import OPTS
 
 
-class wordline_driver_array(design):
+class gain_cell_wordline_driver_array(design):
     """
     Creates a Wordline Driver
     Generates the wordline-driver to drive the bitcell
@@ -49,8 +49,12 @@ class wordline_driver_array(design):
 
         # Leave a well gap to separate the bitcell array well from this well
         well_gap = 2 * drc("pwell_to_nwell") + drc("nwell_enclose_active")
-        self.width = self.wld_inst[-1].rx() + well_gap
-        self.height = self.wld_inst[-1].uy()
+        if self.port in self.read_ports:
+            self.width = self.rwld_inst[-1].rx() + well_gap
+            self.height = self.rwld_inst[-1].uy()
+        elif self.port in self.write_ports:
+            self.width = self.wwld_inst[-1].rx() + well_gap
+            self.height = self.wwld_inst[-1].uy()
 
         self.add_boundary()
         self.route_supplies()
@@ -86,16 +90,25 @@ class wordline_driver_array(design):
         Add vertical power rails.
         """
 
-        if layer_props.wordline_driver.vertical_supply:
-            self.route_vertical_pins("vdd", self.wld_inst)
-            self.route_vertical_pins("gnd", self.wld_inst)
-        else:
-            self.route_vertical_pins("vdd", self.wld_inst, xside="rx",)
-            self.route_vertical_pins("gnd", self.wld_inst, xside="lx",)
+        if self.port in self.read_ports:
+            if layer_props.wordline_driver.vertical_supply:
+                self.route_vertical_pins("vdd", self.rwld_inst)
+                self.route_vertical_pins("gnd", self.rwld_inst)
+            else:
+                self.route_vertical_pins("vdd", self.rwld_inst, xside="rx",)
+                self.route_vertical_pins("gnd", self.rwld_inst, xside="lx",)
+        elif self.port in self.write_ports:
+            if layer_props.wordline_driver.vertical_supply:
+                self.route_vertical_pins("vdd", self.wwld_inst)
+                self.route_vertical_pins("gnd", self.wwld_inst)
+            else:
+                self.route_vertical_pins("vdd", self.wwld_inst, xside="rx",)
+                self.route_vertical_pins("gnd", self.wwld_inst, xside="lx",)
 
 
     def create_drivers(self):
-        self.wld_inst = []
+        self.rwld_inst = []
+        self.wwld_inst = []
         if self.port in self.read_ports:
             for row in range(self.rows):
                 name_and = "rwl_driver_and{}".format(row)
@@ -137,10 +150,10 @@ class wordline_driver_array(design):
         elif self.port in self.write_ports:
             for row in range(self.rows):
                 if (row % 2):
-                    y_offset = self.wwl_driver.height * (row + 1)
+                    y_offset = self.wwl_driver.height * (row + 1) 
                     inst_mirror = "MX"
                 else:
-                    y_offset = self.wwl_driver.height * row
+                    y_offset = self.wwl_driver.height * row 
                     inst_mirror = "R0"
 
                 and2_offset = [self.wwl_driver.width, y_offset]
@@ -153,36 +166,55 @@ class wordline_driver_array(design):
         """ Route all of the signals """
 
         # Wordline enable connection
-        en_pin = self.wld_inst[0].get_pin("B")
-        en_bottom_pos = vector(en_pin.cx(), 0)
-        en_top_pos = vector(en_pin.cx(), self.wld_inst[-1].uy())
-        en_pin = self.add_layout_pin_segment_center(text="en",
-                                                    layer="m2",
-                                                    start=en_bottom_pos,
-                                                    end=en_top_pos)
+        if self.port in self.read_ports:
+            r_en_pin = self.rwld_inst[0].get_pin("B")
+            r_en_bottom_pos = vector(r_en_pin.cx(), 0)
+            r_en_top_pos = vector(r_en_pin.cx(), self.rwld_inst[-1].uy())
+            r_en_pin = self.add_layout_pin_segment_center(text="en",
+                                                        layer="m2",
+                                                        start=r_en_bottom_pos,
+                                                        end=r_en_top_pos)
+            for row in range(self.rows):
+                r_and_inst = self.rwld_inst[row]
 
-        for row in range(self.rows):
-            and_inst = self.wld_inst[row]
+                # Drop a via
+                r_b_pin = r_and_inst.get_pin("B")
+                self.add_via_stack_center(from_layer=r_b_pin.layer,
+                                        to_layer="m2",
+                                        offset=r_b_pin.center())
 
-            # Drop a via
-            b_pin = and_inst.get_pin("B")
-            self.add_via_stack_center(from_layer=b_pin.layer,
-                                      to_layer="m2",
-                                      offset=b_pin.center())
+                # connect the decoder input pin to and2 A
+                self.copy_layout_pin(r_and_inst, "A", "in_{0}".format(row))
 
-            # connect the decoder input pin to and2 A
-            self.copy_layout_pin(and_inst, "A", "in_{0}".format(row))
-
-            # output each WL on the right
-            if self.port in self.read_ports:
-                rwl_offset = and_inst.get_pin("Z").rc()
+                rwl_offset = r_and_inst.get_pin("Z").rc()
                 self.add_layout_pin_segment_center(text="rwl_{0}".format(row),
                                                layer=self.route_layer,
                                                start=rwl_offset,
                                                end=rwl_offset - vector(self.m1_width, 0))
-            elif self.port in self.write_ports:
-                wwl_offset = and_inst.get_pin("Z").rc()
+        elif self.port in self.write_ports:
+            
+            w_en_pin = self.wwld_inst[0].get_pin("B")
+            w_en_bottom_pos = vector(w_en_pin.cx(), 0)
+            w_en_top_pos = vector(w_en_pin.cx(), self.wwld_inst[-1].uy())
+            w_en_pin = self.add_layout_pin_segment_center(text="en",
+                                                        layer="m2",
+                                                        start=w_en_bottom_pos,
+                                                        end=w_en_top_pos)
+            for row in range(self.rows): 
+                w_and_inst = self.wwld_inst[row]
+
+                # Drop a via
+                w_b_pin = w_and_inst.get_pin("B")
+                self.add_via_stack_center(from_layer=w_b_pin.layer,
+                                        to_layer="m2",
+                                        offset=w_b_pin.center())
+
+                # connect the decoder input pin to and2 A
+                self.copy_layout_pin(w_and_inst, "A", "in_{0}".format(row))
+
+                # output each WL on the right
+                wwl_offset = w_and_inst.get_pin("Z").rc()
                 self.add_layout_pin_segment_center(text="wwl_{0}".format(row),
-                                               layer=self.route_layer,
-                                               start=wwl_offset,
-                                               end=wwl_offset - vector(self.m1_width, 0))
+                                            layer=self.route_layer,
+                                            start=wwl_offset,
+                                            end=wwl_offset - vector(self.m1_width, 0))

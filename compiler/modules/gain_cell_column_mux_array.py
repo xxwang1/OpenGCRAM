@@ -14,23 +14,23 @@ from openram.tech import layer_properties as layer_props
 from openram import OPTS
 
 
-class column_mux_array(design):
+class gain_cell_column_mux_array(design):
     """
     Dynamically generated column mux array.
     Array of column mux to read the bitlines through the 6T.
     """
 
-    def __init__(self, name, columns, word_size, offsets=None, bitcell_bl="bl", bitcell_br="br", column_offset=0):
+    def __init__(self, name, columns, word_size, offsets=None, gain_cell_bl="bl", gain_cell_br="br", column_offset=0):
         super().__init__(name)
         debug.info(1, "Creating {0}".format(self.name))
-        self.add_comment("cols: {0} word_size: {1} bl: {2} br: {3}".format(columns, word_size, bitcell_bl, bitcell_br))
+        self.add_comment("cols: {0} word_size: {1} bl: {2} br: {3}".format(columns, word_size, gain_cell_bl, gain_cell_br))
 
         self.columns = columns
         self.word_size = word_size
         self.offsets = offsets
         self.words_per_row = int(self.columns / self.word_size)
-        self.bitcell_bl = bitcell_bl
-        self.bitcell_br = bitcell_br
+        self.gain_cell_bl = gain_cell_rbl
+        self.gain_cell_br = gain_cell_br
         self.column_offset = column_offset
 
         self.sel_layer = layer_props.column_mux_array.select_layer
@@ -84,11 +84,11 @@ class column_mux_array(design):
         self.add_pin("gnd")
 
     def add_modules(self):
-        self.mux = factory.create(module_type="column_mux",
-                                  bitcell_bl=self.bitcell_bl,
-                                  bitcell_br=self.bitcell_br)
+        self.mux = factory.create(module_type="gain_cell_column_mux",
+                                  gain_cell_bl=self.gain_cell_bl,
+                                  gain_cell_br=self.gain_cell_br)
 
-        self.cell = factory.create(module_type=OPTS.bitcell)
+        self.cell = factory.create(module_type=OPTS.gain_cell)
 
     def setup_layout_constants(self):
         self.column_addr_size = int(self.words_per_row / 2)
@@ -254,7 +254,7 @@ class column_mux_array(design):
     def graph_exclude_columns(self, column_include_num):
         """
         Excludes all columns muxes unrelated to the target bit being simulated.
-        Each mux in mux_inst corresponds to respective column in bitcell array.
+        Each mux in mux_inst corresponds to respective column in gain_cell array.
         """
         for i in range(len(self.mux_inst)):
             if i != column_include_num:

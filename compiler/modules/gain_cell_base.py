@@ -182,12 +182,12 @@ class gain_cell_base(design):
 
     def get_all_wl_names(self):
         """ Creates a list of all wordline pin names """
-        row_pins = ["rwl", "wwl"]
+        row_pins = ["wwl", "rwl"]
         return row_pins
 
     def get_all_bitline_names(self):
         """ Creates a list of all bitline pin names (both bl and br) """
-        return ["rbl", "wbl"]
+        return ["wbl", "rbl"]
 
     def get_all_rbl_names(self):
         """ Creates a list of all bl pins names """
@@ -199,7 +199,7 @@ class gain_cell_base(design):
 
     def get_rbl_name(self, port=0):
         """Get bl name"""
-        debug.check(port == 0, "One port for gain_cell only.")
+        # debug.check(port == 0, "One port for gain_cell only.")
         return "rbl"
     def get_all_rwl_names(self):
         """ Creates a list of all bl pins names """
@@ -211,7 +211,7 @@ class gain_cell_base(design):
         
     def get_wbl_name(self, port=0):
         """Get bl name"""
-        debug.check(port == 0, "One port for gain_cell only.")
+        # debug.check(port == 0, "One port for gain_cell only.")
         return "wbl"
 
     def get_all_wwl_names(self):
@@ -220,12 +220,12 @@ class gain_cell_base(design):
 
     def get_wwl_name(self, port=0):
         """Get bl name"""
-        debug.check(port == 0, "One port for gain_cell only.")
+        # debug.check(port == 0, "One port for gain_cell only.")
         return "wwl"
 
     def get_rwl_name(self, port=0):
         """Get wl name"""
-        debug.check(port == 0, "One port for gain_cell only.")
+        # debug.check(port == 0, "One port for gain_cell only.")
         return "rwl"
 
     def get_on_resistance(self):

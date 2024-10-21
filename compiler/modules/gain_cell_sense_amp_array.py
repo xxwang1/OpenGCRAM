@@ -13,7 +13,7 @@ from openram.tech import cell_properties
 from openram import OPTS
 
 
-class sense_amp_array(design):
+class gain_cell_sense_amp_array(design):
     """
     Array of sense amplifiers to read the bitlines through the column mux.
     Dynamically generated sense amp array for all bitlines.
@@ -92,7 +92,7 @@ class sense_amp_array(design):
         self.add_pin("gnd", "GROUND")
 
     def add_modules(self):
-        self.amp = factory.create(module_type="sense_amp")
+        self.amp = factory.create(module_type="gain_cell_sense_amp")
 
         # This is just used for measurements,
         # so don't add the module

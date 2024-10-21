@@ -14,21 +14,21 @@ from openram.sram_factory import factory
 from openram import OPTS
 from openram.tech import drc, GDS
 
-class control_logic_base(design):
+class gain_cell_control_logic_base(design):
     """
-    Generic base class for SRAM control logic.
+    Generic base class for gain_cell control logic.
     """
 
-    def __init__(self, num_rows, words_per_row, word_size, spare_columns=None, sram=None, port_type="rw", name=""):
+    def __init__(self, num_rows, words_per_row, word_size, spare_columns=None, gain_cell=None, port_type="rw", name=""):
         """ Constructor """
-        name = "control_logic_" + port_type
+        name = "gain_cell_control_logic_" + port_type
         super().__init__(name)
         debug.info(1, "Creating {}".format(name))
         self.add_comment("num_rows: {0}".format(num_rows))
         self.add_comment("words_per_row: {0}".format(words_per_row))
         self.add_comment("word_size {0}".format(word_size))
 
-        self.sram=sram
+        self.gain_cell=gain_cell
         self.num_rows = num_rows
         self.words_per_row = words_per_row
         self.word_size = word_size
@@ -163,7 +163,7 @@ class control_logic_base(design):
 
     def route_rails(self):
         """ Add the input signal inverted tracks """
-        height = self.control_logic_center.y - self.m2_pitch
+        height = self.gain_cell_control_logic_center.y - self.m2_pitch
         # DFF spacing plus the power routing
         offset = vector(self.ctrl_dff_array.width + self.m6_pitch, 0)
 
@@ -192,14 +192,14 @@ class control_logic_base(design):
         self.place_delay(4)
         height = self.delay_inst.uy()
 
-        # This offset is used for placement of the control logic in the SRAM level.
-        self.control_logic_center = vector(self.ctrl_dff_inst.rx(), self.control_center_y)
+        # This offset is used for placement of the control logic in the gain_cell level.
+        self.gain_cell_control_logic_center = vector(self.ctrl_dff_inst.rx(), self.control_center_y)
 
         # Extra pitch on top and right
         self.height = height + 2 * self.m1_pitch
         # Max of modules or logic rows
         self.width = max([inst.rx() for inst in self.row_end_inst])
-        if (self.port_type == "rw") or (self.port_type == "r"):
+        if (self.port_type == "rw") or (self.port_type == "r") or (self.port_type == "w"):
             self.width = max(self.delay_inst.rx(), self.width)
         self.width += self.m2_pitch
 
@@ -248,8 +248,8 @@ class control_logic_base(design):
 
         self.gated_clk_bar_inst = self.add_inst(name="and2_gated_clk_bar",
                                                 mod=self.and2)
-        self.connect_inst(["clk_bar", "cs", "gated_clk_bar", "vdd", "gnd"])
-
+        if self.port_type == "r": self.connect_inst(["clk_bar", "cs", "gated_clk_bar", "vdd", "gnd"])
+        if self.port_type == "w": self.connect_inst(["clk_bar", "we", "gated_clk_bar", "vdd", "gnd"])
     def place_gated_clk_bar_row(self, row):
         x_offset = self.control_x_offset
 
@@ -273,7 +273,8 @@ class control_logic_base(design):
 
 
         # This is the second gate over, so it needs to be on M3
-        clkbuf_map = zip(["B"], ["cs"])
+        if self.port_type == "r": clkbuf_map = zip(["B"], ["cs"])
+        if self.port_type == "w": clkbuf_map = zip(["B"], ["we"])
         self.connect_vertical_bus(clkbuf_map,
                                   self.gated_clk_bar_inst,
                                   self.input_bus,
@@ -291,7 +292,8 @@ class control_logic_base(design):
     def create_gated_clk_buf_row(self):
         self.gated_clk_buf_inst = self.add_inst(name="and2_gated_clk_buf",
                                                 mod=self.and2)
-        self.connect_inst(["clk_buf", "cs", "gated_clk_buf", "vdd", "gnd"])
+        if self.port_type == "r": self.connect_inst(["clk_buf", "cs", "gated_clk_buf", "vdd", "gnd"])
+        if self.port_type == "w": self.connect_inst(["clk_buf", "we", "gated_clk_buf", "vdd", "gnd"])
 
     def place_gated_clk_buf_row(self, row):
         x_offset = self.control_x_offset
@@ -301,7 +303,8 @@ class control_logic_base(design):
         self.row_end_inst.append(self.gated_clk_buf_inst)
 
     def route_gated_clk_buf(self):
-        clkbuf_map = zip(["A", "B"], ["clk_buf", "cs"])
+        if self.port_type == "r": clkbuf_map = zip(["A", "B"], ["clk_buf", "cs"])
+        if self.port_type == "w": clkbuf_map = zip(["A", "B"], ["clk_buf", "we"])
         self.connect_vertical_bus(clkbuf_map,
                                   self.gated_clk_buf_inst,
                                   self.input_bus)
@@ -330,7 +333,10 @@ class control_logic_base(design):
         if self.port_type == "rw":
             dff_out_map = zip(["dout_bar_0", "dout_bar_1", "dout_1"], ["cs", "we", "we_bar"])
         else:
-            dff_out_map = zip(["dout_bar_0"], ["cs"])
+            if self.port_type == "r":
+                dff_out_map = zip(["dout_bar_0"], ["cs"])
+            if self.port_type == "w":
+                dff_out_map = zip([ "dout_bar_0", "dout_0"], ["we", "we_bar"])
         self.connect_vertical_bus(dff_out_map, self.ctrl_dff_inst, self.input_bus, self.m2_stack[::-1])
 
         # Connect the clock rail to the other clock rail
@@ -342,9 +348,9 @@ class control_logic_base(design):
         self.add_via_center(layers=self.m1_stack,
                             offset=rail_pos)
 
-        self.copy_layout_pin(self.ctrl_dff_inst, "din_0", "csb")
-        if (self.port_type == "rw"):
-            self.copy_layout_pin(self.ctrl_dff_inst, "din_1", "web")
+        if self.port_type == "r": self.copy_layout_pin(self.ctrl_dff_inst, "din_0", "csb")
+        if (self.port_type == "rw") or (self.port_type == "w"):
+            self.copy_layout_pin(self.ctrl_dff_inst, "din_0", "web")
 
     def get_offset(self, row):
         """ Compute the y-offset and mirroring """

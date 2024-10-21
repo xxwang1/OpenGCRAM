@@ -12,7 +12,7 @@ from openram.tech import parameter, drc, spice
 from openram.tech import cell_properties as props
 
 
-class sense_amp(design):
+class gain_cell_sense_amp(design):
     """
     This module implements the single sense amp cell used in the design. It
     is a hand-made cell, so the layout and netlist should be available in
@@ -24,7 +24,7 @@ class sense_amp(design):
         super().__init__(name, prop=props.gain_cell_sense_amp)
         debug.info(2, "Create sense_amp")
 
-    def get_bl_names(self):
+    def get_rbl_names(self):
         return "rbl"
 
     def get_ref_names(self):

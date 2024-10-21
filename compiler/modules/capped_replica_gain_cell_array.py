@@ -170,27 +170,61 @@ class capped_replica_gain_cell_array(gain_cell_base_array):
         self.supplies = ["vdd", "gnd"]
 
         # Main array
+        bl = []
+        
+        for i in range(0, 2, 2):
+            bl.append(self.bitline_pin_list[i+1])
+            bl.append(self.bitline_pin_list[i])
+        bl.extend(self.bitline_pin_list[2:-2])
+        for i in range(len(self.bitline_pin_list) - 2, len(self.bitline_pin_list), 2):
+            bl.append(self.bitline_pin_list[i+1])
+            bl.append(self.bitline_pin_list[i])
+        print("capped_replica_gain_cell_array self.bitline_pin_list = ", self.bitline_pin_list)
         self.replica_gain_cell_array_inst=self.add_inst(name="replica_gain_cell_array",
                                                       mod=self.replica_gain_cell_array)
         self.connect_inst(self.bitline_pin_list + self.replica_array_wordline_names_with_grounded_wls + self.supplies)
+        # self.connect_inst(bl + self.replica_array_wordline_names_with_grounded_wls + self.supplies)
 
         # Top/bottom dummy rows or col caps
         self.dummy_row_insts = []
         self.dummy_row_insts.append(self.add_inst(name="dummy_row_bot",
                                                   mod=self.col_cap_bottom))
-        self.connect_inst(self.bitline_pin_list + ["gnd"] * len(self.col_cap_bottom.get_wordline_names()) + self.supplies)
+        # self.connect_inst(self.bitline_pin_list + ["gnd"] * len(self.col_cap_bottom.get_wordline_names()) + self.supplies)
+        self.connect_inst(bl + ["gnd"] * len(self.col_cap_bottom.get_wordline_names()) + self.supplies)
         self.dummy_row_insts.append(self.add_inst(name="dummy_row_top",
                                                   mod=self.col_cap_top))
-        self.connect_inst(self.bitline_pin_list + ["gnd"] * len(self.col_cap_top.get_wordline_names()) + self.supplies)
+        # self.connect_inst(self.bitline_pin_list + ["gnd"] * len(self.col_cap_top.get_wordline_names()) + self.supplies)
+        self.connect_inst(bl + ["gnd"] * len(self.col_cap_top.get_wordline_names()) + self.supplies)
 
         # Left/right Dummy columns
         self.dummy_col_insts = []
         self.dummy_col_insts.append(self.add_inst(name="dummy_col_left",
                                                     mod=self.row_cap_left))
-        self.connect_inst(["dummy_left_" + bl for bl in self.row_cap_left.all_bitline_names] + self.wordline_pin_list + self.supplies)
+        wl = []
+        wl.extend(self.wordline_pin_list[:4])
+        for i in range(4, len(self.wordline_pin_list) - 4, 2):
+                    wl.append(self.wordline_pin_list[i + 1])
+                    wl.append(self.wordline_pin_list[i])
+                    # wl_copy.append(self.wordline_pin_list[i + 1])
+                    # wl.append(self.wordline_pin_list[i])
+                # self.connect_inst(self.rbl_bitline_names[port] + self.wordline_pin_list + self.supplies)
+                
+                # wwl = wl[0]
+                # rwl = wl[1]
+                # wl[0] = rwl
+                # wl[1] = wwl
+                # wwl = wl[-2]
+                # rwl = wl[-1]
+                # wl[-2] = rwl
+                # wl[-1] = wwl
+        wl.extend(self.wordline_pin_list[-4:])
+        # self.connect_inst(["dummy_left_" + bl for bl in self.row_cap_left.all_bitline_names] + self.wordline_pin_list + self.supplies)
+        
+        self.connect_inst(["dummy_left_" + bl for bl in self.row_cap_left.all_bitline_names] + wl + self.supplies)
         self.dummy_col_insts.append(self.add_inst(name="dummy_col_right",
                                                     mod=self.row_cap_right))
-        self.connect_inst(["dummy_right_" + bl for bl in self.row_cap_right.all_bitline_names] + self.wordline_pin_list + self.supplies)
+        # self.connect_inst(["dummy_right_" + bl for bl in self.row_cap_right.all_bitline_names] + self.wordline_pin_list + self.supplies)
+        self.connect_inst(["dummy_right_" + bl for bl in self.row_cap_right.all_bitline_names] + wl + self.supplies)
 
         # gain_cell array needed for some offset calculations
         self.gain_cell_array_inst = self.replica_gain_cell_array.gain_cell_array_inst

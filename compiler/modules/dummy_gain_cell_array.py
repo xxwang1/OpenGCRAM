@@ -80,6 +80,14 @@ class dummy_gain_cell_array(gain_cell_base_array):
                 self.add_pin(wl_name, "INOUT")
             else:
                 self.add_pin(wl_name, "INPUT")
+        # for port in self.read_ports:
+        #     self.add_pin(self.get_bitline_names()[port], "INOUT")
+        # for port in self.write_ports:
+        #     self.add_pin(self.get_bitline_names()[port], "INPUT")
+        # for port in self.read_ports:
+        #     self.add_pin(self.get_wordline_names()[port], "INOUT")
+        # for port in self.write_ports:
+        #     self.add_pin(self.get_wordline_names()[port], "INPUT")
         self.add_pin("vdd", "POWER")
         self.add_pin("gnd", "GROUND")
 

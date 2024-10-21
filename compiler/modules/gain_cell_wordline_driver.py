@@ -14,7 +14,7 @@ from openram.tech import layer_properties as layer_props
 from openram import OPTS
 
 
-class wordline_driver(design):
+class gain_cell_wordline_driver(design):
     """
     This is an AND (or NAND) with configurable drive strength to drive the wordlines.
     It is matched to the bitcell height.
@@ -25,8 +25,9 @@ class wordline_driver(design):
         super().__init__(name)
 
         if height is None:
-            b = factory.create(module_type=OPTS.bitcell)
+            b = factory.create(module_type=OPTS.gain_cell)
             self.height = b.height
+            # self.height = 3.145
         else:
             self.height = height
         self.cols = cols
