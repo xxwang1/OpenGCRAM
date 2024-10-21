@@ -11,10 +11,10 @@ from openram.tech import preferred_directions
 from openram.tech import cell_properties as props
 from openram import OPTS
 from . import utils
-from .hierarchy_design import hierarchy_design
+from .gain_cell_hierarchy_design import gain_cell_hierarchy_design
 
 
-class design(hierarchy_design):
+class design(gain_cell_hierarchy_design):
     """
     This is the same as the hierarchy_design class except it contains
     some DRC/layer constants and analytical models for other modules to reuse.
