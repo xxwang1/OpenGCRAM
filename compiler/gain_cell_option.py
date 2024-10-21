@@ -192,12 +192,9 @@ class options(optparse.Values):
     # run (doesn't purge on errors, anyhow)
 
     # Bitline, s_en and cell names used in characterizer
-    bl_format = "X{name}{hier_sep}xbank0{hier_sep}bl_{row}_{col}"
-    br_format = "X{name}{hier_sep}xbank0{hier_sep}br_{row}_{col}"
     rbl_format = "X{name}{hier_sep}xbank0{hier_sep}rbl_{row}_{col}"
     wbl_format = "X{name}{hier_sep}xbank0{hier_sep}wbl_{row}_{col}"
     sen_format = "X{name}{hier_sep}xbank0{hier_sep}s_en"
-    cell_format = "X{name}{hier_sep}xbank0{hier_sep}xbitcell_array{hier_sep}xreplica_bitcell_array{hier_sep}xbitcell_array{hier_sep}xbit_r{row}_c{col}"
     cell_format = "X{name}{hier_sep}xbank0{hier_sep}xgain_cell_array{hier_sep}xreplica_gain_cell_array{hier_sep}xgain_cell_array{hier_sep}xbit_r{row}_c{col}"
 
     # Random seed for functional simulation
@@ -213,8 +210,8 @@ class options(optparse.Values):
 
     # These are the default modules that can be over-riden
     bank_select = "bank_select"
-    bitcell_array = "bitcell_array"
-    bitcell = "bitcell"
+    gain_cell_array = "gain_cell_array"
+    gain_cell = "gain_cell"
     buf_dec = "pbuf"
     column_decoder = "column_decoder"
     column_mux_array = "column_mux_array"
@@ -227,26 +224,15 @@ class options(optparse.Values):
     nand2_dec = "pnand2"
     nand3_dec = "pnand3"
     nand4_dec = "pnand4" # Not available right now
-    precharge = "precharge"
-    precharge_array = "precharge_array"
-    ptx = "ptx"
-    replica_bitline = "replica_bitline"
-    sense_amp_array = "sense_amp_array"
-    sense_amp = "sense_amp"
-    tri_gate_array = "tri_gate_array"
-    tri_gate = "tri_gate"
-    wordline_driver = "wordline_driver"
-    write_driver_array = "write_driver_array"
-    write_driver = "write_driver"
-    write_mask_and_array = "write_mask_and_array"
-
-    gain_cell_array = "gain_cell_array"
-    gain_cell = "gain_cell"
     gain_cell_precharge = "gain_cell_precharge"
     gain_cell_precharge_array = "gain_cell_precharge_array"
+    ptx = "ptx"
+    replica_bitline = "replica_bitline"
     gain_cell_sense_amp_array = "gain_cell_sense_amp_array"
     gain_cell_sense_amp = "gain_cell_sense_amp"
+    tri_gate_array = "tri_gate_array"
+    tri_gate = "tri_gate"
     gain_cell_wordline_driver = "gain_cell_wordline_driver"
     gain_cell_write_driver_array = "gain_cell_write_driver_array"
     gain_cell_write_driver = "gain_cell_write_driver"
-    gain_cell_control_logic = "gain_cell_control_logic"
+    write_mask_and_array = "write_mask_and_array"
