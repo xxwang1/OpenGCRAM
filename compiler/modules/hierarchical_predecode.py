@@ -25,10 +25,11 @@ class hierarchical_predecode(design):
     def __init__(self, name, input_number, column_decoder=False, height=None):
         self.number_of_inputs = input_number
 
-        b = factory.create(module_type=OPTS.bitcell)
+        b = factory.create(module_type=OPTS.gain_cell)
 
         if not height:
             self.cell_height = b.height
+            # self.cell_height = 3.145
         else:
             self.cell_height = height
 

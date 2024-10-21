@@ -30,8 +30,9 @@ class hierarchical_decoder(design):
         self.pre3x8_inst = []
         self.pre4x16_inst = []
 
-        b = factory.create(module_type=OPTS.bitcell)
+        b = factory.create(module_type=OPTS.gain_cell)
         self.cell_height = b.height
+        # self.cell_height = 3.145
         self.predecode_bus_rail_pos = []
         self.num_outputs = num_outputs
         self.num_inputs = math.ceil(math.log(self.num_outputs, 2))
