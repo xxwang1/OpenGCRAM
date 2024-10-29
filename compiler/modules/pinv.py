@@ -297,7 +297,7 @@ class pinv(pgate):
         self.add_path(self.route_layer, [nmos_drain_pos, pmos_drain_pos])
 
         # Remember the mid for the output
-        mid_drain_offset = vector(nmos_drain_pos.x, self.output_pos.y)
+        mid_drain_offset = vector(nmos_drain_pos.x, self.output_pos.y + self.m1_pitch)
 
         # This leaves the output as an internal pin (min sized)
         output_offset = mid_drain_offset.snap_to_grid() + vector(self.route_layer_width, 0)
