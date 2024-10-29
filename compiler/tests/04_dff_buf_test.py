@@ -16,13 +16,13 @@ from openram.sram_factory import factory
 from openram import OPTS
 
 
-class dff_buf_test(openram_test):
+class gain_cell_dff_buf_test(openram_test):
 
     def runTest(self):
         config_file = "{}/tests/configs/config".format(os.getenv("OPENRAM_HOME"))
         openram.init_openram(config_file, is_unit_test=True)
-        debug.info(2, "Testing dff_buf 4x 8x")
-        a = factory.create(module_type="dff_buf", inv1_size=4, inv2_size=8)
+        debug.info(2, "Testing gain_cell_dff_buf 4x 8x")
+        a = factory.create(module_type="gain_cell_dff_buf", inv1_size=4, inv2_size=8)
         self.local_check(a)
 
         openram.end_openram()

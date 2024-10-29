@@ -38,9 +38,13 @@ class code_format_test(openram_test):
                 continue
             if re.search("sram_compiler.py$", code):
                 continue
+            if re.search("gain_cell_compiler.py$", code):
+                continue
             if re.search("testutils.py$", code):
                 continue
             if re.search("gen_stimulus.py$", code):
+                continue
+            if re.search("gain_cell_gen_stimulus.py$", code):
                 continue
             errors += check_print_output(code)
 
