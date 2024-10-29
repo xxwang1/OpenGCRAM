@@ -220,6 +220,8 @@ class options(optparse.Values):
     delay_chain = "delay_chain"
     dff_array = "dff_array"
     dff = "dff"
+    gain_cell_dff_array = "gain_cell_dff_array"
+    gain_cell_dff = "gain_cell_dff"
     inv_dec = "pinv"
     nand2_dec = "pnand2"
     nand3_dec = "pnand3"
