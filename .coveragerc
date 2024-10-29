@@ -1,0 +1,33 @@
+[run]
+omit =
+    # omit anything in a .local directory anywhere
+    */.local/*
+    # omit everything in /usr
+    /usr/*
+    # ignore the unit tests themselves
+    */tests/*
+    # ignore the debug utilities
+    debug.py
+    # ignore the no DRC/LVS tool options
+    none.py
+[paths]
+source =
+  ../..
+  /home/gitlab-runner/builds/2fd64746/0
+  /home/gitlab-runner/builds/2fd64746/1
+  /home/gitlab-runner/builds/2fd64746/2
+  /home/gitlab-runner/builds/2fd64746/3
+  /home/gitlab-runner/builds/2fd64746/4
+  /home/gitlab-runner/builds/2fd64746/5
+[report]
+exclude_lines =
+  pragma: no cover
+  def __repr__
+  def __str__
+  class gdsStreamer
+  except Exception
+  raise AssertionError
+  raise NotImplementedError
+  if 0:
+  if __name__ == "__main__":
+  if not OPTS.is_unit_test

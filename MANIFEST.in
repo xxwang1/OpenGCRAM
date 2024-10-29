@@ -12,7 +12,7 @@ exclude .idea
 exclude **/model_data
 exclude technology/sky130/*_lib
 exclude technology/sky130/tech/.magicrc
-exclude compiler/gen_stimulus.py
+exclude compiler/gain_cell_gen_stimulus.py
 exclude compiler/model_data_util.py
 exclude compiler/printGDS.py
 exclude compiler/processGDS.py

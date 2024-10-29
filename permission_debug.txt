@@ -1,0 +1,33 @@
+|==============================================================================|
+|=========                      OpenRAM v1.2.48                       =========|
+|=========                                                            =========|
+|=========               VLSI Design and Automation Lab               =========|
+|=========        Computer Science and Engineering Department         =========|
+|=========            University of California Santa Cruz             =========|
+|=========                                                            =========|
+|=========          Usage help: openram-user-group@ucsc.edu           =========|
+|=========        Development help: openram-dev-group@ucsc.edu        =========|
+|=========                See LICENSE for license info                =========|
+|==============================================================================|
+** Start: 10/01/2024 15:31:21
+Technology: tsmcN40
+Total size: 16384 bits
+Word size: 64
+Words: 64
+Banks: 4
+RW ports: 1
+R-only ports: 0
+W-only ports: 0
+DRC/LVS/PEX is only run on the top-level design to save run-time (inline_lvsdrc=True to do inline checking).
+Characterization is disabled (using analytical delay models) (analytical_delay=False to simulate).
+Words per row: None
+Output files are: 
+/home/xxwang1/OpenRAM/temp/tsmc_sram_256x256.lvs
+/home/xxwang1/OpenRAM/temp/tsmc_sram_256x256.sp
+/home/xxwang1/OpenRAM/temp/tsmc_sram_256x256.v
+/home/xxwang1/OpenRAM/temp/tsmc_sram_256x256.lib
+/home/xxwang1/OpenRAM/temp/tsmc_sram_256x256.py
+/home/xxwang1/OpenRAM/temp/tsmc_sram_256x256.html
+/home/xxwang1/OpenRAM/temp/tsmc_sram_256x256.log
+/home/xxwang1/OpenRAM/temp/tsmc_sram_256x256.lef
+/home/xxwang1/OpenRAM/temp/tsmc_sram_256x256.gds
