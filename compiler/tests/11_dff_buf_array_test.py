@@ -16,22 +16,22 @@ from openram.sram_factory import factory
 from openram import OPTS
 
 
-class dff_buf_array_test(openram_test):
+class gain_cell_dff_buf_array_test(openram_test):
 
     def runTest(self):
         config_file = "{}/tests/configs/config".format(os.getenv("OPENRAM_HOME"))
         openram.init_openram(config_file, is_unit_test=True)
 
-        debug.info(2, "Testing dff_buf_array for 3x3")
-        a = factory.create(module_type="dff_buf_array", rows=3, columns=3)
+        debug.info(2, "Testing gain_cell_dff_buf_array for 3x3")
+        a = factory.create(module_type="gain_cell_dff_buf_array", rows=3, columns=3)
         self.local_check(a)
 
-        debug.info(2, "Testing dff_buf_array for 1x3")
-        a = factory.create(module_type="dff_buf_array", rows=1, columns=3)
+        debug.info(2, "Testing gain_cell_dff_buf_array for 1x3")
+        a = factory.create(module_type="gain_cell_dff_buf_array", rows=1, columns=3)
         self.local_check(a)
 
-        debug.info(2, "Testing dff_buf_array for 3x1")
-        a = factory.create(module_type="dff_buf_array", rows=3, columns=1)
+        debug.info(2, "Testing gain_cell_dff_buf_array for 3x1")
+        a = factory.create(module_type="gain_cell_dff_buf_array", rows=3, columns=1)
         self.local_check(a)
 
         openram.end_openram()
