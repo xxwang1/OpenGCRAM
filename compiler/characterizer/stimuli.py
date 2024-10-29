@@ -27,6 +27,7 @@ class stimuli():
         self.gnd_name = "gnd"
         self.pmos_name = tech.spice["pmos"]
         self.nmos_name = tech.spice["nmos"]
+        self.osfet_name = tech.spice["osfet"]
         self.tx_width = tech.drc["minwidth_tx"]
         self.tx_length = tech.drc["minlength_channel"]
 
@@ -37,6 +38,7 @@ class stimuli():
         found = False
         self.device_libraries = []
         self.device_models = []
+        self.os_device_models = []
         try:
             self.device_libraries += tech.spice["fet_libraries"][self.process]
             found = True
@@ -44,6 +46,11 @@ class stimuli():
             pass
         try:
             self.device_models += tech.spice["fet_models"][self.process]
+            found = True
+        except KeyError:
+            pass
+        try:
+            self.os_device_models += tech.spice["osfet_models"][self.process]
             found = True
         except KeyError:
             pass
@@ -317,7 +324,7 @@ class stimuli():
             else:
                 debug.error("Could not find spice library: {0}\nSet SPICE_MODEL_DIR to over-ride path.\n".format(item[0]), -1)
         
-        includes = self.device_models + [circuit]
+        includes = self.device_models + self.os_device_models + [circuit]
 
         for item in list(includes):
             if OPTS.spice_name:
@@ -328,6 +335,7 @@ class stimuli():
             print("*****************************************************************")
             print("Include to write =", ".include \"{0}\"\n".format(item))
             print("*****************************************************************")
+        
 
     def add_comment(self, msg):
         self.sf.write(msg + "\n")

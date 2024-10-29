@@ -21,7 +21,7 @@ class setup_hold():
 
     def __init__(self, corner):
         # This must match the spice model order
-        self.dff = factory.create(module_type=OPTS.dff)
+        self.gain_cell_dff = factory.create(module_type=OPTS.gain_cell_dff)
 
         self.period = tech.spice["feasible_period"]
 
@@ -54,8 +54,8 @@ class setup_hold():
 
         # instantiate the master-slave d-flip-flop
         self.sf.write("\n* Instantiation of the Master-Slave D-flip-flop\n")
-        self.stim.inst_model(pins=self.dff.get_original_pin_names(),
-                             model_name=self.dff.cell_name)
+        self.stim.inst_model(pins=self.gain_cell_dff.get_original_pin_names(),
+                             model_name=self.gain_cell_dff.cell_name)
 
         self.write_data(mode=mode,
                         target_time=target_time,
@@ -77,7 +77,7 @@ class setup_hold():
         self.sf.write("\n* Stimulus for setup/hold: data {0} period {1}n\n".format(correct_value, self.period))
 
         # include files in stimulus file
-        self.stim.write_include(self.dff.sp_file)
+        self.stim.write_include(self.gain_cell_dff.sp_file)
 
         # add vdd/gnd statements
         self.sf.write("\n* Global Power Supplies\n")

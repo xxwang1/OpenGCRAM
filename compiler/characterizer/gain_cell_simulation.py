@@ -495,9 +495,9 @@ class gain_cell_simulation():
         # for testing.
         if OPTS.top_process != 'memchar':
             self.gain_cell.bank.graph_exclude_precharge()
-            self.gain_cell.graph_exclude_addr_dff()
-            self.gain_cell.graph_exclude_data_dff()
-            self.gain_cell.graph_exclude_ctrl_dffs()
+            self.gain_cell.graph_exclude_addr_gain_cell_dff()
+            self.gain_cell.graph_exclude_data_gain_cell_dff()
+            self.gain_cell.graph_exclude_ctrl_gain_cell_dffs()
             self.gain_cell.bank.gain_cell_array.graph_exclude_replica_col_bits()
 
     def set_internal_spice_names(self):
