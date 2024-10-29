@@ -139,8 +139,8 @@ class openram_test(unittest.TestCase):
         Reset everything after each test.
         """
         # Reset the static duplicate name checker for unit tests.
-        from openram.base import hierarchy_design
-        hierarchy_design.name_map=[]
+        from openram.base import gain_cell_hierarchy_design
+        gain_cell_hierarchy_design.name_map=[]
 
     def check_golden_data(self, data, golden_data, error_tolerance=1e-2):
         """
