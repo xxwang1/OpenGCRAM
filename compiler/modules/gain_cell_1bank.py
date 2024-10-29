@@ -454,7 +454,7 @@ class gain_cell_1bank(design, verilog, lef):
 
     def add_modules(self):
         self.gain_cell = factory.create(module_type=OPTS.gain_cell)
-        self.dff = factory.create(module_type="dff")
+        self.gain_cell_dff = factory.create(module_type="gain_cell_dff")
 
         # Create the bank module (up to four are instantiated)
         self.bank = factory.create("gain_cell_bank", sram_config=self.gain_cell_config, module_name="gain_cell_bank")
@@ -462,20 +462,20 @@ class gain_cell_1bank(design, verilog, lef):
         self.num_spare_cols = self.bank.num_spare_cols
 
         # Create the address and control flops (but not the clk)
-        self.row_addr_dff = factory.create("dff_array", module_name="row_addr_dff", rows=self.row_addr_size, columns=1)
+        self.row_addr_gain_cell_dff = factory.create("gain_cell_dff_array", module_name="row_addr_gain_cell_dff", rows=self.row_addr_size, columns=1)
 
         if self.col_addr_size > 0:
-            self.col_addr_dff = factory.create("dff_array", module_name="col_addr_dff", rows=1, columns=self.col_addr_size)
+            self.col_addr_gain_cell_dff = factory.create("gain_cell_dff_array", module_name="col_addr_gain_cell_dff", rows=1, columns=self.col_addr_size)
         else:
-            self.col_addr_dff = None
+            self.col_addr_gain_cell_dff = None
 
-        self.data_dff = factory.create("dff_array", module_name="data_dff", rows=1, columns=self.word_size + self.num_spare_cols)
+        self.data_gain_cell_dff = factory.create("gain_cell_dff_array", module_name="data_gain_cell_dff", rows=1, columns=self.word_size + self.num_spare_cols)
 
         if self.write_size != self.word_size:
-            self.wmask_dff = factory.create("dff_array", module_name="wmask_dff", rows=1, columns=self.num_wmasks)
+            self.wmask_gain_cell_dff = factory.create("gain_cell_dff_array", module_name="wmask_gain_cell_dff", rows=1, columns=self.num_wmasks)
 
         if self.num_spare_cols:
-            self.spare_wen_dff = factory.create("dff_array", module_name="spare_wen_dff", rows=1, columns=self.num_spare_cols)
+            self.spare_wen_gain_cell_dff = factory.create("gain_cell_dff_array", module_name="spare_wen_gain_cell_dff", rows=1, columns=self.num_spare_cols)
 
         self.bank_count = 0
 
@@ -574,12 +574,12 @@ class gain_cell_1bank(design, verilog, lef):
 
         return bank_inst
 
-    def create_row_addr_dff(self):
+    def create_row_addr_gain_cell_dff(self):
         """ Add all address flops for the main decoder """
         insts = []
         for port in self.all_ports:
             insts.append(self.add_inst(name="row_address{}".format(port),
-                                       mod=self.row_addr_dff))
+                                       mod=self.row_addr_gain_cell_dff))
 
             # inputs, outputs/output/bar
             inputs = []
@@ -592,12 +592,12 @@ class gain_cell_1bank(design, verilog, lef):
 
         return insts
 
-    def create_col_addr_dff(self):
+    def create_col_addr_gain_cell_dff(self):
         """ Add and place all address flops for the column decoder """
         insts = []
         for port in self.all_ports:
             insts.append(self.add_inst(name="col_address{}".format(port),
-                                       mod=self.col_addr_dff))
+                                       mod=self.col_addr_gain_cell_dff))
 
             # inputs, outputs/output/bar
             inputs = []
@@ -610,13 +610,13 @@ class gain_cell_1bank(design, verilog, lef):
 
         return insts
 
-    def create_data_dff(self):
+    def create_data_gain_cell_dff(self):
         """ Add and place all data flops """
         insts = []
         for port in self.all_ports:
             if port in self.write_ports:
-                insts.append(self.add_inst(name="data_dff{}".format(port),
-                                           mod=self.data_dff))
+                insts.append(self.add_inst(name="data_gain_cell_dff{}".format(port),
+                                           mod=self.data_gain_cell_dff))
             else:
                 insts.append(None)
                 continue
@@ -632,13 +632,13 @@ class gain_cell_1bank(design, verilog, lef):
 
         return insts
 
-    def create_wmask_dff(self):
+    def create_wmask_gain_cell_dff(self):
         """ Add and place all wmask flops """
         insts = []
         for port in self.all_ports:
             if port in self.write_ports:
-                insts.append(self.add_inst(name="wmask_dff{}".format(port),
-                                           mod=self.wmask_dff))
+                insts.append(self.add_inst(name="wmask_gain_cell_dff{}".format(port),
+                                           mod=self.wmask_gain_cell_dff))
             else:
                 insts.append(None)
                 continue
@@ -654,13 +654,13 @@ class gain_cell_1bank(design, verilog, lef):
 
         return insts
 
-    def create_spare_wen_dff(self):
+    def create_spare_wen_gain_cell_dff(self):
         """ Add all spare write enable flops """
         insts = []
         for port in self.all_ports:
             if port in self.write_ports:
-                insts.append(self.add_inst(name="spare_wen_dff{}".format(port),
-                                           mod=self.spare_wen_dff))
+                insts.append(self.add_inst(name="spare_wen_gain_cell_dff{}".format(port),
+                                           mod=self.spare_wen_gain_cell_dff))
             else:
                 insts.append(None)
                 continue
@@ -772,19 +772,19 @@ class gain_cell_1bank(design, verilog, lef):
 
         self.gain_cell_control_logic_insts = self.create_gain_cell_control_logic()
 
-        self.row_addr_dff_insts = self.create_row_addr_dff()
+        self.row_addr_gain_cell_dff_insts = self.create_row_addr_gain_cell_dff()
 
-        if self.col_addr_dff:
-            self.col_addr_dff_insts = self.create_col_addr_dff()
+        if self.col_addr_gain_cell_dff:
+            self.col_addr_gain_cell_dff_insts = self.create_col_addr_gain_cell_dff()
 
         if self.write_size != self.word_size:
-            self.wmask_dff_insts = self.create_wmask_dff()
-            self.data_dff_insts = self.create_data_dff()
+            self.wmask_gain_cell_dff_insts = self.create_wmask_gain_cell_dff()
+            self.data_gain_cell_dff_insts = self.create_data_gain_cell_dff()
         else:
-            self.data_dff_insts = self.create_data_dff()
+            self.data_gain_cell_dff_insts = self.create_data_gain_cell_dff()
 
         if self.num_spare_cols:
-            self.spare_wen_dff_insts = self.create_spare_wen_dff()
+            self.spare_wen_gain_cell_dff_insts = self.create_spare_wen_gain_cell_dff()
         else:
             self.num_spare_cols = 0
 
@@ -841,45 +841,45 @@ class gain_cell_1bank(design, verilog, lef):
 
         # The control and row addr flops are independent of any bus widths.
         self.place_control()
-        self.place_row_addr_dffs()
+        self.place_row_addr_gain_cell_dffs()
 
         # Place with an initial wide channel (from above)
-        self.place_dffs()
+        self.place_gain_cell_dffs()
 
         # Route the channel and set to the new data bus size
         # We need to temporarily add some pins for the x offsets
         # but we'll remove them so that they have the right y
         # offsets after the DFF placement.
         self.add_layout_pins(add_vias=False)
-        self.route_dffs(add_routes=False)
+        self.route_gain_cell_dffs(add_routes=False)
         self.remove_layout_pins()
 
         # Re-place with the new channel size
-        self.place_dffs()
+        self.place_gain_cell_dffs()
 
-    def place_row_addr_dffs(self):
+    def place_row_addr_gain_cell_dffs(self):
         """
         Must be run after place control logic.
         """
         port = 0
         # The row address bits are placed above the control logic aligned on the right.
-        x_offset = self.gain_cell_control_logic_insts[port].rx() - self.row_addr_dff_insts[port].width
+        x_offset = self.gain_cell_control_logic_insts[port].rx() - self.row_addr_gain_cell_dff_insts[port].width
         # It is above the control logic and the predecoder array
         y_offset = max(self.gain_cell_control_logic_insts[port].uy(), self.bank.predecoder_top)
 
         self.row_addr_pos[port] = vector(x_offset, y_offset)
-        # print("self.row_addr_dff_insts[port] = ", self.row_addr_dff_insts[port])
-        self.row_addr_dff_insts[port].place(self.row_addr_pos[port])
+        # print("self.row_addr_gain_cell_dff_insts[port] = ", self.row_addr_gain_cell_dff_insts[port])
+        self.row_addr_gain_cell_dff_insts[port].place(self.row_addr_pos[port])
 
         if len(self.all_ports)>1:
             port = 1
             # The row address bits are placed above the control logic aligned on the left.
-            x_offset = self.control_pos[port].x - self.gain_cell_control_logic_insts[port].width + self.row_addr_dff_insts[port].width
+            x_offset = self.control_pos[port].x - self.gain_cell_control_logic_insts[port].width + self.row_addr_gain_cell_dff_insts[port].width
             # If it can be placed above the predecoder and below the control logic, do it
             y_offset = self.bank.predecoder_bottom
             self.row_addr_pos[port] = vector(x_offset, y_offset)
-            # print("self.row_addr_dff_insts[port] = ", self.row_addr_dff_insts[port])
-            self.row_addr_dff_insts[port].place(self.row_addr_pos[port], mirror="XY")
+            # print("self.row_addr_gain_cell_dff_insts[port] = ", self.row_addr_gain_cell_dff_insts[port])
+            self.row_addr_gain_cell_dff_insts[port].place(self.row_addr_pos[port], mirror="XY")
 
     def place_control(self):
         port = 0
@@ -904,7 +904,7 @@ class gain_cell_1bank(design, verilog, lef):
             # print("self.gain_cell_control_logic_insts[port] = ", self.gain_cell_control_logic_insts[port])
             self.gain_cell_control_logic_insts[port].place(self.control_pos[port], mirror="XY")
 
-    def place_dffs(self):
+    def place_gain_cell_dffs(self):
         """
         Place the col addr, data, wmask, and spare data DFFs.
         This can be run more than once after we recompute the channel width.
@@ -912,17 +912,17 @@ class gain_cell_1bank(design, verilog, lef):
 
         port = 0
         # Add the col address flops below the bank to the right of the control logic
-        x_offset = self.gain_cell_control_logic_insts[port].rx() + self.dff.width
+        x_offset = self.gain_cell_control_logic_insts[port].rx() + self.gain_cell_dff.width
         # Place it a data bus below the x-axis, but at least as low as the control logic to not block
         # the control logic signals
-        y_offset = min(-self.data_bus_size[port] - self.dff.height,
+        y_offset = min(-self.data_bus_size[port] - self.gain_cell_dff.height,
                        self.gain_cell_control_logic_insts[port].by())
-        if self.col_addr_dff:
+        if self.col_addr_gain_cell_dff:
             self.col_addr_pos[port] = vector(x_offset,
                                              y_offset)
-            # print("self.col_addr_dff_insts[port] = ", self.col_addr_dff_insts[port])
-            self.col_addr_dff_insts[port].place(self.col_addr_pos[port])
-            x_offset = self.col_addr_dff_insts[port].rx()
+            # print("self.col_addr_gain_cell_dff_insts[port] = ", self.col_addr_gain_cell_dff_insts[port])
+            self.col_addr_gain_cell_dff_insts[port].place(self.col_addr_pos[port])
+            x_offset = self.col_addr_gain_cell_dff_insts[port].rx()
         else:
             self.col_addr_pos[port] = vector(x_offset, 0)
 
@@ -931,25 +931,25 @@ class gain_cell_1bank(design, verilog, lef):
                 # Add the write mask flops below the write mask AND array.
                 self.wmask_pos[port] = vector(x_offset,
                                               y_offset)
-                # print("self.wmask_dff_insts[port] = ", self.wmask_dff_insts[port])
-                self.wmask_dff_insts[port].place(self.wmask_pos[port])
-                x_offset = self.wmask_dff_insts[port].rx()
+                # print("self.wmask_gain_cell_dff_insts[port] = ", self.wmask_gain_cell_dff_insts[port])
+                self.wmask_gain_cell_dff_insts[port].place(self.wmask_pos[port])
+                x_offset = self.wmask_gain_cell_dff_insts[port].rx()
 
             # Add the data flops below the write mask flops.
             self.data_pos[port] = vector(x_offset,
                                          y_offset)
-            # print("self.data_dff_insts[port] = ", self.data_dff_insts[port])
-            self.data_dff_insts[port].place(self.data_pos[port])
-            x_offset = self.data_dff_insts[port].rx()
+            # print("self.data_gain_cell_dff_insts[port] = ", self.data_gain_cell_dff_insts[port])
+            self.data_gain_cell_dff_insts[port].place(self.data_pos[port])
+            x_offset = self.data_gain_cell_dff_insts[port].rx()
 
             # Add spare write enable flops to the right of data flops since the spare columns
             # will be on the right
             if self.num_spare_cols:
                 self.spare_wen_pos[port] = vector(x_offset,
                                                   y_offset)
-                # print("self.spare_wen_dff_insts[port] = ", self.spare_wen_dff_insts[port])
-                self.spare_wen_dff_insts[port].place(self.spare_wen_pos[port])
-                x_offset = self.spare_wen_dff_insts[port].rx()
+                # print("self.spare_wen_gain_cell_dff_insts[port] = ", self.spare_wen_gain_cell_dff_insts[port])
+                self.spare_wen_gain_cell_dff_insts[port].place(self.spare_wen_pos[port])
+                x_offset = self.spare_wen_gain_cell_dff_insts[port].rx()
 
         else:
             self.wmask_pos[port] = vector(x_offset, y_offset)
@@ -960,17 +960,17 @@ class gain_cell_1bank(design, verilog, lef):
             port = 1
 
             # Add the col address flops below the bank to the right of the control logic
-            x_offset = self.gain_cell_control_logic_insts[port].lx() - 2 * self.dff.width
+            x_offset = self.gain_cell_control_logic_insts[port].lx() - 2 * self.gain_cell_dff.width
             # Place it a data bus below the x-axis, but at least as high as the control logic to not block
             # the control logic signals
-            y_offset = max(self.bank.height + self.data_bus_size[port] + self.dff.height,
-                           self.gain_cell_control_logic_insts[port].uy() - self.dff.height)
-            if self.col_addr_dff:
+            y_offset = max(self.bank.height + self.data_bus_size[port] + self.gain_cell_dff.height,
+                           self.gain_cell_control_logic_insts[port].uy() - self.gain_cell_dff.height)
+            if self.col_addr_gain_cell_dff:
                 self.col_addr_pos[port] = vector(x_offset,
                                                  y_offset)
-                # print("self.col_addr_dff_insts[port] = ", self.col_addr_dff_insts[port])
-                self.col_addr_dff_insts[port].place(self.col_addr_pos[port], mirror="XY")
-                x_offset = self.col_addr_dff_insts[port].lx()
+                # print("self.col_addr_gain_cell_dff_insts[port] = ", self.col_addr_gain_cell_dff_insts[port])
+                self.col_addr_gain_cell_dff_insts[port].place(self.col_addr_pos[port], mirror="XY")
+                x_offset = self.col_addr_gain_cell_dff_insts[port].lx()
             else:
                 self.col_addr_pos[port] = vector(x_offset, y_offset)
 
@@ -978,25 +978,25 @@ class gain_cell_1bank(design, verilog, lef):
                 # Add spare write enable flops to the right of the data flops since the spare
                 # columns will be on the left
                 if self.num_spare_cols:
-                    self.spare_wen_pos[port] = vector(x_offset - self.spare_wen_dff_insts[port].width,
+                    self.spare_wen_pos[port] = vector(x_offset - self.spare_wen_gain_cell_dff_insts[port].width,
                                                       y_offset)
-                    # print("self.spare_wen_dff_insts[port] = ", self.spare_wen_dff_insts[port])
-                    self.spare_wen_dff_insts[port].place(self.spare_wen_pos[port], mirror="MX")
-                    x_offset = self.spare_wen_dff_insts[port].lx()
+                    # print("self.spare_wen_gain_cell_dff_insts[port] = ", self.spare_wen_gain_cell_dff_insts[port])
+                    self.spare_wen_gain_cell_dff_insts[port].place(self.spare_wen_pos[port], mirror="MX")
+                    x_offset = self.spare_wen_gain_cell_dff_insts[port].lx()
 
                 if self.write_size != self.word_size:
                     # Add the write mask flops below the write mask AND array.
-                    self.wmask_pos[port] = vector(x_offset - self.wmask_dff_insts[port].width,
+                    self.wmask_pos[port] = vector(x_offset - self.wmask_gain_cell_dff_insts[port].width,
                                                   y_offset)
-                    # print("self.wmask_dff_insts[port] = ", self.wmask_dff_insts[port])
-                    self.wmask_dff_insts[port].place(self.wmask_pos[port], mirror="MX")
-                    x_offset = self.wmask_dff_insts[port].lx()
+                    # print("self.wmask_gain_cell_dff_insts[port] = ", self.wmask_gain_cell_dff_insts[port])
+                    self.wmask_gain_cell_dff_insts[port].place(self.wmask_pos[port], mirror="MX")
+                    x_offset = self.wmask_gain_cell_dff_insts[port].lx()
 
                 # Add the data flops below the write mask flops.
-                self.data_pos[port] = vector(x_offset - self.data_dff_insts[port].width,
+                self.data_pos[port] = vector(x_offset - self.data_gain_cell_dff_insts[port].width,
                                              y_offset)
-                # print("self.data_dff_insts[port] = ", self.data_dff_insts[port])
-                self.data_dff_insts[port].place(self.data_pos[port], mirror="MX")
+                # print("self.data_gain_cell_dff_insts[port] = ", self.data_gain_cell_dff_insts[port])
+                self.data_gain_cell_dff_insts[port].place(self.data_pos[port], mirror="MX")
         else:
             self.wmask_pos[port] = vector(x_offset, y_offset)
             self.data_pos[port] = vector(x_offset, y_offset)
@@ -1010,7 +1010,7 @@ class gain_cell_1bank(design, verilog, lef):
             # Hack: If we are escape routing, set the pin layer to
             # None so that we will start from the pin layer
             # Otherwise, set it as the pin layer so that no vias are added.
-            # Otherwise, when we remove pins to move the dff array dynamically,
+            # Otherwise, when we remove pins to move the gain_cell_dff array dynamically,
             # we will leave some remaining vias when the pin locations change.
             if add_vias:
                 pin_layer = None
@@ -1029,7 +1029,7 @@ class gain_cell_1bank(design, verilog, lef):
 
             if port in self.write_ports:
                 for bit in range(self.word_size + self.num_spare_cols):
-                    # self.add_io_pin(self.data_dff_insts[port],
+                    # self.add_io_pin(self.data_gain_cell_dff_insts[port],
                     #                 "din_{}".format(bit),
                     #                 "din{0}[{1}]".format(port, bit),
                     #                 start_layer=pin_layer,
@@ -1045,14 +1045,14 @@ class gain_cell_1bank(design, verilog, lef):
                                 minarea=True)
 
             for bit in range(self.col_addr_size):
-                # self.add_io_pin(self.col_addr_dff_insts[port],
+                # self.add_io_pin(self.col_addr_gain_cell_dff_insts[port],
                 #                 "din_{}".format(bit),
                 #                 "addr{0}[{1}]".format(port, bit),
                 #                 start_layer=pin_layer,
                 #                 minarea=True)
                 pass
             for bit in range(self.row_addr_size):
-                self.add_io_pin(self.row_addr_dff_insts[port],
+                self.add_io_pin(self.row_addr_gain_cell_dff_insts[port],
                                 "din_{}".format(bit),
                                 "addr{0}[{1}]".format(port, bit + self.col_addr_size),
                                 start_layer=pin_layer,
@@ -1061,7 +1061,7 @@ class gain_cell_1bank(design, verilog, lef):
             if port in self.write_ports:
                 if self.write_size != self.word_size:
                     for bit in range(self.num_wmasks):
-                        self.add_io_pin(self.wmask_dff_insts[port],
+                        self.add_io_pin(self.wmask_gain_cell_dff_insts[port],
                                         "din_{}".format(bit),
                                         "wmask{0}[{1}]".format(port, bit),
                                         start_layer=pin_layer,
@@ -1069,14 +1069,14 @@ class gain_cell_1bank(design, verilog, lef):
 
             if port in self.write_ports:
                 if self.num_spare_cols == 1:
-                    self.add_io_pin(self.spare_wen_dff_insts[port],
+                    self.add_io_pin(self.spare_wen_gain_cell_dff_insts[port],
                                     "din_{}".format(0),
                                     "spare_wen{0}".format(port),
                                     start_layer=pin_layer,
                                 minarea=True)
                 else:
                     for bit in range(self.num_spare_cols):
-                        self.add_io_pin(self.spare_wen_dff_insts[port],
+                        self.add_io_pin(self.spare_wen_gain_cell_dff_insts[port],
                                         "din_{}".format(bit),
                                         "spare_wen{0}[{1}]".format(port, bit),
                                         start_layer=pin_layer,
@@ -1089,9 +1089,9 @@ class gain_cell_1bank(design, verilog, lef):
 
         self.route_gain_cell_control_logic()
 
-        self.route_row_addr_dff()
+        self.route_row_addr_gain_cell_dff()
 
-        self.route_dffs()
+        self.route_gain_cell_dffs()
 
         # We add the vias to M3 before routing supplies because
         # they might create some blockages
@@ -1111,40 +1111,40 @@ class gain_cell_1bank(design, verilog, lef):
             self.route_supplies(init_bbox)
 
 
-    def route_dffs(self, add_routes=True):
+    def route_gain_cell_dffs(self, add_routes=True):
 
         for port in self.all_ports:
-            self.route_dff(port, add_routes)
+            self.route_gain_cell_dff(port, add_routes)
 
-    def route_dff(self, port, add_routes):
+    def route_gain_cell_dff(self, port, add_routes):
 
         # This is only done when we add_routes because the data channel will be larger
         # so that can be used for area estimation.
         if add_routes:
-            self.route_col_addr_dffs(port)
+            self.route_col_addr_gain_cell_dffs(port)
 
-        self.route_data_dffs(port, add_routes)
+        self.route_data_gain_cell_dffs(port, add_routes)
 
-    def route_col_addr_dffs(self, port):
+    def route_col_addr_gain_cell_dffs(self, port):
 
         route_map = []
 
-        # column mux dff is routed on it's own since it is to the far end
+        # column mux gain_cell_dff is routed on it's own since it is to the far end
         # decoder inputs are min pitch M2, so need to use lower layer stack
         if self.col_addr_size > 0:
-            dff_names = ["dout_{}".format(x) for x in range(self.col_addr_size)]
-            dff_pins = [self.col_addr_dff_insts[port].get_pin(x) for x in dff_names]
+            gain_cell_dff_names = ["dout_{}".format(x) for x in range(self.col_addr_size)]
+            gain_cell_dff_pins = [self.col_addr_gain_cell_dff_insts[port].get_pin(x) for x in gain_cell_dff_names]
             bank_names = ["addr{0}_{1}".format(port, x) for x in range(self.col_addr_size)]
             bank_pins = [self.bank_inst.get_pin(x) for x in bank_names]
-            route_map.extend(list(zip(bank_pins, dff_pins)))
+            route_map.extend(list(zip(bank_pins, gain_cell_dff_pins)))
 
         if len(route_map) > 0:
 
-            # This layer stack must be different than the data dff layer stack
+            # This layer stack must be different than the data gain_cell_dff layer stack
             layer_stack = self.m1_stack
 
             if port == 0:
-                offset = vector(self.gain_cell_control_logic_insts[port].rx() + self.dff.width,
+                offset = vector(self.gain_cell_control_logic_insts[port].rx() + self.gain_cell_dff.width,
                                 - self.data_bus_size[port] + 2 * self.m3_pitch)
                 cr = channel_route(netlist=route_map,
                                    offset=offset,
@@ -1154,7 +1154,7 @@ class gain_cell_1bank(design, verilog, lef):
                 # This causes problem in magic since it sometimes cannot extract connectivity of instances
                 # with no active devices.
                 self.add_inst(cr.name, cr)
-                print("route_col_addr_dffs port=0, cr.name = ", cr.name)
+                print("route_col_addr_gain_cell_dffs port=0, cr.name = ", cr.name)
                 self.connect_inst([])
                 # self.add_flat_inst(cr.name, cr)
             else:
@@ -1168,40 +1168,40 @@ class gain_cell_1bank(design, verilog, lef):
                 # This causes problem in magic since it sometimes cannot extract connectivity of instances
                 # with no active devices.
                 self.add_inst(cr.name, cr)
-                print("route_col_addr_dffs port!=0, cr.name = ", cr.name)
+                print("route_col_addr_gain_cell_dffs port!=0, cr.name = ", cr.name)
                 self.connect_inst([])
                 # self.add_flat_inst(cr.name, cr)
 
-    def route_data_dffs(self, port, add_routes):
+    def route_data_gain_cell_dffs(self, port, add_routes):
         route_map = []
 
-        # wmask dff
+        # wmask gain_cell_dff
         if self.num_wmasks > 0 and port in self.write_ports:
-            dff_names = ["dout_{}".format(x) for x in range(self.num_wmasks)]
-            dff_pins = [self.wmask_dff_insts[port].get_pin(x) for x in dff_names]
+            gain_cell_dff_names = ["dout_{}".format(x) for x in range(self.num_wmasks)]
+            gain_cell_dff_pins = [self.wmask_gain_cell_dff_insts[port].get_pin(x) for x in gain_cell_dff_names]
             bank_names = ["bank_wmask{0}_{1}".format(port, x) for x in range(self.num_wmasks)]
             bank_pins = [self.bank_inst.get_pin(x) for x in bank_names]
-            route_map.extend(list(zip(bank_pins, dff_pins)))
+            route_map.extend(list(zip(bank_pins, gain_cell_dff_pins)))
 
         if port in self.write_ports:
-            # synchronized inputs from data dff
-            dff_names = ["dout_{}".format(x) for x in range(self.word_size + self.num_spare_cols)]
-            dff_pins = [self.data_dff_insts[port].get_pin(x) for x in dff_names]
+            # synchronized inputs from data gain_cell_dff
+            gain_cell_dff_names = ["dout_{}".format(x) for x in range(self.word_size + self.num_spare_cols)]
+            gain_cell_dff_pins = [self.data_gain_cell_dff_insts[port].get_pin(x) for x in gain_cell_dff_names]
             bank_names = ["din{0}_{1}".format(port, x) for x in range(self.word_size + self.num_spare_cols)]
             bank_pins = [self.bank_inst.get_pin(x) for x in bank_names]
-            route_map.extend(list(zip(bank_pins, dff_pins)))
+            route_map.extend(list(zip(bank_pins, gain_cell_dff_pins)))
 
-        # spare wen dff
+        # spare wen gain_cell_dff
         if self.num_spare_cols > 0 and port in self.write_ports:
-            dff_names = ["dout_{}".format(x) for x in range(self.num_spare_cols)]
-            dff_pins = [self.spare_wen_dff_insts[port].get_pin(x) for x in dff_names]
+            gain_cell_dff_names = ["dout_{}".format(x) for x in range(self.num_spare_cols)]
+            gain_cell_dff_pins = [self.spare_wen_gain_cell_dff_insts[port].get_pin(x) for x in gain_cell_dff_names]
             bank_names = ["bank_spare_wen{0}_{1}".format(port, x) for x in range(self.num_spare_cols)]
             bank_pins = [self.bank_inst.get_pin(x) for x in bank_names]
-            route_map.extend(list(zip(bank_pins, dff_pins)))
+            route_map.extend(list(zip(bank_pins, gain_cell_dff_pins)))
 
         if len(route_map) > 0:
 
-            # This layer stack must be different than the column addr dff layer stack
+            # This layer stack must be different than the column addr gain_cell_dff layer stack
             layer_stack = self.m4_stack
             if port == 0:
                 # This is relative to the bank at 0,0 or the s_en which is routed on M3 also
@@ -1211,7 +1211,7 @@ class gain_cell_1bank(design, verilog, lef):
                     y_bottom = 0
 
                 y_offset = y_bottom - self.data_bus_size[port] + 2 * self.m3_pitch
-                offset = vector(self.gain_cell_control_logic_insts[port].rx() + self.dff.width,
+                offset = vector(self.gain_cell_control_logic_insts[port].rx() + self.gain_cell_dff.width,
                                 y_offset)
                 cr = channel_route(netlist=route_map,
                                    offset=offset,
@@ -1222,7 +1222,7 @@ class gain_cell_1bank(design, verilog, lef):
                     # This causes problem in magic since it sometimes cannot extract connectivity of instances
                     # with no active devices.
                     self.add_inst(cr.name, cr)
-                    print("route_data_dffs port=0, cr.name = ", cr.name)
+                    print("route_data_gain_cell_dffs port=0, cr.name = ", cr.name)
                     self.connect_inst([])
                     # self.add_flat_inst(cr.name, cr)
                 else:
@@ -1244,7 +1244,7 @@ class gain_cell_1bank(design, verilog, lef):
                     # This causes problem in magic since it sometimes cannot extract connectivity of instances
                     # with no active devices.
                     self.add_inst(cr.name, cr)
-                    print("route_data_dffs port=0, cr.name = ", cr.name)
+                    print("route_data_gain_cell_dffs port=0, cr.name = ", cr.name)
                     self.connect_inst([])
                     # self.add_flat_inst(cr.name, cr)
                 else:
@@ -1263,16 +1263,16 @@ class gain_cell_1bank(design, verilog, lef):
 
             # This uses a metal2 track to the right (for port0) of the control/row addr DFF
             # to route vertically. For port1, it is to the left.
-            row_addr_clk_pin = self.row_addr_dff_insts[port].get_pin("clk")
+            row_addr_clk_pin = self.row_addr_gain_cell_dff_insts[port].get_pin("clk")
             if port % 2:
                 control_clk_buf_pos = control_clk_buf_pin.lc()
                 row_addr_clk_pos = row_addr_clk_pin.lc()
-                mid1_pos = vector(self.row_addr_dff_insts[port].lx() - self.m2_pitch,
+                mid1_pos = vector(self.row_addr_gain_cell_dff_insts[port].lx() - self.m2_pitch,
                                   row_addr_clk_pos.y)
             else:
                 control_clk_buf_pos = control_clk_buf_pin.rc()
                 row_addr_clk_pos = row_addr_clk_pin.rc()
-                mid1_pos = vector(self.row_addr_dff_insts[port].rx() + self.m2_pitch,
+                mid1_pos = vector(self.row_addr_gain_cell_dff_insts[port].rx() + self.m2_pitch,
                                   row_addr_clk_pos.y)
 
             # This is the steiner point where the net branches out
@@ -1289,23 +1289,23 @@ class gain_cell_1bank(design, verilog, lef):
             self.add_wire(self.m2_stack[::-1],
                           [row_addr_clk_pos, mid1_pos, clk_steiner_pos])
 
-            if self.col_addr_dff:
-                dff_clk_pin = self.col_addr_dff_insts[port].get_pin("clk")
-                dff_clk_pos = dff_clk_pin.center()
-                mid_pos = vector(clk_steiner_pos.x, dff_clk_pos.y)
+            if self.col_addr_gain_cell_dff:
+                gain_cell_dff_clk_pin = self.col_addr_gain_cell_dff_insts[port].get_pin("clk")
+                gain_cell_dff_clk_pos = gain_cell_dff_clk_pin.center()
+                mid_pos = vector(clk_steiner_pos.x, gain_cell_dff_clk_pos.y)
                 self.add_wire(self.m2_stack[::-1],
-                              [dff_clk_pos, mid_pos, clk_steiner_pos])
+                              [gain_cell_dff_clk_pos, mid_pos, clk_steiner_pos])
             elif port in self.write_ports:
-                data_dff_clk_pin = self.data_dff_insts[port].get_pin("clk")
-                data_dff_clk_pos = data_dff_clk_pin.center()
-                mid_pos = vector(clk_steiner_pos.x, data_dff_clk_pos.y)
+                data_gain_cell_dff_clk_pin = self.data_gain_cell_dff_insts[port].get_pin("clk")
+                data_gain_cell_dff_clk_pos = data_gain_cell_dff_clk_pin.center()
+                mid_pos = vector(clk_steiner_pos.x, data_gain_cell_dff_clk_pos.y)
                 # In some designs, the steiner via will be too close to the mid_pos via
                 # so make the wire as wide as the contacts
                 self.add_path("m2",
                               [mid_pos, clk_steiner_pos])
                             #   width=max(self.m2_via.width, self.m2_via.height))
                 self.add_wire(self.m2_stack[::-1],
-                              [data_dff_clk_pos, mid_pos, clk_steiner_pos])
+                              [data_gain_cell_dff_clk_pos, mid_pos, clk_steiner_pos])
 
     def route_gain_cell_control_logic(self):
         """
@@ -1354,7 +1354,7 @@ class gain_cell_1bank(design, verilog, lef):
                                           min_area=True,
                                       multiple_via4=True)
 
-    def route_row_addr_dff(self):
+    def route_row_addr_gain_cell_dff(self):
         """
         Connect the output of the row flops to the bank pins
         """
@@ -1362,7 +1362,7 @@ class gain_cell_1bank(design, verilog, lef):
             for bit in range(self.row_addr_size):
                 flop_name = "dout_{}".format(bit)
                 bank_name = "addr{0}_{1}".format(port, bit + self.col_addr_size)
-                flop_pin = self.row_addr_dff_insts[port].get_pin(flop_name)
+                flop_pin = self.row_addr_gain_cell_dff_insts[port].get_pin(flop_name)
                 bank_pin = self.bank_inst.get_pin(bank_name)
                 flop_pos = flop_pin.center()
                 bank_pos = bank_pin.center()
@@ -1391,39 +1391,39 @@ class gain_cell_1bank(design, verilog, lef):
                            layer=pin.layer,
                            offset=pin.center())
 
-    def graph_exclude_data_dff(self):
+    def graph_exclude_data_gain_cell_dff(self):
         """
-        Removes data dff and wmask dff (if applicable) from search graph.
+        Removes data gain_cell_dff and wmask gain_cell_dff (if applicable) from search graph.
         """
-        # Data dffs and wmask dffs are only for writing so are not useful for evaluating read delay.
-        for inst in self.data_dff_insts:
+        # Data gain_cell_dffs and wmask gain_cell_dffs are only for writing so are not useful for evaluating read delay.
+        for inst in self.data_gain_cell_dff_insts:
             self.graph_inst_exclude.add(inst)
         if self.write_size != self.word_size:
-            for inst in self.wmask_dff_insts:
+            for inst in self.wmask_gain_cell_dff_insts:
                 self.graph_inst_exclude.add(inst)
         if self.num_spare_cols:
-            for inst in self.spare_wen_dff_insts:
+            for inst in self.spare_wen_gain_cell_dff_insts:
                 self.graph_inst_exclude.add(inst)
 
-    def graph_exclude_addr_dff(self):
+    def graph_exclude_addr_gain_cell_dff(self):
         """
-        Removes data dff from search graph.
+        Removes data gain_cell_dff from search graph.
         """
         # Address is considered not part of the critical path, subjectively removed
-        for inst in self.row_addr_dff_insts:
+        for inst in self.row_addr_gain_cell_dff_insts:
             self.graph_inst_exclude.add(inst)
 
-        if self.col_addr_dff:
-            for inst in self.col_addr_dff_insts:
+        if self.col_addr_gain_cell_dff:
+            for inst in self.col_addr_gain_cell_dff_insts:
                 self.graph_inst_exclude.add(inst)
 
-    def graph_exclude_ctrl_dffs(self):
+    def graph_exclude_ctrl_gain_cell_dffs(self):
         """
-        Exclude dffs for CSB, WEB, etc from graph
+        Exclude gain_cell_dffs for CSB, WEB, etc from graph
         """
         # Insts located in control logic, exclusion function called here
         for inst in self.gain_cell_control_logic_insts:
-            inst.mod.graph_exclude_dffs()
+            inst.mod.graph_exclude_gain_cell_dffs()
 
     def get_cell_name(self, inst_name, row, col):
         """

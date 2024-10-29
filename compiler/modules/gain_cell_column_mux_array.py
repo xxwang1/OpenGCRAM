@@ -20,17 +20,17 @@ class gain_cell_column_mux_array(design):
     Array of column mux to read the bitlines through the 6T.
     """
 
-    def __init__(self, name, columns, word_size, offsets=None, gain_cell_bl="bl", gain_cell_br="br", column_offset=0):
+    def __init__(self, name, columns, word_size, offsets=None, gain_cell_bl="rbl", column_offset=0):
         super().__init__(name)
         debug.info(1, "Creating {0}".format(self.name))
-        self.add_comment("cols: {0} word_size: {1} bl: {2} br: {3}".format(columns, word_size, gain_cell_bl, gain_cell_br))
+        self.add_comment("cols: {0} word_size: {1} bl: {2}".format(columns, word_size, gain_cell_bl))
 
         self.columns = columns
         self.word_size = word_size
         self.offsets = offsets
         self.words_per_row = int(self.columns / self.word_size)
-        self.gain_cell_bl = gain_cell_rbl
-        self.gain_cell_br = gain_cell_br
+        self.gain_cell_bl = gain_cell_bl
+
         self.column_offset = column_offset
 
         self.sel_layer = layer_props.column_mux_array.select_layer
@@ -46,13 +46,13 @@ class gain_cell_column_mux_array(design):
         if not OPTS.netlist_only:
             self.create_layout()
 
-    def get_bl_name(self):
-        bl_name = self.mux.get_bl_names()
-        return bl_name
+    def get_rbl_name(self):
+        rbl_name = self.mux.get_rbl_names()
+        return rbl_name
 
-    def get_br_name(self, port=0):
-        br_name = self.mux.get_br_names()
-        return br_name
+    def get_wbl_name(self, port=0):
+        wbl_name = self.mux.get_wbl_names()
+        return wbl_name
 
     def create_netlist(self):
         self.add_modules()
@@ -74,19 +74,24 @@ class gain_cell_column_mux_array(design):
 
     def add_pins(self):
         for i in range(self.columns):
-            self.add_pin("bl_{}".format(i))
-            self.add_pin("br_{}".format(i))
+            if "r" in self.gain_cell_bl:
+                self.add_pin("rbl_{}".format(i))
+            else:
+                self.add_pin("wbl_{}".format(i))
+            # self.add_pin("br_{}".format(i))
         for i in range(self.words_per_row):
             self.add_pin("sel_{}".format(i))
         for i in range(self.word_size):
-            self.add_pin("bl_out_{}".format(i))
-            self.add_pin("br_out_{}".format(i))
+            if "r" in self.gain_cell_bl:
+                self.add_pin("rbl_out_{}".format(i))
+            if "w" in self.gain_cell_bl:
+                self.add_pin("wbl_out_{}".format(i))
+            # self.add_pin("br_out_{}".format(i))
         self.add_pin("gnd")
 
     def add_modules(self):
         self.mux = factory.create(module_type="gain_cell_column_mux",
-                                  gain_cell_bl=self.gain_cell_bl,
-                                  gain_cell_br=self.gain_cell_br)
+                                  gain_cell_bl=self.gain_cell_bl)
 
         self.cell = factory.create(module_type=OPTS.gain_cell)
 
@@ -104,13 +109,16 @@ class gain_cell_column_mux_array(design):
             name = "XMUX{0}".format(col_num)
             self.mux_inst.append(self.add_inst(name=name,
                                                mod=self.mux))
-
-            self.connect_inst(["bl_{}".format(col_num),
-                               "br_{}".format(col_num),
-                               "bl_out_{}".format(int(col_num / self.words_per_row)),
-                               "br_out_{}".format(int(col_num / self.words_per_row)),
-                               "sel_{}".format(col_num % self.words_per_row),
-                               "gnd"])
+            if "r" in self.gain_cell_bl:
+                self.connect_inst(["rbl_{}".format(col_num),
+                                "rbl_out_{}".format(int(col_num / self.words_per_row)),
+                                "sel_{}".format(col_num % self.words_per_row),
+                                "gnd"])
+            if "w" in self.gain_cell_bl:
+                self.connect_inst(["wbl_{}".format(col_num),
+                                "wbl_out_{}".format(int(col_num / self.words_per_row)),
+                                "sel_{}".format(col_num % self.words_per_row),
+                                "gnd"])
 
     def place_array(self):
         # Default to single spaced columns
@@ -133,19 +141,27 @@ class gain_cell_column_mux_array(design):
         # For every column, add a pass gate
         for col_num in range(self.columns):
             mux_inst = self.mux_inst[col_num]
-            bl_pin = mux_inst.get_pin("bl")
-            offset = bl_pin.ll()
-            self.add_layout_pin(text="bl_{}".format(col_num),
-                                layer=bl_pin.layer,
-                                offset=offset,
-                                height=self.height - offset.y)
+            if "r" in self.gain_cell_bl:
+                rbl_pin = mux_inst.get_pin("rbl")
+                offset = rbl_pin.ll()
+                self.add_layout_pin(text="rbl_{}".format(col_num),
+                                    layer=rbl_pin.layer,
+                                    offset=offset,
+                                    height=self.height - offset.y)
+            if "w" in self.gain_cell_bl:
+                wbl_pin = mux_inst.get_pin("wbl")
+                offset = wbl_pin.ll()
+                self.add_layout_pin(text="wbl_{}".format(col_num),
+                                    layer=wbl_pin.layer,
+                                    offset=offset,
+                                    height=self.height - offset.y)
 
-            br_pin = mux_inst.get_pin("br")
-            offset = br_pin.ll()
-            self.add_layout_pin(text="br_{}".format(col_num),
-                                layer=br_pin.layer,
-                                offset=offset,
-                                height=self.height - offset.y)
+            # br_pin = mux_inst.get_pin("br")
+            # offset = br_pin.ll()
+            # self.add_layout_pin(text="br_{}".format(col_num),
+            #                     layer=br_pin.layer,
+            #                     offset=offset,
+            #                     height=self.height - offset.y)
 
     def route_supplies(self):
         self.route_horizontal_pins("gnd", self.insts)
@@ -183,9 +199,13 @@ class gain_cell_column_mux_array(design):
 
             offset = vector(gate_offset.x,
                             self.get_pin("sel_{}".format(sel_index)).cy())
+            if "r" in self.gain_cell_bl:
+                bl_offset = offset.scale(0, 1) + vector((self.mux_inst[col].get_pin("sel").cx()), 0)
+                corrected_bl_offset = vector(offset.x, min_yoffset).scale(0, 1) + vector((self.mux_inst[col].get_pin("sel").cx()), 0)
+            if "w" in self.gain_cell_bl:
+                bl_offset = offset.scale(0, 1) + vector((self.mux_inst[col].get_pin("sel").cx()), 0)
+                corrected_bl_offset = vector(offset.x, min_yoffset).scale(0, 1) + vector((self.mux_inst[col].get_pin("sel").cx()), 0)
             
-            bl_offset = offset.scale(0, 1) + vector((self.mux_inst[col].get_pin("br_out").cx() + self.mux_inst[col].get_pin("bl_out").cx())/2, 0)
-            corrected_bl_offset = vector(offset.x, min_yoffset).scale(0, 1) + vector((self.mux_inst[col].get_pin("br_out").cx() + self.mux_inst[col].get_pin("bl_out").cx())/2, 0)
             self.add_via_stack_center(from_layer="poly",
                                       to_layer=self.sel_layer,
                                       offset=bl_offset,
@@ -208,36 +228,37 @@ class gain_cell_column_mux_array(design):
     def route_bitlines(self):
         """  Connect the output bit-lines to form the appropriate width mux """
         for j in range(self.columns):
-
-            bl_offset_begin = self.mux_inst[j].get_pin("bl_out").bc()
-            br_offset_begin = self.mux_inst[j].get_pin("br_out").bc()
+            if "r" in self.gain_cell_bl: bl_out = "rbl_out"
+            if "w" in self.gain_cell_bl: bl_out = "wbl_out"
+            bl_offset_begin = self.mux_inst[j].get_pin(bl_out).bc()
+            # br_offset_begin = self.mux_inst[j].get_pin("br_out").bc()
 
             bl_out_offset_begin = bl_offset_begin - vector(0, (self.words_per_row + 1) * self.sel_pitch)
-            br_out_offset_begin = br_offset_begin - vector(0, (self.words_per_row + 2) * self.sel_pitch)
+            # br_out_offset_begin = br_offset_begin - vector(0, (self.words_per_row + 2) * self.sel_pitch)
 
             # Add the horizontal wires for the first bit
             if j % self.words_per_row == 0:
-                bl_offset_end = self.mux_inst[j + self.words_per_row - 1].get_pin("bl_out").bc()
-                br_offset_end = self.mux_inst[j + self.words_per_row - 1].get_pin("br_out").bc()
+                bl_offset_end = self.mux_inst[j + self.words_per_row - 1].get_pin(bl_out).bc()
+                # br_offset_end = self.mux_inst[j + self.words_per_row - 1].get_pin("br_out").bc()
                 bl_out_offset_end = bl_offset_end - vector(0, (self.words_per_row + 1) * self.sel_pitch)
-                br_out_offset_end = br_offset_end - vector(0, (self.words_per_row + 2) * self.sel_pitch)
+                # br_out_offset_end = br_offset_end - vector(0, (self.words_per_row + 2) * self.sel_pitch)
 
                 self.add_path(self.sel_layer, [bl_out_offset_begin, bl_out_offset_end])
-                self.add_path(self.sel_layer, [br_out_offset_begin, br_out_offset_end])
+                # self.add_path(self.sel_layer, [br_out_offset_begin, br_out_offset_end])
 
                 # Extend the bitline output rails and gnd downward on the first bit of each n-way mux
-                self.add_layout_pin_segment_center(text="bl_out_{}".format(int(j / self.words_per_row)),
+                self.add_layout_pin_segment_center(text=bl_out+"_{}".format(int(j / self.words_per_row)),
                                                    layer=self.bitline_layer,
                                                    start=bl_offset_begin,
                                                    end=bl_out_offset_begin)
-                self.add_layout_pin_segment_center(text="br_out_{}".format(int(j / self.words_per_row)),
-                                                   layer=self.bitline_layer,
-                                                   start=br_offset_begin,
-                                                   end=br_out_offset_begin)
+                # self.add_layout_pin_segment_center(text="br_out_{}".format(int(j / self.words_per_row)),
+                #                                    layer=self.bitline_layer,
+                #                                    start=br_offset_begin,
+                #                                    end=br_out_offset_begin)
 
             else:
                 self.add_path(self.bitline_layer, [bl_out_offset_begin, bl_offset_begin])
-                self.add_path(self.bitline_layer, [br_out_offset_begin, br_offset_begin])
+                # self.add_path(self.bitline_layer, [br_out_offset_begin, br_offset_begin])
 
             # This via is on the right of the wire
             self.add_via_stack_center(from_layer=self.bitline_layer,
@@ -246,10 +267,10 @@ class gain_cell_column_mux_array(design):
                                       directions=self.via_directions)
 
             # This via is on the left of the wire
-            self.add_via_stack_center(from_layer=self.bitline_layer,
-                                      to_layer=self.sel_layer,
-                                      offset=br_out_offset_begin,
-                                      directions=self.via_directions)
+            # self.add_via_stack_center(from_layer=self.bitline_layer,
+            #                           to_layer=self.sel_layer,
+            #                           offset=br_out_offset_begin,
+            #                           directions=self.via_directions)
 
     def graph_exclude_columns(self, column_include_num):
         """

@@ -30,6 +30,7 @@ class gain_cell_sense_amp_array(design):
         self.words_per_row = words_per_row
         self.num_cols = word_size * words_per_row
         self.offsets = offsets
+        print("gain_cell_sense_amp_array offsets = ", self.offsets)
         if not num_spare_cols:
             self.num_spare_cols = 0
         else:
@@ -121,12 +122,13 @@ class gain_cell_sense_amp_array(design):
             self.amp_spacing = precharge_width
         else:
             self.amp_spacing = self.amp.width
-
+        print("place_sense_amp_array self.offsets = ", self.offsets)
         if not self.offsets:
             self.offsets = []
             for i in range(self.num_cols + self.num_spare_cols):
                 self.offsets.append(i * self.amp_spacing)
-
+        print("place_sense_amp_array self.amp_spacing = ", self.amp_spacing)
+        print("place_sense_amp_array self.offsets = ", self.offsets)
         for i, xoffset in enumerate(self.offsets[0:self.num_cols:self.words_per_row]):
             if self.gain_cell.mirror.y and (i * self.words_per_row + self.column_offset) % 2:
                 mirror = "MY"

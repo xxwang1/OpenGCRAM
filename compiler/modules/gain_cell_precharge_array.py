@@ -44,7 +44,7 @@ class gain_cell_precharge_array(design):
         return rbl_name
 
     def get_wbl_name(self):
-        wbl_name = self.pc_cell.get_rbl_names()
+        wbl_name = self.pc_cell.get_wbl_names()
         return wbl_name
 
     def add_pins(self):
@@ -95,8 +95,9 @@ class gain_cell_precharge_array(design):
             # self.copy_layout_pin(inst, "br", "br_{0}".format(i))
 
     def route_supplies(self):
-        self.route_horizontal_pins("vdd")
-
+        print("Gain Cell precharge array routing supplies")
+        self.route_horizontal_pins("vdd", snap_to_grid=True)
+        print("Gain Cell precharge array routing supplies end")
     def create_insts(self):
         """Creates a precharge array by horizontally tiling the precharge cell"""
         self.local_insts = []

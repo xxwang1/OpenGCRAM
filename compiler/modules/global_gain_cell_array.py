@@ -361,7 +361,7 @@ class global_gain_cell_array(gain_cell_base_array):
             mod.clear_exclude_bits()
         self.init_graph_params()
 
-    def graph_exclude_dffs(self):
-        """Exclude dffs from graph as they do not represent critical path"""
+    def graph_exclude_gain_cell_dffs(self):
+        """Exclude gain_cell_dffs from graph as they do not represent critical path"""
 
-        self.graph_inst_exclude.add(self.ctrl_dff_inst)
+        self.graph_inst_exclude.add(self.ctrl_gain_cell_dff_inst)

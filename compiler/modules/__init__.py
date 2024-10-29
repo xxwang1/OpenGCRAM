@@ -32,6 +32,12 @@ from .dff_buf import *
 from .dff_inv_array import *
 from .dff_inv import *
 from .dff import *
+from .gain_cell_dff_array import *
+from .gain_cell_dff_buf_array import *
+from .gain_cell_dff_buf import *
+from .gain_cell_dff_inv_array import *
+from .gain_cell_dff_inv import *
+from .gain_cell_dff import *
 from .dummy_array import *
 from .dummy_gain_cell_array import *
 from .dummy_bitcell_1port import *

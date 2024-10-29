@@ -252,7 +252,7 @@ class gain_cell_bank(design):
         x_offset = self.central_bus_width[port] + self.port_address[port].wordline_driver_array.width
         if self.col_addr_size > 0:
             x_offset += self.column_decoder.width + self.col_addr_bus_width
-            y_offset = 1.25 * self.dff.height + self.column_decoder.height
+            y_offset = 1.25 * self.gain_cell_dff.height + self.column_decoder.height
         else:
             y_offset = 0
         self.column_decoder_offsets[port] = vector(-x_offset, -y_offset)
@@ -294,7 +294,7 @@ class gain_cell_bank(design):
         x_offset = self.gain_cell_array_right  + self.central_bus_width[port] + self.port_address[port].wordline_driver_array.width
         if self.col_addr_size > 0:
             x_offset += self.column_decoder.width + self.col_addr_bus_width
-            y_offset = self.gain_cell_array_top + 1.25 * self.dff.height + self.column_decoder.height
+            y_offset = self.gain_cell_array_top + 1.25 * self.gain_cell_dff.height + self.column_decoder.height
         else:
             y_offset = self.gain_cell_array_top
         self.column_decoder_offsets[port] = vector(x_offset, y_offset)
@@ -556,7 +556,7 @@ class gain_cell_bank(design):
         Create a 2:4 or 3:8 column address decoder.
         """
 
-        self.dff =factory.create(module_type="dff")
+        self.gain_cell_dff =factory.create(module_type="gain_cell_dff")
 
         if self.col_addr_size == 0:
             return

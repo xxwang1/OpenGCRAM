@@ -23,22 +23,22 @@ class gain_cell_column_mux(pgate):
     Column-mux transistors driven by the decoder must be sized
     for optimal speed
     """
-    def __init__(self, name, tx_size=8, gain_cell_bl="bl", gain_cell_br="br"):
+    def __init__(self, name, tx_size=8, gain_cell_bl="rbl"):
         self.implant_enclose = max(self.implant_enclose_active, self.poly_extend_active + self.implant_enclose_poly)
         # self.implant_enclose = self.implant_enclose_active
         debug.info(2, "creating single column mux cell: {0}".format(name))
 
         self.tx_size = int(tx_size)
         self.gain_cell_bl = gain_cell_bl
-        self.gain_cell_br = gain_cell_br
+        # self.gain_cell_br = gain_cell_br
 
         super().__init__(name)
 
-    def get_bl_names(self):
-        return "bl"
+    def get_rbl_names(self):
+        return "rbl"
 
-    def get_br_names(self):
-        return "br"
+    def get_wbl_names(self):
+        return "wbl"
 
     def create_netlist(self):
         self.add_pins()
@@ -65,7 +65,7 @@ class gain_cell_column_mux(pgate):
         else:
             precharge_width = cell.width
         self.width = precharge_width
-        self.height = self.nmos_upper.uy() + self.pin_height
+        self.height = self.nmos_lower.uy() + self.pin_height
 
         self.connect_poly()
         self.add_bitline_pins()
@@ -83,41 +83,59 @@ class gain_cell_column_mux(pgate):
         # Space it in the center
         self.nmos_lower = self.add_inst(name="mux_tx1",
                                         mod=self.nmos)
-        self.connect_inst(["bl", "sel", "bl_out", "gnd"])
+        if "r" in self.gain_cell_bl: 
+            self.connect_inst(["rbl", "sel", "rbl_out", "gnd"])
+        if "w" in self.gain_cell_bl: 
+            self.connect_inst(["wbl", "sel", "wbl_out", "gnd"])
 
         # This aligns it directly above the other tx with gates abutting
-        self.nmos_upper = self.add_inst(name="mux_tx2",
-                                        mod=self.nmos)
-        self.connect_inst(["br", "sel", "br_out", "gnd"])
+        # self.nmos_upper = self.add_inst(name="mux_tx2",
+        #                                 mod=self.nmos)
+        # self.connect_inst(["br", "sel", "br_out", "gnd"])
 
     def add_pins(self):
-        self.add_pin_list(["bl", "br", "bl_out", "br_out", "sel", "gnd"])
+        if "r" in self.gain_cell_bl:
+            self.add_pin_list(["rbl", "rbl_out", "sel", "gnd"])
+        if "w" in self.gain_cell_bl:
+            self.add_pin_list(["wbl", "wbl_out", "sel", "gnd"])
 
     def add_bitline_pins(self):
         """ Add the top and bottom pins to this cell """
 
         bl_pos = vector(self.pin_pitch, 0)
-        br_pos = vector(self.width - self.pin_pitch, 0)
+        bl_out_pos = vector(self.width - self.pin_pitch, 0)
 
         # bl and br
-        self.add_layout_pin(text="bl",
-                            layer=self.pin_layer,
-                            offset=bl_pos + vector(0, self.height - self.pin_height),
-                            height=self.pin_height)
-        self.add_layout_pin(text="br",
-                            layer=self.pin_layer,
-                            offset=br_pos + vector(0, self.height - self.pin_height),
-                            height=self.pin_height)
+        if "r" in self.gain_cell_bl: 
+            self.add_layout_pin(text="rbl",
+                                layer=self.pin_layer,
+                                offset=bl_pos + vector(0, self.height - self.pin_height),
+                                height=self.pin_height)
+        if "w" in self.gain_cell_bl: 
+            self.add_layout_pin(text="wbl",
+                                layer=self.pin_layer,
+                                offset=bl_pos + vector(0, self.height - self.pin_height),
+                                height=self.pin_height)
+        # self.add_layout_pin(text="br",
+        #                     layer=self.pin_layer,
+        #                     offset=br_pos + vector(0, self.height - self.pin_height),
+        #                     height=self.pin_height)
 
         # bl_out and br_out
-        self.add_layout_pin(text="bl_out",
-                            layer=self.pin_layer,
-                            offset=bl_pos,
-                            height=self.pin_height)
-        self.add_layout_pin(text="br_out",
-                            layer=self.pin_layer,
-                            offset=br_pos,
-                            height=self.pin_height)
+        if "r" in self.gain_cell_bl: 
+            self.add_layout_pin(text="rbl_out",
+                                layer=self.pin_layer,
+                                offset=bl_out_pos,
+                                height=self.pin_height)
+        if "w" in self.gain_cell_bl: 
+            self.add_layout_pin(text="wbl_out",
+                                layer=self.pin_layer,
+                                offset=bl_out_pos,
+                                height=self.pin_height)
+        # self.add_layout_pin(text="br_out",
+        #                     layer=self.pin_layer,
+        #                     offset=br_pos,
+        #                     height=self.pin_height)
 
     def place_ptx(self):
         """ Create the two pass gate NMOS transistors to switch the bitlines"""
@@ -128,9 +146,9 @@ class gain_cell_column_mux(pgate):
         self.nmos_lower.place(nmos_lower_position)
 
         # This aligns it directly above the other tx with gates abutting
-        nmos_upper_position = nmos_lower_position \
-                              + vector(0, self.nmos.active_height + max(self.active_space, self.poly_space))
-        self.nmos_upper.place(nmos_upper_position)
+        # nmos_upper_position = nmos_lower_position \
+        #                       + vector(0, self.nmos.active_height + max(self.active_space, self.poly_space))
+        # self.nmos_upper.place(nmos_upper_position)
 
         if cell_props.pgate.add_implants:
             self.extend_implants()
@@ -141,7 +159,7 @@ class gain_cell_column_mux(pgate):
         # offset is the top of the lower nmos' diffusion
         # height is the distance between the nmos' diffusions, which depends on max(self.active_space,self.poly_space)
         offset = self.nmos_lower.get_pin("G").ul() - vector(0, self.poly_extend_active)
-        height = self.nmos_upper.get_pin("G").by() + self.poly_extend_active - offset.y
+        height = self.nmos_lower.get_pin("G").by() + self.poly_extend_active - offset.y
         self.add_rect(layer="poly",
                             offset=offset,
                             height=height)
@@ -154,34 +172,39 @@ class gain_cell_column_mux(pgate):
 
     def connect_bitlines(self):
         """ Connect the bitlines to the mux transistors """
-
-        bl_pin = self.get_pin("bl")
-        br_pin = self.get_pin("br")
-        bl_out_pin = self.get_pin("bl_out")
-        br_out_pin = self.get_pin("br_out")
+        if "r" in self.gain_cell_bl: 
+            bl_pin = self.get_pin("rbl")
+            # br_pin = self.get_pin("br")
+            bl_out_pin = self.get_pin("rbl_out")
+            # br_out_pin = self.get_pin("br_out")
+        if "w" in self.gain_cell_bl: 
+            bl_pin = self.get_pin("wbl")
+            # br_pin = self.get_pin("br")
+            bl_out_pin = self.get_pin("wbl_out")
+            # br_out_pin = self.get_pin("br_out")
 
         nmos_lower_s_pin = self.nmos_lower.get_pin("S")
         nmos_lower_d_pin = self.nmos_lower.get_pin("D")
-        nmos_upper_s_pin = self.nmos_upper.get_pin("S")
-        nmos_upper_d_pin = self.nmos_upper.get_pin("D")
+        # nmos_upper_s_pin = self.nmos_upper.get_pin("S")
+        # nmos_upper_d_pin = self.nmos_upper.get_pin("D")
 
         # Add vias to bl, br_out, nmos_upper/S, nmos_lower/D
         self.add_via_stack_center(from_layer=bl_pin.layer,
                                   to_layer=self.col_mux_stack[0],
                                   offset=vector(bl_pin.bc().x, (bl_pin.bc().y + bl_pin.uc().y) * 0.5),
                                   min_area=True)
-        self.add_via_stack_center(from_layer=br_out_pin.layer,
-                                  to_layer=self.col_mux_stack[0],
-                                  offset=vector(br_out_pin.uc().x, (br_out_pin.uc().y + br_out_pin.uc().y) * 0.5),
-                                  min_area=True)
-        self.add_via_stack_center(from_layer=nmos_upper_s_pin.layer,
-                                  to_layer=self.col_mux_stack[2],
-                                  offset=nmos_upper_s_pin.center(),
-                                  min_area=False)
-        self.add_min_area_rect_center(layer=nmos_upper_s_pin.layer,
-                                      offset=nmos_upper_s_pin.center(),
-                                      width=drc("minwidth_{}".format(nmos_upper_s_pin.layer)),
-                                      height=ceil(drc("minarea_{}".format(nmos_upper_s_pin.layer)) / drc("minwidth_{}".format(nmos_upper_s_pin.layer))))
+        # self.add_via_stack_center(from_layer=br_out_pin.layer,
+        #                           to_layer=self.col_mux_stack[0],
+        #                           offset=vector(br_out_pin.uc().x, (br_out_pin.uc().y + br_out_pin.uc().y) * 0.5),
+        #                           min_area=True)
+        # self.add_via_stack_center(from_layer=nmos_upper_s_pin.layer,
+        #                           to_layer=self.col_mux_stack[2],
+        #                           offset=nmos_upper_s_pin.center(),
+        #                           min_area=False)
+        # self.add_min_area_rect_center(layer=nmos_upper_s_pin.layer,
+        #                               offset=nmos_upper_s_pin.center(),
+        #                               width=drc("minwidth_{}".format(nmos_upper_s_pin.layer)),
+        #                               height=ceil(drc("minarea_{}".format(nmos_upper_s_pin.layer)) / drc("minwidth_{}".format(nmos_upper_s_pin.layer))))
         self.add_via_stack_center(from_layer=nmos_lower_d_pin.layer,
                                   to_layer=self.col_mux_stack[2],
                                   offset=nmos_lower_d_pin.center(),
@@ -191,32 +214,32 @@ class gain_cell_column_mux(pgate):
                                       width=drc("minwidth_{}".format(nmos_lower_d_pin.layer)),
                                       height=ceil(drc("minarea_{}".format(nmos_lower_d_pin.layer)) / drc("minwidth_{}".format(nmos_lower_d_pin.layer))))
 
-        # bl -> nmos_upper/D on metal1
-        # bl_out -> nmos_upper/S on metal2
-        self.add_path(self.col_mux_stack[0],
-                      [bl_pin.ll(), vector(nmos_upper_d_pin.cx(), bl_pin.by()),
-                       nmos_upper_d_pin.center()])
-        # halfway up, move over
-        mid1 = bl_out_pin.uc().scale(1, 0.4) \
-               + nmos_upper_s_pin.bc().scale(0, 0.4)
-        mid2 = bl_out_pin.uc().scale(0, 0.4) \
-               + nmos_upper_s_pin.bc().scale(1, 0.4)
-        self.add_path(self.col_mux_stack[2],
-                      [bl_out_pin.uc(), mid1, mid2, nmos_upper_s_pin.center()])
+        # # bl -> nmos_upper/D on metal1
+        # # bl_out -> nmos_upper/S on metal2
+        # self.add_path(self.col_mux_stack[0],
+        #               [bl_pin.ll(), vector(nmos_upper_d_pin.cx(), bl_pin.by()),
+        #                nmos_upper_d_pin.center()])
+        # # halfway up, move over
+        # mid1 = bl_out_pin.uc().scale(1, 0.4) \
+        #        + nmos_upper_s_pin.bc().scale(0, 0.4)
+        # mid2 = bl_out_pin.uc().scale(0, 0.4) \
+        #        + nmos_upper_s_pin.bc().scale(1, 0.4)
+        # self.add_path(self.col_mux_stack[2],
+        #               [bl_out_pin.uc(), mid1, mid2, nmos_upper_s_pin.center()])
 
         # br -> nmos_lower/D on metal2
         # br_out -> nmos_lower/S on metal1
         self.add_path(self.col_mux_stack[0],
-                      [br_out_pin.uc(),
-                       vector(nmos_lower_s_pin.cx(), br_out_pin.uy()),
+                      [bl_pin.bc(),
+                       vector(nmos_lower_s_pin.cx(), bl_pin.by()),
                        nmos_lower_s_pin.center()])
         # halfway up, move over
-        mid1 = br_pin.bc().scale(1, 0.5) \
-               + nmos_lower_d_pin.uc().scale(0, 0.5)
-        mid2 = br_pin.bc().scale(0, 0.5) \
-               + nmos_lower_d_pin.uc().scale(1, 0.5)
+        mid1 = bl_out_pin.uc().scale(1, 0.5) \
+            #    + nmos_lower_d_pin.uc().scale(0, 0.5)
+        mid2 = bl_out_pin.uc().scale(0, 0.5) \
+               + nmos_lower_d_pin.uc().scale(1, 0)
         self.add_path(self.col_mux_stack[2],
-                      [br_pin.bc(), mid1, mid2, nmos_lower_d_pin.center()])
+                      [bl_out_pin.uc(), mid1, mid2, nmos_lower_d_pin.center()])
 
     def extend_implants(self):
         """
@@ -226,7 +249,7 @@ class gain_cell_column_mux(pgate):
         # ll = (self.nmos_lower.ll() - vector(2 * [self.implant_enclose])).scale(1, 0)
         ll = (self.nmos_lower.ll() - vector(self.implant_enclose_active, self.implant_enclose)).scale(1, 0)
         # Don't route to the top
-        ur = self.nmos_upper.ur() + vector(self.implant_enclose_active, 0)
+        ur = self.nmos_lower.ur() + vector(self.implant_enclose_active, 0)
         self.add_rect("nimplant",
                       ll,
                       ur.x - ll.x,
@@ -243,8 +266,9 @@ class gain_cell_column_mux(pgate):
         else:
             rbc_width = self.gain_cell.width
         # Add it to the right, aligned in between the two tx
+        active_height = round_to_grid(drc("minarea_{}".format("active")) / (self.contact_width + 2 * self.m1_enclose_contact))
         active_pos = vector(rbc_width,
-                            self.nmos_upper.by() - 0.5 * self.poly_space - self.m2_space)
+                            self.nmos_lower.uy() + self.implant_enclose_active + self.nwell_enclose_implant + round_to_grid(0.5 * active_height))
 
         # self.add_via_center(layers=self.active_stack,
         #                     offset=active_pos,

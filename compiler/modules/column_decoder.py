@@ -95,24 +95,24 @@ class column_decoder(design):
 
     def add_modules(self):
 
-        self.dff =factory.create(module_type="dff")
+        self.gain_cell_dff =factory.create(module_type="gain_cell_dff")
 
         if self.col_addr_size == 1:
             self.column_decoder = factory.create(module_type="pinvbuf",
-                                                 height=self.dff.height)
+                                                 height=self.gain_cell_dff.height)
         elif self.col_addr_size == 2:
             self.column_decoder = factory.create(module_type="hierarchical_predecode2x4",
                                                  column_decoder=True,
-                                                 height=self.dff.height)
+                                                 height=self.gain_cell_dff.height)
 
         elif self.col_addr_size == 3:
             self.column_decoder = factory.create(module_type="hierarchical_predecode3x8",
                                                  column_decoder=True,
-                                                 height=self.dff.height)
+                                                 height=self.gain_cell_dff.height)
         elif self.col_addr_size == 4:
             self.column_decoder = factory.create(module_type="hierarchical_predecode4x16",
                                                  column_decoder=True,
-                                                 height=self.dff.height)
+                                                 height=self.gain_cell_dff.height)
         else:
             # No error checking before?
             debug.error("Invalid column decoder?", -1)
