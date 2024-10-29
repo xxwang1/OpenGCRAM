@@ -1014,7 +1014,7 @@ class layout():
 
         return (bot_rect, top_rect)
 
-    def route_horizontal_pins(self, name, insts=None, layer=None, xside="cx", yside="cy", full_width=True, new_name=None, multiple_via4=True):
+    def route_horizontal_pins(self, name, insts=None, layer=None, xside="cx", yside="cy", full_width=True, new_name=None, multiple_via4=True, snap_to_grid=True):
         """
         Route together all of the pins of a given name that horizontally align.
         Uses local_insts if insts not specified.
@@ -1035,7 +1035,7 @@ class layout():
         for inst in insts:
             for pin in inst.get_pins(name):
                 # print("route horizontal pins pin = ", pin)
-                y = getattr(pin, yside)()
+                y = round_to_grid(getattr(pin, yside)())
                 try:
                     bins[y].append((inst,pin))
                 except KeyError:
@@ -1051,7 +1051,8 @@ class layout():
                                         pin.layer,
                                         pin.ll(),
                                         pin.width(),
-                                        pin.height())
+                                        pin.height(),
+                                        snap_to_grid)
                 continue
 
             last_via = None
@@ -1063,7 +1064,7 @@ class layout():
                     pin_layer = self.supply_stack[0]
 
                 x = getattr(pin, xside)()
-
+                print("Route horizontal pins add_via_stack_center offset = ", vector(x, y))
                 last_via = self.add_via_stack_center(from_layer=pin.layer,
                                                      to_layer=pin_layer,
                                                      offset=vector(x, y),
@@ -1092,12 +1093,13 @@ class layout():
             #                                 start=left_pos,
             #                                 end=right_pos,
             #                                 width=via_height)
-
+            print("Route horizontal pins add_layout_pin_segment_center start, end = ", left_pos, right_pos)
             self.add_layout_pin_segment_center(text=pin_name,
                                             layer=pin_layer,
                                             start=left_pos,
                                             end=right_pos,
-                                            width=via_height)
+                                            width=via_height,
+                                            snap_to_grid=snap_to_grid)
 
     def add_layout_end_pin_segment_center(self, text, layer, start, end):
         """
@@ -1126,7 +1128,7 @@ class layout():
         else:
             debug.error("Cannot have a point pin.", -1)
 
-    def add_layout_pin_segment_center(self, text, layer, start, end, width=None):
+    def add_layout_pin_segment_center(self, text, layer, start, end, width=None, snap_to_grid=True):
         """
         Creates a path like pin with center-line convention
         """
@@ -1154,11 +1156,13 @@ class layout():
         else: width = round(abs(max(bbox_width, layer_width)), 3) * (-1)
         if max(bbox_height, layer_width) > 0: height = round(max(bbox_height, layer_width), 3)
         else: height = round(abs(max(bbox_height, layer_width)), 3) * (-1)
+        print("add_layout_pin_segment_center offset = ", ll_offset)
         return self.add_layout_pin(text=text,
                                    layer=layer,
                                    offset=ll_offset,
                                    width=width,
-                                   height=height)
+                                   height=height,
+                                   snap_to_grid=snap_to_grid)
 
     def add_layout_pin_rect_center(self, text, layer, offset, width=None, height=None, snap_to_grid=True):
         """ Creates a path like pin with center-line convention """
@@ -1993,6 +1997,7 @@ class layout():
         Punch a stack of vias from a start layer to a target layer by the center.
         """
         offset = vector(offset[0], offset[1]).snap_to_grid()
+        print("add via stack offset = ", offset)
         if from_layer[-1] == "p":
             from_layer = from_layer[:-1]
         if to_layer[-1] == "p":
@@ -2719,7 +2724,7 @@ class layout():
                              height=ymax - ymin)
         return rect
 
-    def copy_power_pins(self, inst, name, add_vias=True, new_name="", minarea=False):
+    def copy_power_pins(self, inst, name, add_vias=True, new_name="", minarea=False, snap_to_grid=True):
         """
         This will copy a power pin if it is on the lowest power_grid layer.
         If it is on M1, it will add a power via too.
@@ -2737,10 +2742,11 @@ class layout():
                                     pin_layer,
                                     pin.ll(),
                                     pin.width(),
-                                    pin.height())
+                                    pin.height(),
+                                    snap_to_grid)
 
             elif add_vias:
-                self.copy_power_pin(pin, new_name=new_name, minarea=minarea)
+                self.copy_power_pin(pin, new_name=new_name, minarea=minarea, snap_to_grid=snap_to_grid)
 
     def add_io_pin(self, instance, pin_name, new_name, start_layer=None, directions=None, minarea=False,multiple_via4=True):
         """
@@ -2806,7 +2812,7 @@ class layout():
 
         return pin
 
-    def copy_power_pin(self, pin, loc=None, directions=None, new_name="",minarea=False):
+    def copy_power_pin(self, pin, loc=None, directions=None, new_name="",minarea=False, snap_to_grid=True):
         """
         Add a single power pin from the lowest power_grid layer down to M1 (or li) at
         the given center location. The starting layer is specified to determine
@@ -2838,7 +2844,8 @@ class layout():
                                             layer=pin.layer,
                                             offset=loc,
                                             width=width,
-                                            height=height)
+                                            height=height,
+                                            snap_to_grid=snap_to_grid)
         else:
             via = self.add_via_stack_center(from_layer=pin.layer,
                                             to_layer=self.pwr_grid_layers[0],
@@ -2858,7 +2865,8 @@ class layout():
                                             layer=self.pwr_grid_layers[0],
                                             offset=loc,
                                             width=width,
-                                            height=height)
+                                            height=height,
+                                            snap_to_grid=snap_to_grid)
 
     def add_perimeter_pin(self, name, pin, side, bbox):
         """

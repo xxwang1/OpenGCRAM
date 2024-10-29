@@ -322,7 +322,8 @@ class channel_route(design):
             # Route each pin to the trunk
             for pin in pins:
                 if pin.cy() < trunk_offset.y:
-                    pin_pos = pin.uc()
+                    # pin_pos = pin.uc()
+                    pin_pos = pin.center()
                 else:
                     pin_pos = pin.bc()
 
@@ -339,7 +340,8 @@ class channel_route(design):
         for pin in pins:
             # Find the correct side of the pin
             if pin.cy() < trunk_offset.y:
-                pin_pos = pin.uc()
+                # pin_pos = pin.uc()
+                pin_pos = pin.center()
             else:
                 pin_pos = pin.bc()
                 pin_pos = vector(pin.bc().x, 0.5 * (pin.bc().y + pin.uc().y))
