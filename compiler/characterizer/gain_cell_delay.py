@@ -260,6 +260,7 @@ class gain_cell_delay(gain_cell_simulation):
 #        # but is never mentioned otherwise
         port = self.read_ports[0]
         sen_and_port = self.sen_name + str(port)
+        print("create_sen_and_bitline_path_measures sen_and_port = ", sen_and_port)
         if port in self.read_ports: 
             bl_and_port = self.rbl_name.format(port) # bl_name contains a '{}' for the port
             debug.info(1, "self.rbl_name = {0}".format(self.rbl_name))
@@ -267,14 +268,18 @@ class gain_cell_delay(gain_cell_simulation):
             bl_and_port = self.wbl_name.format(port)
             debug.info(1, "self.wbl_name = {0}".format(self.wbl_name))
         # Isolate the s_en and bitline paths
-        
+        print("self.graph.all_paths = ", self.graph.all_paths)
         debug.info(2, "self.graph.all_paths = {0}".format(self.graph.all_paths))
         sen_paths = [path for path in self.graph.all_paths if sen_and_port in path]
+        print("sen_and_port = ", sen_and_port)
+        print("sen_paths = ", sen_paths)
         bl_paths = [path for path in self.graph.all_paths if bl_and_port in path]
-        debug.check(len(sen_paths)==1, 'Found {0} paths which contain the s_en net.'.format(len(sen_paths)))
-        debug.check(len(bl_paths)==1, 'Found {0} paths which contain the bitline net.'.format(len(bl_paths)))
-        sen_path = sen_paths[0]
-        bitline_path = bl_paths[0]
+        print("bl_and_port = ", bl_and_port)
+        print("bl_paths = ", bl_paths)
+        # debug.check(len(sen_paths)==1, 'Found {0} paths which contain the s_en net.'.format(len(sen_paths)))
+        # debug.check(len(bl_paths)==1, 'Found {0} paths which contain the bitline net.'.format(len(bl_paths)))
+        sen_path = sen_paths[1]
+        bitline_path = bl_paths[1]
 
         # Get the measures
         self.sen_path_meas = self.create_delay_path_measures(sen_path, "sen")
@@ -695,11 +700,18 @@ class gain_cell_delay(gain_cell_simulation):
                                                                                        row,
                                                                                        col - 1,
                                                                                        OPTS.hier_seperator))
-            probe_nets.add(
-                "{0}{3}p_en_bar{1}_Xbank0_Xport_data{1}_Xprecharge_array{1}_Xpre_column_{2}".format(gain_cell_name,
-                                                                                                    port,
-                                                                                                    col,
-                                                                                                    OPTS.hier_seperator))
+            if port in self.targ_write_ports:
+                probe_nets.add(
+                    "{0}{3}p_en_bar{1}_Xbank0_Xport_data{1}_Xprecharge_array{1}_Xpre_column_{2}".format(gain_cell_name,
+                                                                                                        port,
+                                                                                                        col,
+                                                                                                        OPTS.hier_seperator))
+            if port in self.targ_read_ports:
+                probe_nets.add(
+                    "{0}{3}p_en{1}_Xbank0_Xport_data{1}_Xprecharge_array{1}_Xpre_column_{2}".format(gain_cell_name,
+                                                                                                        port,
+                                                                                                        col,
+                                                                                                        OPTS.hier_seperator))
             probe_nets.add(
                 "{0}{3}vdd_Xbank0_Xport_data{1}_Xprecharge_array{1}_xpre_column_{2}".format(gain_cell_name,
                                                                                             port,

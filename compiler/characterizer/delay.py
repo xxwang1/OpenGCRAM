@@ -183,7 +183,7 @@ class delay(simulation):
                                                            meas.targ_name_no_port))
             self.dout_volt_meas[-1].meta_str = meas.meta_str
 
-            if OPTS.use_pex and OPTS.pex_exe[0] != 'calibre':
+            if OPTS.use_pex: #and OPTS.pex_exe[0] != 'calibre':
                 self.sen_meas = delay_measure("delay_sen", self.clk_frmt, self.sen_name, "FALL", "RISE", measure_scale=1e9)
             else:
                 self.sen_meas = delay_measure("delay_sen", self.clk_frmt, self.sen_name + "{}", "FALL", "RISE", measure_scale=1e9)
@@ -237,7 +237,7 @@ class delay(simulation):
             storage_names = cell_inst.mod.get_storage_net_names()
         debug.check(len(storage_names) == 2, ("Only inverting/non-inverting storage nodes"
                                               "supported for characterization. Storage nets={0}").format(storage_names))
-        if OPTS.use_pex and OPTS.pex_exe[0] != "calibre":
+        if OPTS.use_pex: #and OPTS.pex_exe[0] != "calibre":
             bank_num = self.sram.get_bank_num(self.sram.name, bit_row, bit_col)
             q_name = "bitcell_Q_b{0}_r{1}_c{2}".format(bank_num, bit_row, bit_col)
             qbar_name = "bitcell_Q_bar_b{0}_r{1}_c{2}".format(bank_num, bit_row, bit_col)
