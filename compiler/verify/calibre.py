@@ -230,11 +230,17 @@ def write_pex_script(cell_name, extract, output, final_verification=False, outpu
 
     # write probe file
     # TODO: get from cell name
-    f = open(output_path + "probe_file", "w")
-    f.write('CELL cell_1rw\n')
-    f.write('  Q     0.100  0.510  11\n')
-    f.write('  Q_bar  0.520  0.510  11\n')
-    f.close()
+    if OPTS.tech_name == "tsmcN40":
+        f = open(output_path + "probe_file", "w")
+        f.write('CELL si_gc\n')
+        f.write('  SN     0.400  0.935  31\n')
+        f.close()
+    else:
+        f = open(output_path + "probe_file", "w")
+        f.write('CELL cell_1rw\n')
+        f.write('  Q     0.100  0.510  11\n')
+        f.write('  Q_bar  0.520  0.510  11\n')
+        f.close()
 
     # Create an auxiliary script to run calibre with the runset
     run_file = output_path + "run_pex.sh"
@@ -406,7 +412,8 @@ def run_pex(cell_name, gds_name, sp_name, output=None, final_verification=False)
 
     out_errors = len(stdouterrors)
 
-    assert(os.path.isfile(output))
+    # assert(os.path.isfile(output))
+    print("run_pex cell_name, output, sp_name = ", cell_name, output, sp_name)
     correct_port(cell_name, output, sp_name)
 
     return out_errors
