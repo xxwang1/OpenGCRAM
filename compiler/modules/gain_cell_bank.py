@@ -103,7 +103,10 @@ class gain_cell_bank(design):
         for port in self.read_ports:
             self.add_pin("s_en{0}".format(port), "INPUT")
         for port in self.all_ports:
-            self.add_pin("p_en_bar{0}".format(port), "INPUT")
+            if port in self.write_ports:
+                self.add_pin("p_en_bar{0}".format(port), "INPUT")
+            if port in self.read_ports:
+                self.add_pin("p_en{0}".format(port), "INPUT")
         for port in self.write_ports:
             self.add_pin("w_en{0}".format(port), "INPUT")
             for bit in range(self.num_wmasks):
@@ -350,7 +353,7 @@ class gain_cell_bank(design):
             self.input_control_signals.append(["p_en_bar{}".format(port_num), "w_en{}".format(port_num)])
             port_num += 1
         for port in range(OPTS.num_r_ports):
-            self.input_control_signals.append(["p_en_bar{}".format(port_num), "s_en{}".format(port_num)])
+            self.input_control_signals.append(["p_en{}".format(port_num), "s_en{}".format(port_num)])
             port_num += 1
 
         # Number of control lines in the bus for each port
@@ -486,7 +489,10 @@ class gain_cell_bank(design):
             temp.extend(sel_names)
             if port in self.read_ports:
                 temp.append("s_en{0}".format(port))
-            temp.append("p_en_bar{0}".format(port))
+            if port in self.write_ports:
+                temp.append("p_en_bar{0}".format(port))
+            if port in self.read_ports:
+                temp.append("p_en{0}".format(port))
             if port in self.write_ports:
                 temp.append("w_en{0}".format(port))
                 for bit in range(self.num_wmasks):
@@ -663,8 +669,8 @@ class gain_cell_bank(design):
             bank_sel_signals = ["clk_buf", "w_en", "p_en_bar", "bank_sel"]
             gated_bank_sel_signals = ["gated_clk_buf", "gated_w_en", "gated_p_en_bar"]
         else:
-            bank_sel_signals = ["clk_buf", "s_en", "p_en_bar", "bank_sel"]
-            gated_bank_sel_signals = ["gated_clk_buf", "gated_s_en", "gated_p_en_bar"]
+            bank_sel_signals = ["clk_buf", "s_en", "p_en", "bank_sel"]
+            gated_bank_sel_signals = ["gated_clk_buf", "gated_s_en", "gated_p_en"]
 
         copy_control_signals = self.input_control_signals[port] + ["bank_sel{}".format(port)]
         for signal in range(len(copy_control_signals)):
@@ -747,7 +753,9 @@ class gain_cell_bank(design):
         """ Routing of BL and BR between port data and gain_cell array """
 
         # Connect the regular bitlines
+        print("route_port_data_to_gain_cell_array port = ", port)
         inst2 = self.port_data_inst[port]
+        print("inst2 = ", inst2)
         inst1 = self.gain_cell_array_inst
         if port in self.read_ports:
             inst1_bl_name = [x for x in self.gain_cell_array.get_bitline_names(port) if "rbl" in x]
@@ -867,7 +875,7 @@ class gain_cell_bank(design):
         else:
             (bottom_inst, bottom_name) = (inst2, inst2_name)
             (top_inst, top_name) = (inst1, inst1_name)
-
+        print("gain_cell_bank connect_bitline bottom_inst, bottom_name = ", bottom_inst, bottom_name)
         bottom_pin = bottom_inst.get_pin(bottom_name)
         top_pin = top_inst.get_pin(top_name)
         debug.check(bottom_pin.layer == top_pin.layer, "Pin layers do not match.")
@@ -1069,8 +1077,12 @@ class gain_cell_bank(design):
         # Connection from the central bus to the main control block crosses
         # pre-decoder and this connection is in metal3
         connection = []
-        connection.append((self.prefix + "p_en_bar{}".format(port),
-                           self.port_data_inst[port].get_pin("p_en_bar")))
+        if port in self.write_ports:
+            connection.append((self.prefix + "p_en_bar{}".format(port),
+                            self.port_data_inst[port].get_pin("p_en_bar")))
+        if port in self.read_ports:
+            connection.append((self.prefix + "p_en{}".format(port),
+                            self.port_data_inst[port].get_pin("p_en")))
 
         if port in self.write_ports:
             connection.append((self.prefix + "w_en{}".format(port),

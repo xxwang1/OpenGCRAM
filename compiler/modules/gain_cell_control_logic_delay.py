@@ -93,7 +93,12 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
         # p_en_bar drives every column in the bitcell array
         # but it is sized the same as the wl_en driver with
         # prepended 3 inverter stages to guarantee it is slower and odd polarity
-        self.p_en_bar_driver = factory.create(module_type="pdriver",
+        if self.port_type == "w":
+            self.p_en_bar_driver = factory.create(module_type="pdriver",
+                                              fanout=self.num_cols,
+                                              height=gain_cell_dff_height)
+        if self.port_type == "r":
+            self.p_en_driver = factory.create(module_type="pdriver",
                                               fanout=self.num_cols,
                                               height=gain_cell_dff_height)
 
@@ -132,7 +137,10 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
         pen_cap_ff = self.num_cols * (3 * spice["min_tx_gate_c"] + spice["wire_unit_c"] * 1e15 * wordline_area)
         pen_cap = convert_farad_to_relative_c(pen_cap_ff)
         # number of stages in the p_en driver
-        pen_stages = self.p_en_bar_driver.num_stages
+        if self.port_type == "w":
+            pen_stages = self.p_en_bar_driver.num_stages
+        if self.port_type == "r":
+            pen_stages = self.p_en_driver.num_stages
 
         inverter_stage_delay = logical_effort("inv", 1, 1, OPTS.delay_chain_fanout_per_stage, 1, True).get_absolute_delay()
         # model precharge as a minimum sized inverter with the bitline as its load
@@ -208,7 +216,10 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
             self.output_list = ["s_en"]
         else:
             self.output_list = ["w_en"]
-        self.output_list.append("p_en_bar")
+        if self.port_type == "w":
+            self.output_list.append("p_en_bar")
+        if self.port_type == "r":
+            self.output_list.append("p_en")
         if self.port_type == "r":
             self.output_list.append("rwl_en")
         if self.port_type == "w":
@@ -379,17 +390,27 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
             self.connect_output(self.wl_en_driver_inst, "Z", "wwl_en")
 
     def create_pen_row(self):
-        self.p_en_bar_driver_inst=self.add_inst(name="buf_p_en_bar",
-                                                mod=self.p_en_bar_driver)
-        self.connect_inst(["glitch0", "p_en_bar", "vdd", "gnd"])
+        if self.port_type == "w":
+            self.p_en_bar_driver_inst=self.add_inst(name="buf_p_en_bar",
+                                                    mod=self.p_en_bar_driver)
+            self.connect_inst(["glitch0", "p_en_bar", "vdd", "gnd"])
+        if self.port_type == "r":
+            self.p_en_driver_inst=self.add_inst(name="buf_p_en",
+                                                    mod=self.p_en_driver)
+            self.connect_inst(["glitch0", "p_en", "vdd", "gnd"])
 
     def place_pen_row(self, row):
         x_offset = self.gain_cell_control_logic_x_offset
 
         x_offset = self.place_util(self.glitch0_nand_inst, x_offset, row)
-        x_offset = self.place_util(self.p_en_bar_driver_inst, x_offset+self.nwell_enclose_implant, row)
+        if self.port_type == "w":
+            x_offset = self.place_util(self.p_en_bar_driver_inst, x_offset+self.nwell_enclose_implant, row)
 
-        self.row_end_inst.append(self.p_en_bar_driver_inst)
+            self.row_end_inst.append(self.p_en_bar_driver_inst)
+        if self.port_type == "r":
+            x_offset = self.place_util(self.p_en_driver_inst, x_offset+self.nwell_enclose_implant, row)
+
+            self.row_end_inst.append(self.p_en_driver_inst)
 
     def route_pen(self):
         in_map = zip(["A", "B"], ["delay0", "delay2"])
@@ -397,15 +418,21 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
 
         out_pin = self.glitch0_nand_inst.get_pin("Z") # same code here as wl_en, refactor?
         out_pos = out_pin.center()
-        in_pin = self.p_en_bar_driver_inst.get_pin("A")
+        if self.port_type == "w":
+            in_pin = self.p_en_bar_driver_inst.get_pin("A")
+        if self.port_type == "r":
+            in_pin = self.p_en_driver_inst.get_pin("A")
         in_pos = in_pin.center()
         mid1 = vector(in_pos.x, out_pos.y)
         self.add_path(out_pin.layer, [out_pos, mid1, in_pos])
         self.add_via_stack_center(from_layer=out_pin.layer,
                                   to_layer=in_pin.layer,
                                   offset=in_pin.center())
+        if self.port_type == "w":
+            self.connect_output(self.p_en_bar_driver_inst, "Z", "p_en_bar")
+        if self.port_type == "r":
+            self.connect_output(self.p_en_driver_inst, "Z", "p_en")
 
-        self.connect_output(self.p_en_bar_driver_inst, "Z", "p_en_bar")
 
     def create_sen_row(self):
         if self.port_type=="rw":

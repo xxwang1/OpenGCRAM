@@ -76,9 +76,12 @@ class gain_cell_1bank(design, verilog, lef):
                 self.gain_cell_control_logic_outputs.append(self.gain_cell_control_logic_r.get_outputs())
 
         for port in self.all_ports:
-            self.add_pin("csb{}".format(port), "INPUT")
-        for port in self.readwrite_ports:
-            self.add_pin("web{}".format(port), "INPUT")
+            if port in self.write_ports:
+                self.add_pin("web{}".format(port), "INPUT")
+            elif port in self.read_ports:
+                self.add_pin("csb{}".format(port), "INPUT")
+        # for port in self.readwrite_ports:
+        #     self.add_pin("web{}".format(port), "INPUT")
         for port in self.all_ports:
             self.add_pin("clk{}".format(port), "INPUT")
         # add the optional write mask pins
@@ -129,17 +132,17 @@ class gain_cell_1bank(design, verilog, lef):
             rbl_meta = pex_data[4]
             wbl_meta = pex_data[5]
 
-            bl = []
-            # br = []
+            rbl = []
+            wbl = []
 
-            storage_layer_name = "m1"
+            storage_layer_name = "m1p"
             bitline_layer_name = self.gain_cell.get_pin("rbl").layer
 
             for cell in range(len(bank_offset)):
-                Q = [bank_offset[cell][0] + Q_offset[cell][0],
-                     bank_offset[cell][1] + Q_offset[cell][1]]
-                Q_bar = [bank_offset[cell][0] + Q_bar_offset[cell][0],
-                         bank_offset[cell][1] + Q_bar_offset[cell][1]]
+                SN = [bank_offset[cell][0] + SN_offset[cell][0],
+                     bank_offset[cell][1] + SN_offset[cell][1]]
+                # Q_bar = [bank_offset[cell][0] + Q_bar_offset[cell][0],
+                #          bank_offset[cell][1] + Q_bar_offset[cell][1]]
                 OPTS.words_per_row = self.words_per_row
                 row = int(cell % (OPTS.num_words / self.words_per_row))
                 col = int(cell / (OPTS.num_words))
@@ -166,7 +169,7 @@ class gain_cell_1bank(design, verilog, lef):
                 for bitline in range(len(wbl_offsets[cell])):
                     bitline_location = [float(bank_offset[cell][0]) + wbl_offsets[cell][bitline][0],
                                         float(bank_offset[cell][1]) + wbl_offsets[cell][bitline][1]]
-                    br.append([bitline_location, wbl_meta[cell][bitline][3], col])
+                    wbl.append([bitline_location, wbl_meta[cell][bitline][3], col])
 
             for i in range(len(rbl)):
                 self.add_layout_pin_rect_center("rbl{0}_{1}".format(rbl[i][1], rbl[i][2]),
@@ -185,8 +188,9 @@ class gain_cell_1bank(design, verilog, lef):
                 pin.transform([0, 0], instance.mirror, instance.rotate)
                 offset = [gain_cell_control_logic_offset[0] + pin.center()[0],
                           gain_cell_control_logic_offset[1] + pin.center()[1]]
+                print("add_global_pex_labels control_logic pin = ", "{0}{1}".format(pin.name, i))
                 self.add_layout_pin_rect_center("{0}{1}".format(pin.name, i),
-                                                storage_layer_name,
+                                                bitline_layer_name,
                                                 offset)
 
     def create_netlist(self):
@@ -403,7 +407,10 @@ class gain_cell_1bank(design, verilog, lef):
             self.control_bus_names[port] = ["clk_buf{}".format(port)]
             wen = "w_en{}".format(port)
             sen = "s_en{}".format(port)
-            pen = "p_en_bar{}".format(port)
+            if port in self.write_ports:
+                pen = "p_en_bar{}".format(port)
+            if port in self.read_ports:
+                pen = "p_en{}".format(port)
             if self.port_id[port] == "r":
                 self.control_bus_names[port].extend([sen, pen])
             elif self.port_id[port] == "w":
@@ -528,7 +535,10 @@ class gain_cell_1bank(design, verilog, lef):
         for port in self.read_ports:
             temp.append("s_en{0}".format(port))
         for port in self.all_ports:
-            temp.append("p_en_bar{0}".format(port))
+            if port in self.write_ports:
+                temp.append("p_en_bar{0}".format(port))
+            if port in self.read_ports:
+                temp.append("p_en{0}".format(port))
         for port in self.write_ports:
             temp.append("w_en{0}".format(port))
             for bit in range(self.num_wmasks):
@@ -691,9 +701,12 @@ class gain_cell_1bank(design, verilog, lef):
             insts.append(self.add_inst(name="control{}".format(port), mod=mod))
 
             # Inputs
-            temp = ["csb{}".format(port)]
-            if port in self.readwrite_ports:
-                temp.append("web{}".format(port))
+            if port in self.write_ports:
+                temp = ["web{}".format(port)]
+            elif port in self.read_ports:
+                temp = ["csb{}".format(port)]
+            # if port in self.readwrite_ports:
+            #     temp.append("web{}".format(port))
             temp.append("clk{}".format(port))
             if self.has_rbl:
                 if port in self.read_ports: temp.append("rbl_rbl{}".format(port))
@@ -704,7 +717,10 @@ class gain_cell_1bank(design, verilog, lef):
                 temp.append("s_en{}".format(port))
             if port in self.write_ports:
                 temp.append("w_en{}".format(port))
-            temp.append("p_en_bar{}".format(port))
+            if port in self.write_ports:
+                temp.append("p_en_bar{}".format(port))
+            if port in self.read_ports:
+                temp.append("p_en{}".format(port))
             if port in self.read_ports: temp.extend(["rwl_en{}".format(port), "clk_buf{}".format(port)] + self.ext_supplies)
             elif port in self.write_ports: temp.extend(["wwl_en{}".format(port), "clk_buf{}".format(port)] + self.ext_supplies)
             self.connect_inst(temp)
@@ -850,7 +866,7 @@ class gain_cell_1bank(design, verilog, lef):
         # We need to temporarily add some pins for the x offsets
         # but we'll remove them so that they have the right y
         # offsets after the DFF placement.
-        self.add_layout_pins(add_vias=False)
+        self.add_layout_pins(add_vias=False, add_rect=False)
         self.route_gain_cell_dffs(add_routes=False)
         self.remove_layout_pins()
 
@@ -1002,7 +1018,7 @@ class gain_cell_1bank(design, verilog, lef):
             self.data_pos[port] = vector(x_offset, y_offset)
             self.spare_wen_pos[port] = vector(x_offset, y_offset)
 
-    def add_layout_pins(self, add_vias=True):
+    def add_layout_pins(self, add_vias=True, add_rect=True):
         """
         Add the top-level pins for a single bank gain_cell with control.
         """
@@ -1029,12 +1045,13 @@ class gain_cell_1bank(design, verilog, lef):
 
             if port in self.write_ports:
                 for bit in range(self.word_size + self.num_spare_cols):
-                    # self.add_io_pin(self.data_gain_cell_dff_insts[port],
-                    #                 "din_{}".format(bit),
-                    #                 "din{0}[{1}]".format(port, bit),
-                    #                 start_layer=pin_layer,
-                    #             minarea=True)
-                    pass
+                    self.add_io_pin(self.data_gain_cell_dff_insts[port],
+                                    "din_{}".format(bit),
+                                    "din{0}[{1}]".format(port, bit),
+                                    start_layer=pin_layer,
+                                    add_rect=add_rect,
+                                minarea=True)
+                    # pass
 
             if port in self.read_ports:
                 for bit in range(self.word_size + self.num_spare_cols):
@@ -1045,17 +1062,19 @@ class gain_cell_1bank(design, verilog, lef):
                                 minarea=True)
 
             for bit in range(self.col_addr_size):
-                # self.add_io_pin(self.col_addr_gain_cell_dff_insts[port],
-                #                 "din_{}".format(bit),
-                #                 "addr{0}[{1}]".format(port, bit),
-                #                 start_layer=pin_layer,
-                #                 minarea=True)
-                pass
+                self.add_io_pin(self.col_addr_gain_cell_dff_insts[port],
+                                "din_{}".format(bit),
+                                "addr{0}[{1}]".format(port, bit),
+                                start_layer=pin_layer,
+                                add_rect=add_rect,
+                                minarea=True)
+                # pass
             for bit in range(self.row_addr_size):
                 self.add_io_pin(self.row_addr_gain_cell_dff_insts[port],
                                 "din_{}".format(bit),
                                 "addr{0}[{1}]".format(port, bit + self.col_addr_size),
                                 start_layer=pin_layer,
+                                add_rect=add_rect,
                                 minarea=True)
 
             if port in self.write_ports:

@@ -34,7 +34,7 @@ class gain_cell_base(design):
         # Could be specified in the tech.py file.
         cin = 3
         # min size NMOS gate load
-        read_port_load = 0.5
+        read_port_load = 0.5 # LY: check if this is W = 0.5 * Cg
 
         return logical_effort('bitline',
                               size,
@@ -48,18 +48,29 @@ class gain_cell_base(design):
         from openram.tech import spice
         leakage = spice["gain_cell_leakage"]
         # FIXME
-        dynamic = 0
+        dynamic = 0 # check gain cell dynamic power, since gain cell leakage is very low
         total_power = self.return_power(dynamic, leakage)
         return total_power
 
     def input_load(self):
         """ Return the relative capacitance of the access transistor gates """
-
+        # LY: Shall we consider write and read separtely? where is this function used?
+        # write input load is Cg of WWL acccesstransitor
+        # read input laod is Cgs and Csb, or approximate W_rd * Cg
+        # Okay this is for write
         # FIXME: This applies to bitline capacitances as well.
         # FIXME: sizing is not accurate with the handmade cell.
         # Change once cell widths are fixed.
         access_tx_cin = parameter["write_size"] / drc["minwidth_tx"]
-        return 2 * access_tx_cin
+        return 1 * access_tx_cin
+
+    # def read_input_load(self):
+    #     """ Return the relative capacitance of the access transistor gates """
+    #     # FIXME: This applies to bitline capacitances as well.
+    #     # FIXME: sizing is not accurate with the handmade cell.
+    #     # Change once cell widths are fixed.
+    #     access_tx_cin = parameter["read_size"] / drc["minwidth_tx"]
+    #     return 1 * access_tx_cin
 
     def get_wwl_cin(self):
         """Return the relative capacitance of the access transistor gates"""
@@ -80,7 +91,13 @@ class gain_cell_base(design):
         # the related gates and dividing by the minimum width.
         # FIXME: sizing is not accurate with the handmade cell.
         # Change once cell widths are fixed.
-        access_tx_cin = parameter["write_size"] / drc["minwidth_tx"]
+        # LY: maybe change 
+        stack = 1
+        mult = 1
+        # access_tx_cin = parameter["read_size"] / drc["minwidth_tx"]
+        access_tx_cin = self.drain_c_(parameter["read_size"]/drc["minwidth_tx"],
+                                      stack,
+                                      mult)
         return access_tx_cin
 
     def get_storage_net_names(self):
@@ -102,15 +119,22 @@ class gain_cell_base(design):
         labels for pex simulation.
         """
         # If we generated the gain_cell, we already know where Q and Q_bar are
-        if OPTS.gain_cell == "gain_cell":
+        # print("running get_storage_net_offsets")
+        # print("OPTS.gain_cell = ", OPTS.gain_cell)
+        if OPTS.gain_cell != "pgain_cell":
+            
             self.storage_net_offsets = []
+            # print("self.get_storage_net_names() = ", self.get_storage_net_names())
             for i in range(len(self.get_storage_net_names())):
+                # print("self.gds.getTexts(layer[m1] = ", self.gds.getTexts(layer["m1"]))
                 for text in self.gds.getTexts(layer["m1"]):
+                    # print("text = ", text.textString.rstrip('\x00'))
                     if self.storage_nets[i] == text.textString.rstrip('\x00'):
                         self.storage_net_offsets.append(text.coordinates[0])
-
+                        # print("self.storage_net_offsets = ", self.storage_net_offsets)
             for i in range(len(self.storage_net_offsets)):
                 self.storage_net_offsets[i]  = tuple([self.gds.info["units"][0] * x for x in self.storage_net_offsets[i]])
+                # print("self.storage_net_offsets[i] = ", self.storage_net_offsets[i])
 
         return(self.storage_net_offsets)
 
@@ -156,7 +180,7 @@ class gain_cell_base(design):
         of the gain_cell. This is useful for making sense of offsets outside
         of the gain_cell.
         """
-        if OPTS.gain_cell == "gain_cell":
+        if OPTS.gain_cell != "pgain_cell":
             normalized_storage_net_offset = self.get_storage_net_offset()
 
         else:
@@ -229,16 +253,18 @@ class gain_cell_base(design):
         return "rwl"
 
     def get_on_resistance(self):
-        """On resistance of pinv, defined by single nmos"""
+        """for SRAM, charging the inverter's On resistance of pinv, defined by single nmos
+            for Gain Cell, charging the read transistor when signal comes. """
         is_nchannel = True
-        stack = 2 # for access and inv tx
+        stack = 1 # for access and inv tx # LY: what does this mean?
         is_cell = False
         return self.tr_r_on(drc["minwidth_tx"], is_nchannel, stack, is_cell)
 
     def get_input_capacitance(self):
         """Input cap of input, passes width of gates to gate cap function"""
         # Input cap of both access TX connected to the wordline
-        return self.gate_c(2*parameter["write_size"])
+        # Changed to 1 TX for Gain Cell
+        return self.gate_c(1*parameter["write_size"])
 
     def get_intrinsic_capacitance(self):
         """Get the drain capacitances of the TXs in the gate."""
@@ -248,18 +274,20 @@ class gain_cell_base(design):
         # min_width as a temp value
 
         # Add the inverter drain Cap and the bitline TX drain Cap
-        nmos_drain_c =  self.drain_c_(drc["minwidth_tx"]*mult,
+        # nmos_drain_c =  self.drain_c_(drc["minwidth_tx"]*mult,
+        #                               stack,
+        #                               mult)
+        # pmos_drain_c =  self.drain_c_(drc["minwidth_tx"]*mult,
+        #                               stack,
+        #                               mult)
+
+        # Add the WR tx drain cap and the RD tx gate cap at the SN node.
+        wr_tx_drain_c = self.drain_c_(parameter["write_size"]/drc["minwidth_tx"],
                                       stack,
                                       mult)
-        pmos_drain_c =  self.drain_c_(drc["minwidth_tx"]*mult,
-                                      stack,
-                                      mult)
+        rd_tx_gate_c = self.gate_c(parameter["read_size"]/drc["minwidth_tx"])
 
-        rbl_nmos_drain_c =  self.drain_c_(parameter["read_size"],
-                                         stack,
-                                         mult)
-
-        return nmos_drain_c + pmos_drain_c + rbl_nmos_drain_c
+        return wr_tx_drain_c + rd_tx_gate_c
 
     def module_wire_c(self):
         """Capacitance of bitline"""

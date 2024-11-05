@@ -87,9 +87,14 @@ class gain_cell_control_logic(gain_cell_control_logic_base):
         # p_en_bar drives every column in the bitcell array
         # but it is sized the same as the wl_en driver with
         # prepended 3 inverter stages to guarantee it is slower and odd polarity
-        self.p_en_bar_driver = factory.create(module_type="pdriver",
-                                              fanout=self.num_cols,
-                                              height=gain_cell_dff_height)
+        if self.port_type == "w":
+            self.p_en_bar_driver = factory.create(module_type="pdriver",
+                                                fanout=self.num_cols,
+                                                height=gain_cell_dff_height)
+        if self.port_type == "r":
+            self.p_en_driver = factory.create(module_type="pdriver",
+                                                fanout=self.num_cols,
+                                                height=gain_cell_dff_height)
 
         self.nand2 = factory.create(module_type="pnand2",
                                     height=gain_cell_dff_height)
@@ -140,7 +145,10 @@ class gain_cell_control_logic(gain_cell_control_logic_base):
             self.output_list = ["s_en"]
         else:
             self.output_list = ["w_en"]
-        self.output_list.append("p_en_bar")
+        if self.port_type == "w":
+            self.output_list.append("p_en_bar")
+        if self.port_type == "r":
+            self.output_list.append("p_en")
         if self.port_type == "r": self.output_list.append("rwl_en")
         if self.port_type == "w": self.output_list.append("wwl_en")
         self.output_list.append("clk_buf")
@@ -261,46 +269,83 @@ class gain_cell_control_logic(gain_cell_control_logic_base):
 
     def create_pen_row(self):
         # nand2_1
-        self.p_en_bar_nand_inst=self.add_inst(name="nand_p_en_bar",
-                                              mod=self.nand2)
-        # We use the rbl_bl_delay here to ensure that the p_en is only asserted when the
-        # bitlines have already been discharged. Otherwise, it is a combination loop.
-        if self.port_type == "r": 
-            self.connect_inst(["gated_clk_buf", "rbl_rbl_delay", "p_en_bar_unbuf", "vdd", "gnd"])
-        if self.port_type == "w": 
-            self.connect_inst(["gated_clk_buf", "rbl_wbl_delay", "p_en_bar_unbuf", "vdd", "gnd"])
-        # pdirver_4
-        self.p_en_bar_driver_inst=self.add_inst(name="buf_p_en_bar",
-                                                mod=self.p_en_bar_driver)
-        self.connect_inst(["p_en_bar_unbuf", "p_en_bar", "vdd", "gnd"])
+        if self.port_type == "w":
+            self.p_en_bar_nand_inst=self.add_inst(name="nand_p_en_bar",
+                                                mod=self.nand2)
+            # We use the rbl_bl_delay here to ensure that the p_en is only asserted when the
+            # bitlines have already been discharged. Otherwise, it is a combination loop.
+            if self.port_type == "r": 
+                self.connect_inst(["gated_clk_buf", "rbl_rbl_delay", "p_en_bar_unbuf", "vdd", "gnd"])
+            if self.port_type == "w": 
+                self.connect_inst(["gated_clk_buf", "rbl_wbl_delay", "p_en_bar_unbuf", "vdd", "gnd"])
+            # pdirver_4
+            self.p_en_bar_driver_inst=self.add_inst(name="buf_p_en_bar",
+                                                    mod=self.p_en_bar_driver)
+            self.connect_inst(["p_en_bar_unbuf", "p_en_bar", "vdd", "gnd"])
+
+        if self.port_type == "r":
+            self.p_en_and_inst=self.add_inst(name="nand_p_en",
+                                                mod=self.and2)
+            # We use the rbl_bl_delay here to ensure that the p_en is only asserted when the
+            # bitlines have already been discharged. Otherwise, it is a combination loop.
+            if self.port_type == "r": 
+                self.connect_inst(["gated_clk_buf", "rbl_rbl_delay", "p_en_unbuf", "vdd", "gnd"])
+            if self.port_type == "w": 
+                self.connect_inst(["gated_clk_buf", "rbl_wbl_delay", "p_en_unbuf", "vdd", "gnd"])
+            # pdirver_4
+            self.p_en_driver_inst=self.add_inst(name="buf_p_en",
+                                                    mod=self.p_en_driver)
+            self.connect_inst(["p_en_unbuf", "p_en", "vdd", "gnd"])
 
     def place_pen_row(self, row):
-        x_offset = self.control_x_offset
-
-        x_offset = self.place_util(self.p_en_bar_nand_inst, x_offset, row, pp_space = False)
-        # print("place_pen_row x_offset, control_x_offset, nwell_enclose_implant, nwell_space, w_en_gate_inst.width = ", x_offset, self.control_x_offset, self.nwell_enclose_implant, self.nwell_space, self.w_en_gate_inst.width)
-        if self.port_type == "w": x_offset = self.place_util(self.p_en_bar_driver_inst, self.control_x_offset + 2 * self.nwell_enclose_implant + self.nwell_space + self.w_en_gate_inst.width, row, pp_space = False) 
-        if self.port_type == "r": x_offset = self.place_util(self.p_en_bar_driver_inst, self.control_x_offset + 2 * self.nwell_enclose_implant + self.nwell_space + self.s_en_gate_inst.width, row, pp_space = False)
-        self.row_end_inst.append(self.p_en_bar_driver_inst)
+        x_offset = self.control_x_offset + self.nwell_space
+        if self.port_type == "w":
+            x_offset = self.place_util(self.p_en_bar_nand_inst, x_offset, row, pp_space = False)
+            # print("place_pen_row x_offset, control_x_offset, nwell_enclose_implant, nwell_space, w_en_gate_inst.width = ", x_offset, self.control_x_offset, self.nwell_enclose_implant, self.nwell_space, self.w_en_gate_inst.width)
+            if self.port_type == "w": x_offset = self.place_util(self.p_en_bar_driver_inst, self.control_x_offset + 2 * self.nwell_enclose_implant + self.nwell_space + self.w_en_gate_inst.width, row, pp_space = False) 
+            if self.port_type == "r": x_offset = self.place_util(self.p_en_bar_driver_inst, self.control_x_offset + 2 * self.nwell_enclose_implant + self.nwell_space + self.s_en_gate_inst.width, row, pp_space = False)
+            self.row_end_inst.append(self.p_en_bar_driver_inst)
+        if self.port_type == "r":
+            x_offset = self.place_util(self.p_en_and_inst, x_offset, row, pp_space = False)
+            # print("place_pen_row x_offset, control_x_offset, nwell_enclose_implant, nwell_space, w_en_gate_inst.width = ", x_offset, self.control_x_offset, self.nwell_enclose_implant, self.nwell_space, self.w_en_gate_inst.width)
+            if self.port_type == "w": x_offset = self.place_util(self.p_en_driver_inst, self.control_x_offset + 2 * self.nwell_enclose_implant + self.nwell_space + self.w_en_gate_inst.width, row, pp_space = False) 
+            if self.port_type == "r": x_offset = self.place_util(self.p_en_driver_inst, self.control_x_offset + 2 * self.nwell_enclose_implant + self.nwell_space + self.s_en_gate_inst.width, row, pp_space = False)
+            self.row_end_inst.append(self.p_en_driver_inst)
 
     def route_pen(self):
         if self.port_type == "r": 
             in_map = zip(["A", "B"], ["gated_clk_buf", "rbl_rbl_delay"])
         if self.port_type == "w": 
             in_map = zip(["A", "B"], ["gated_clk_buf", "rbl_wbl_delay"])
-        self.connect_vertical_bus(in_map, self.p_en_bar_nand_inst, self.input_bus)
+        
+        if self.port_type == "w":
+            self.connect_vertical_bus(in_map, self.p_en_bar_nand_inst, self.input_bus)
 
-        out_pin = self.p_en_bar_nand_inst.get_pin("Z")
-        out_pos = out_pin.center()
-        in_pin = self.p_en_bar_driver_inst.get_pin("A")
-        in_pos = in_pin.center()
-        mid1 = vector(in_pos.x, out_pos.y)
-        self.add_path(out_pin.layer, [out_pos, mid1, in_pos])
-        self.add_via_stack_center(from_layer=out_pin.layer,
-                                  to_layer=in_pin.layer,
-                                  offset=in_pin.center())
+            out_pin = self.p_en_bar_nand_inst.get_pin("Z")
+            out_pos = out_pin.center()
+            in_pin = self.p_en_bar_driver_inst.get_pin("A")
+            in_pos = in_pin.center()
+            mid1 = vector(in_pos.x, out_pos.y)
+            self.add_path(out_pin.layer, [out_pos, mid1, in_pos])
+            self.add_via_stack_center(from_layer=out_pin.layer,
+                                    to_layer=in_pin.layer,
+                                    offset=in_pin.center())
 
-        self.connect_output(self.p_en_bar_driver_inst, "Z", "p_en_bar")
+            self.connect_output(self.p_en_bar_driver_inst, "Z", "p_en_bar")
+        if self.port_type == "r":
+            self.connect_vertical_bus(in_map, self.p_en_and_inst, self.input_bus)
+
+            out_pin = self.p_en_and_inst.get_pin("Z")
+            out_pos = out_pin.center()
+            in_pin = self.p_en_driver_inst.get_pin("A")
+            in_pos = in_pin.center()
+            mid1 = vector(in_pos.x, out_pos.y)
+            self.add_path(out_pin.layer, [out_pos, mid1, in_pos])
+            self.add_via_stack_center(from_layer=out_pin.layer,
+                                    to_layer=in_pin.layer,
+                                    offset=in_pin.center())
+
+            self.connect_output(self.p_en_driver_inst, "Z", "p_en")
 
     def create_sen_row(self):
         """ Create the sense enable buffer. """
