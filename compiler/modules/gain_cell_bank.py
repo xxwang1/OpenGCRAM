@@ -102,6 +102,7 @@ class gain_cell_bank(design):
         # the signals gated_*.
         for port in self.read_ports:
             self.add_pin("s_en{0}".format(port), "INPUT")
+            self.add_pin("ref{0}".format(port), "INPUT")
         for port in self.all_ports:
             if port in self.write_ports:
                 self.add_pin("p_en_bar{0}".format(port), "INPUT")
@@ -118,6 +119,7 @@ class gain_cell_bank(design):
             self.add_pin("rwl_en{0}".format(port), "INPUT")
         for port in self.write_ports:
             self.add_pin("wwl_en{0}".format(port), "INPUT")
+        
         self.add_pin("vdd", "POWER")
         self.add_pin("gnd", "GROUND")
 
@@ -353,7 +355,7 @@ class gain_cell_bank(design):
             self.input_control_signals.append(["p_en_bar{}".format(port_num), "w_en{}".format(port_num)])
             port_num += 1
         for port in range(OPTS.num_r_ports):
-            self.input_control_signals.append(["p_en{}".format(port_num), "s_en{}".format(port_num)])
+            self.input_control_signals.append(["p_en{}".format(port_num), "s_en{}".format(port_num), "ref{}".format(port_num)])
             port_num += 1
 
         # Number of control lines in the bus for each port
@@ -489,6 +491,7 @@ class gain_cell_bank(design):
             temp.extend(sel_names)
             if port in self.read_ports:
                 temp.append("s_en{0}".format(port))
+                temp.append("ref{0}".format(port))
             if port in self.write_ports:
                 temp.append("p_en_bar{0}".format(port))
             if port in self.read_ports:
@@ -499,6 +502,7 @@ class gain_cell_bank(design):
                     temp.append("bank_wmask{0}_{1}".format(port, bit))
                 for bit in range(self.num_spare_cols):
                     temp.append("bank_spare_wen{0}_{1}".format(port, bit))
+                
             temp.extend(["vdd", "gnd"])
             self.connect_inst(temp)
 
@@ -669,8 +673,8 @@ class gain_cell_bank(design):
             bank_sel_signals = ["clk_buf", "w_en", "p_en_bar", "bank_sel"]
             gated_bank_sel_signals = ["gated_clk_buf", "gated_w_en", "gated_p_en_bar"]
         else:
-            bank_sel_signals = ["clk_buf", "s_en", "p_en", "bank_sel"]
-            gated_bank_sel_signals = ["gated_clk_buf", "gated_s_en", "gated_p_en"]
+            bank_sel_signals = ["clk_buf", "s_en", "p_en", "bank_sel", "ref"]
+            gated_bank_sel_signals = ["gated_clk_buf", "gated_s_en", "gated_p_en", "gated_ref"]
 
         copy_control_signals = self.input_control_signals[port] + ["bank_sel{}".format(port)]
         for signal in range(len(copy_control_signals)):
@@ -1091,6 +1095,10 @@ class gain_cell_bank(design):
         if port in self.read_ports:
             connection.append((self.prefix + "s_en{}".format(port),
                                self.port_data_inst[port].get_pin("s_en")))
+        
+        if port in self.read_ports:
+            connection.append((self.prefix + "ref{}".format(port),
+                               self.port_data_inst[port].get_pin("ref")))
 
         for (control_signal, pin) in connection:
             control_pin = self.bus_pins[port][control_signal]

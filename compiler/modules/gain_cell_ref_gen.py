@@ -1,0 +1,46 @@
+# See LICENSE for licensing information.
+#
+# Copyright (c) 2016-2024 Regents of the University of California and The Board
+# of Regents for the Oklahoma Agricultural and Mechanical College
+# (acting for and on behalf of Oklahoma State University)
+# All rights reserved.
+#
+from openram import debug
+from openram.base import design
+from openram.tech import cell_properties as props
+
+
+class gain_cell_ref_gen(design):
+    """
+    Tristate write driver to be active during write operations only.
+    This module implements the write driver cell used in the design. It
+    is a hand-made cell, so the layout and netlist should be available in
+    the technology library.
+    """
+
+    def __init__(self, name):
+        super().__init__(name, prop=props.gain_cell_ref_gen)
+        debug.info(2, "Create ref_gen")
+
+    # def get_wbl_names(self):
+    #     return "wbl"
+
+    # def get_ref_names(self):
+    #     return "ref"
+
+    @property
+    def Vref_name(self):
+        return "Vref"
+
+    # @property
+    # def en_name(self):
+        # return "en"
+
+    # def get_w_en_cin(self):
+    #     """Get the relative capacitance of a single input"""
+    #     # This is approximated from SCMOS. It has roughly 5 3x transistor gates.
+    #     return 5 * 3
+
+    def build_graph(self, graph, inst_name, port_nets):
+        """Adds edges based on inputs/outputs. Overrides base class function."""
+        self.add_graph_edges(graph, port_nets)

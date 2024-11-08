@@ -11,7 +11,7 @@ from openram.base import vector
 from openram.sram_factory import factory
 from openram import OPTS
 from .gain_cell_control_logic_base import gain_cell_control_logic_base
-
+from openram.tech import drc, GDS
 
 class gain_cell_control_logic(gain_cell_control_logic_base):
     """
@@ -101,9 +101,14 @@ class gain_cell_control_logic(gain_cell_control_logic_base):
 
         debug.check(OPTS.delay_chain_stages % 2,
                     "Must use odd number of delay chain stages for inverting delay chain.")
-        self.delay_chain=factory.create(module_type="delay_chain",
-                                        fanout_list = OPTS.delay_chain_stages * [ OPTS.delay_chain_fanout_per_stage ])
-
+        if self.port_type == "w":
+            self.delay_chain=factory.create(module_type="delay_chain",
+                                            fanout_list = OPTS.delay_chain_stages * [ OPTS.delay_chain_fanout_per_stage ])
+        if self.port_type == "r":
+            self.delay_chain=factory.create(module_type="delay_chain",
+                                            fanout_list = (OPTS.delay_chain_stages - 1) * [ OPTS.delay_chain_fanout_per_stage ])
+            self.gain_cell_ref_gen = factory.create(module_type="gain_cell_ref_gen")
+            
     def setup_signal_busses(self):
         """ Setup bus names, determine the size of the busses etc """
 
@@ -143,12 +148,14 @@ class gain_cell_control_logic(gain_cell_control_logic_base):
             self.output_list = ["s_en", "w_en"]
         elif self.port_type == "r":
             self.output_list = ["s_en"]
+            self.output_list.append("ref")
         else:
             self.output_list = ["w_en"]
         if self.port_type == "w":
             self.output_list.append("p_en_bar")
         if self.port_type == "r":
             self.output_list.append("p_en")
+            
         if self.port_type == "r": self.output_list.append("rwl_en")
         if self.port_type == "w": self.output_list.append("wwl_en")
         self.output_list.append("clk_buf")
@@ -169,6 +176,9 @@ class gain_cell_control_logic(gain_cell_control_logic_base):
             self.create_sen_row()
         self.create_delay()
         self.create_pen_row()
+        if self.port_type == "r":
+            self.create_ref_gen()
+            
 
     def place_logic_rows(self):
         row = 0
@@ -190,7 +200,9 @@ class gain_cell_control_logic(gain_cell_control_logic_base):
             self.place_rbl_delay_row(row)
             row += 1
         self.place_wlen_row(row)
-
+        row +=1
+        if self.port_type == "r":
+            self.place_ref_gen(row)
         self.control_center_y = self.wl_en_inst.uy() + self.m3_pitch
 
     def route_all(self):
@@ -203,6 +215,7 @@ class gain_cell_control_logic(gain_cell_control_logic_base):
             self.route_wen()
         if (self.port_type == "rw") or (self.port_type == "r"):
             self.route_sen()
+            self.route_ref_gen()
         self.route_delay()
         self.route_pen()
         self.route_clk_buf()
@@ -219,6 +232,12 @@ class gain_cell_control_logic(gain_cell_control_logic_base):
             self.connect_inst(["rbl_rbl", "rbl_rbl_delay", "vdd", "gnd"])
         if self.port_type == "w":
             self.connect_inst(["rbl_wbl", "rbl_wbl_delay", "vdd", "gnd"])
+
+    def create_ref_gen(self):
+        if self.port_type == "r": 
+            self.ref_gen_inst = self.add_inst(name="gain_cell_ref_gen",
+                                         mod=self.gain_cell_ref_gen)
+            self.connect_inst(["ref", "vdd", "gnd"])
 
     def route_delay(self):
 
@@ -253,11 +272,19 @@ class gain_cell_control_logic(gain_cell_control_logic_base):
             self.connect_inst(["gated_clk_bar", "wwl_en", "vdd", "gnd"])
 
     def place_wlen_row(self, row):
-        x_offset = self.control_x_offset + self.implant_space
-
+        x_offset = self.control_x_offset + self.implant_space 
+        if self.port_type == "r":
+            x_offset += drc["active_enclose_gate"]
         x_offset = self.place_util(self.wl_en_inst, x_offset, row, pp_space = True)
 
         self.row_end_inst.append(self.wl_en_inst)
+
+    def place_ref_gen(self, row):
+        x_offset = self.control_x_offset + self.implant_space
+
+        x_offset = self.place_util(self.ref_gen_inst, x_offset, row, pp_space = True)
+
+        self.row_end_inst.append(self.ref_gen_inst)
 
     def route_wlen(self):
         wlen_map = zip(["A"], ["gated_clk_bar"])
@@ -266,6 +293,10 @@ class gain_cell_control_logic(gain_cell_control_logic_base):
             self.connect_output(self.wl_en_inst, "Z", "rwl_en")
         if self.port_type == "w":
             self.connect_output(self.wl_en_inst, "Z", "wwl_en")
+
+    def route_ref_gen(self):
+        if self.port_type == "r":
+            self.connect_output(self.ref_gen_inst, "ref", "ref")
 
     def create_pen_row(self):
         # nand2_1

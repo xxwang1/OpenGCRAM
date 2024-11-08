@@ -242,6 +242,8 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
         if (self.port_type == "rw") or (self.port_type == "r"):
             self.create_sen_row()
         self.create_pen_row()
+        if self.port_type == "r":
+            self.create_ref_gen()
 
     def place_logic_rows(self):
         row = 0
@@ -264,6 +266,9 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
         self.place_glitch1_row(row)
         row += 1
         self.place_glitch2_row(row)
+        row +=1
+        if self.port_type == "r":
+            self.place_ref_gen(row)
 
         self.gain_cell_control_logic_center_y = self.glitch2_nand_inst.uy() + self.m3_pitch
 

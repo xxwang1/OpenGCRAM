@@ -410,6 +410,7 @@ class gain_cell_1bank(design, verilog, lef):
             if port in self.write_ports:
                 pen = "p_en_bar{}".format(port)
             if port in self.read_ports:
+                ref = "ref{}".format(port)
                 pen = "p_en{}".format(port)
             if self.port_id[port] == "r":
                 self.control_bus_names[port].extend([sen, pen])
@@ -534,6 +535,7 @@ class gain_cell_1bank(design, verilog, lef):
                 temp.append("a{0}_{1}".format(port, bit))
         for port in self.read_ports:
             temp.append("s_en{0}".format(port))
+            temp.append("ref{0}".format(port))
         for port in self.all_ports:
             if port in self.write_ports:
                 temp.append("p_en_bar{0}".format(port))
@@ -715,6 +717,7 @@ class gain_cell_1bank(design, verilog, lef):
             # Outputs
             if port in self.read_ports:
                 temp.append("s_en{}".format(port))
+                temp.append("ref{}".format(port))
             if port in self.write_ports:
                 temp.append("w_en{}".format(port))
             if port in self.write_ports:

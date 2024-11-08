@@ -155,6 +155,7 @@ class gain_cell_port_data(design):
             self.add_pin(pin_name, "INPUT")
         if self.port in self.read_ports:
             self.add_pin("s_en", "INPUT")
+            self.add_pin("ref", "INPUT")
         if self.port in self.read_ports:
             self.add_pin("p_en", "INPUT")
         elif self.port in self.write_ports:
@@ -165,6 +166,7 @@ class gain_cell_port_data(design):
                 self.add_pin("bank_wmask_{}".format(bit), "INPUT")
             for bit in range(self.num_spare_cols):
                 self.add_pin("bank_spare_wen{}".format(bit), "INPUT")
+        
         self.add_pin("vdd", "POWER")
         self.add_pin("gnd", "GROUND")
 
@@ -463,17 +465,18 @@ class gain_cell_port_data(design):
             temp.append("dout_{}".format(bit))
             if self.words_per_row == 1:
                 temp.append("rbl_{0}".format(bit))
-                temp.append("ref_{0}".format(bit))
+                # temp.append("ref_{0}".format(bit))
             else:
                 temp.append("rbl_out_{0}".format(bit))
-                temp.append("ref_out_{0}".format(bit))
+                # temp.append("ref_out_{0}".format(bit))
 
         for bit in range(self.num_spare_cols):
             temp.append("dout_{}".format(self.word_size + bit))
             temp.append("sparerbl_{0}".format(bit))
-            temp.append("spareref_{0}".format(bit))
-
+            # temp.append("spareref_{0}".format(bit))
+        temp.append("ref")
         temp.append("s_en")
+        
         temp.extend(["vdd", "gnd"])
         self.connect_inst(temp)
 
@@ -1023,6 +1026,7 @@ class gain_cell_port_data(design):
                 self.copy_layout_pin(self.column_mux_array_inst, pin_name)
         if self.sense_amp_array_inst:
            self.copy_layout_pin(self.sense_amp_array_inst, "en", "s_en")
+           self.copy_layout_pin(self.sense_amp_array_inst, "ref", "ref")
         if self.write_driver_array_inst:
             if self.write_mask_and_array_inst:
                 for bit in range(self.num_wmasks):

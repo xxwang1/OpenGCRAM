@@ -38,6 +38,10 @@ class gain_cell_sense_amp(design):
     def en_name(self):
         return "en"
 
+    @property
+    def ref_name(self):
+        return "ref"
+
     def get_cin(self):
 
         # FIXME: This input load will be applied to both the s_en timing and bitline timing.
