@@ -189,9 +189,9 @@ class gain_cell():
 
         # Characterize the design
         start_time = datetime.datetime.now()
-        from openram.characterizer import lib
-        debug.print_raw("LIB: Characterizing... ")
-        lib(out_dir=OPTS.output_path, gain_cell=self.s, sp_file=sp_file)
+        from openram.characterizer import gain_cell_lib
+        debug.print_raw("GAIN_CELL_LIB: Characterizing... ")
+        gain_cell_lib(out_dir=OPTS.output_path, gain_cell=self.s, sp_file=sp_file)
         print_time("Characterization", datetime.datetime.now(), start_time)
 
         # Write the config file

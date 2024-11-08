@@ -135,7 +135,7 @@ class options(optparse.Values):
     # Remove noncritical memory cells for characterization speed-up
     trim_netlist = True
     # Run with extracted parasitics
-    use_pex = False
+    use_pex = True
     # Output config with all options
     output_extended_config = False
     # Output temporary file used to format HTML page
@@ -246,6 +246,8 @@ class options(optparse.Values):
     gain_cell = "gain_cell"
     gain_cell_precharge = "gain_cell_precharge"
     gain_cell_precharge_array = "gain_cell_precharge_array"
+    gain_cell_predischarge = "gain_cell_predischarge"
+    gain_cell_predischarge_array = "gain_cell_predischarge_array"
     gain_cell_sense_amp_array = "gain_cell_sense_amp_array"
     gain_cell_sense_amp = "gain_cell_sense_amp"
     gain_cell_wordline_driver = "gain_cell_wordline_driver"
