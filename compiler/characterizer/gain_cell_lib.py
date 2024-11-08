@@ -14,11 +14,11 @@ from openram import tech
 from openram.tech import spice
 from openram import OPTS
 from .setup_hold import *
-from .delay import *
+from .gain_cell_delay import *
 from .charutils import *
 
 
-class lib:
+class gain_cell_lib:
     """ lib file generation."""
 
     def __init__(self, out_dir, gain_cell, sp_file, use_model=OPTS.analytical_delay):
