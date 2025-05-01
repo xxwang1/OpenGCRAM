@@ -33,9 +33,13 @@ navigate through the documentation.
 In general, the OpenGCRAM compiler has very few dependencies:
 + Git
 + Make
-+ Python 3.5 or higher
++ Python 3.6 or higher
 + Various Python packages (pip install -r requirements.txt)
++ Cadence Virtuoso
++ Calibre DRC/LVS/PEX
++ PDK
 + Anaconda
+
 
 Commercial tools (optional):
 * Spice Simulator
@@ -58,7 +62,9 @@ Commercial tools (optional):
 * Skywater 130nm (sky130)
     * Fabricable technology
     * Magic/Netgen or klayout
-
+* TSMC 40nm
+    * Fabricable technology
+    * Calibre for DRC/LVS
 
 
 ## Implementation
@@ -96,7 +102,7 @@ Commercial tools (optional):
 
 
 ## Contributors/Collaborators
-<img align="right" height="120" src="../assets/images/logos/okstate.png">
+<!--<img align="right" height="120" src="../assets/images/logos/okstate.png">
 
 * Prof. Matthew Guthaus (UCSC)
 * Prof. James Stine & Dr. Samira Ataei (Oklahoma State University)
@@ -113,3 +119,4 @@ Commercial tools (optional):
     * Marcelo Sero
     * Seokjoong Kim
     * Sage Walker
+-->

@@ -1,55 +1,56 @@
 ### [Go Back](./index.md#table-of-contents)
 
 # Basic Setup
-This page shows the basic setup for using OpenRAM to generate an SRAM.
-
+This page shows the basic setup for using OpenGCRAM with customized process design kit (PDK) to generate a gain-cell memory (GCRAM) using the command-line flow.
 
 
 ## Table of Contents
 1. [Dependencies](#dependencies)
 1. [Anaconda](#anaconda)
-1. [Docker](#docker-deprecated-use-anaconda-instead)
 1. [Environment](#environment)
-1. [Sky130 Setup](#sky130-setup)
-
+1. [Customized PDK Setup](#customized-pdk-setup)
+1. [Launching Virtuoso](#launching-virtuoso)
+1. [Running the compiler](#running-the-compiler)
+1. [Commands Summary](#commands-summary)
 
 
 ## Dependencies
-In general, the OpenRAM compiler has very few dependencies:
+In general, the OpenGCRAM compiler has very few dependencies:
 + Git
 + Make
-+ Python 3.5 or higher
++ Python 3.6 or higher
 + Various Python packages (pip install -r requirements.txt)
++ Cadence Virtuoso
++ Calibre DRC/LVS/PEX
++ PDK
 + Anaconda
 
 
 
 ## Anaconda
-We use Anaconda package manager to install the tools used by OpenRAM. This way,
-you don't have to worry about updating/installing these tools. OpenRAM installs
+We use Anaconda package manager to install the tools used by OpenGCRAM. This way,
+you don't have to worry about updating/installing these tools. OpenGCRAM installs
 Anaconda silently in the background (without affecting any existing Anaconda
 setup you have).
 
-You don't have to manually activate/deactivate the Anaconda environment. OpenRAM
+You don't have to manually activate/deactivate the Anaconda environment. OpenGCRAM
 automatically manages this before and after running the tools.
 
-OpenRAM uses Anaconda by default, but you can turn this feature off by setting
-`use_conda = False` in your config file. Then, OpenRAM will use the tools you
-have installed on your system.
+OpenGCRAM uses Anaconda by default.
 
-You can also tell OpenRAM where Anaconda should be installed or which Anaconda
+You can also tell OpenGCRAM where Anaconda should be installed or which Anaconda
 setup it should use. You can set the `$CONDA_HOME` variable like this:
 ```
 export CONDA_HOME="/path/to/conda/setup"
 ```
 
-> **Note**: If you want to install Anaconda without running OpenRAM (for example
+> **Note**: If you want to install Anaconda without running OpenGCRAM (for example
 > to run unit tests, which do not install Anaconda), you can run:
 > ```
 > ./install_conda.sh
 > ```
 
-> **Note**: You can uninstall OpenRAM's Anaconda installation by simply deleting
+> **Note**: You can uninstall OpenGCRAM's Anaconda installation by simply deleting
 > the folder Anaconda is installed to. You can run:
 > ```
 > rm -rf miniconda
@@ -62,41 +63,30 @@ export CONDA_HOME="/path/to/conda/setup"
 > conda install -y -c vlsida-eda <tool>=<version>
 > ```
 
-
-
-## Docker (deprecated, use Anaconda instead)
-We have a [docker setup](../../docker) to run OpenRAM. To use this, you should
-run:
+After setting the `$CONDA_HOME` variable, you can activate the environment with 
 ```
-cd OpenRAM/docker
-make build
+conda activate your_OpenGCRAM_env_name
 ```
-This must be run once and will take a while to build all the tools. If you have
-the OpenRAM library installed, you can also run the docker setup from the
-package installation directory.
-
-
 
 ## Environment
 
-If you haven't installed the OpenRAM library or you want to use a different
-OpenRAM installation, you can set two environment variables:
+To use your custom OpenGCRAM setup, configure the following environment variables:
 + `OPENRAM_HOME` should point to the compiler source directory.
 + `OPENRAM_TECH` should point to one or more root technology directories (colon
   separated).
++ `OPENRAM_TMP` should point to a writable directory used for intermediate files and temporary storage during compilation. This helps separate large temporary files (e.g., generated SPICE netlists, layout views) from the main source tree.
 
-If you have the library installed and `OPENRAM_HOME` set, the library will use
-the installation on the `OPENRAM_HOME` path.
-
-> See [Python library](./python_library.md#go-back) for details.
-
-If you don't have the library, you should also add `OPENRAM_HOME` to your
-`PYTHONPATH`. This is not needed if you have the library.
-
-You can add these environment variables to your `.bashrc`:
+You should also add `OPENRAM_HOME` to your
+`PYTHONPATH`.
 ```
-export OPENRAM_HOME="$HOME/OpenRAM/compiler"
-export OPENRAM_TECH="$HOME/OpenRAM/technology"
+export PYTHONPATH=$OPENRAM_HOME
+```
+
+You can add these environment variables to your `.bashrc` or `~/.bash_profile` for convenience:
+```
+export OPENRAM_HOME="$HOME/OpenGCRAM/compiler"
+export OPENRAM_TECH="$HOME/OpenGCRAM/technology"
+export OPENRAM_TMP="$HOME/OpenGCRAM/tmp"
 export PYTHONPATH=$OPENRAM_HOME
 ```
 
@@ -107,51 +97,111 @@ modules as well. For example:
 export PYTHONPATH="$OPENRAM_HOME:$OPENRAM_TECH/sky130:$OPENRAM_TECH/sky130/custom"
 ```
 
-We include the tech files necessary for [SCMOS] SCN4M\_SUBM, [FreePDK45]. The
-[SCMOS] spice models, however, are generic and should be replaced with foundry
-models. You may get the entire [FreePDK45 PDK here][FreePDK45].
+## Customized PDK Setup
+To set up OpenGCRAM with the customized PDK of your choice, set the following environment variable to point to your PDK’s Calibre rule directory:
+```
+export TSMC_CAL_DFM_PATH="/path/to/your/customized/pdk/Calibre/rcx/DFM/"
+```
+This is required for loading the Calibre decks (DRC/LVS/RCX) during physical verification.
 
-
-
-## Sky130 Setup
-
-To install [Sky130], you can run:
+A sample PDK folder used by OpenGCRAM should be organized as follows:
 
 ```
-cd $HOME/OpenRAM
-make sky130-pdk
+sample_PDK
+├── gds_lib/               # Standard cell GDSII files
+│   └── *.gds
+├── sp_lib/                # SPICE netlists for simulations
+│   └── *.sp
+├── tech/                  # Technology files for layout and verification
+│   ├── calibre.drc        # Calibre DRC rule deck
+│   ├── calibre.lvs        # Calibre LVS rule deck
+│   ├── calibre.rcx        # Calibre RCX rule deck
+│   └── sample_PDK.tech.py # Technology file
+├── tf/                    # Technology file for layout and layer mapping
+│   ├── sample_PDK.tf
+│   └── virtuoso_sample_PDK.map
+└── __init__.py            # Python module init file
+```
+Ensure that the required rule decks and layer map files exist and are compatible with your OpenGCRAM build environment.
+
+Several changes required to made in the technology file sample_PDK.tech.py. 
+To customize DRC/LVS/RCX settings for the customized PDK of your choice:
+```python
+# DRC/LVS/RCX test setup
+drc["drc_rules"] = "/path/to/OpenGCRAM/technology/sample_PDK/tech/calibre.drc"
+drc["lvs_rules"] = "/path/to/OpenGCRAM/technology/sample_PDK/tech/calibre.lvs"
+drc["xrc_rules"] = "/path/to/OpenGCRAM/technology/sample_PDK/tech/calibre.rcx"
+drc["layer_map"] = os.environ.get("OPENRAM_TECH") + "/sample_PDK/tf/virtuoso_sample_PDK.map"
+```
+> **Important:** You need to update the paths above to match your local directory structure. If you install the PDK in a different location, you **must** change these paths accordingly.
+
+> **Note**: **DRC errors:** Check `calibre.drc` path and ensure Calibre is using the correct layer map.
+> **LVS mismatch:** Verify the SPICE netlist and GDS layers are aligned. Look at `calibre.lvs` and ensure net/label layers are correctly defined.
+> **Missing parasitics:** Confirm `calibre.rcx` exists and includes appropriate extraction commands.
+
+To configure SPICE models for GCRAM design simulation using OpenGCRAM:
+Set the SPICE model directory using:
+
+```bash
+export SPICE_MODEL_DIR="/path/to/your/spice/models"
 ```
 
-This will use volare to get the PDK.
-
-> **Note**: If you don't have Magic installed, you need to install and activate
-> the conda environment before running this command. You can run:
->
-> ```
-> ./install_conda.sh
-> source miniconda/bin/activate
-> ```
-
-Then you must also install the [Sky130] SRAM build space with the appropriate
-cell views into the OpenRAM technology directory by running:
-
-```
-cd $HOME/OpenRAM
-make sky130-install
+Update __init__.py as follows:
+```python
+os.environ["SPICE_MODEL_DIR"] = "/cad/tsmc/PDK_N40_2022/1p6m_4x1z/models/hspice"
 ```
 
-You can also run these from the package installation directory if you have the
-OpenRAM library.
+Update sample_PDK.tech.py as follows:
 
-## GF180 Setup
+```python
+SPICE_MODEL_DIR = os.environ.get("SPICE_MODEL_DIR")
 
-OpenRAM currently **does not** support gf180mcu for SRAM generation. However ROM generation for gf180mcu is supported as an experimental feature.
+spice["fet_libraries"] = {
+    "TT": [[SPICE_MODEL_DIR + "/toplevel.l", "top_tt"]]
+}
 
-It is not necessary to install the gf180mcu PDK, as all necessary files are already in the git repository under `technology/gf180mcu/`.
+spice["osfet_models"] = {
+    "TT": ["/path/to/your/osfet/models/OSFET/osfet/veriloga/veriloga.oa"]
+}
+```
 
-If you still want to install the PDK, you can run `make gf180mcu-pdk`.
+> **Note:** 
+> - `toplevel.l` should contain transistor model definitions (e.g., NMOS/PMOS) for typical (TT) corner.
+> - The OSFET Verilog-A model path must point to a valid `.oa` file that is accessible during simulation. You need to update the absolute path.
 
-[SCMOS]:    https://www.mosis.com/files/scmos/scmos.pdf
-[FreePDK45]: https://www.eda.ncsu.edu/wiki/FreePDK45:Contents
-[Sky130]:   https://github.com/google/skywater-pdk-libs-sky130_fd_bd_sram.git
+Ensure these files are compatible with your SPICE simulator. 
 
+> **Important:** Make sure you load the required EDA tools with the appropriate module versions
+```
+module load hspice/latest
+module load calibre/2023.1_34
+```
+
+## Launching Virtuoso
+If you want to use Cadence Virtuoso to inspect or modify layouts, you can start it with the appropriate environment:
+```
+source hli_cshrc
+virtuoso &
+
+```
+
+## Running the Compiler
+Once your environment is ready, you can run this GCRAM compiler with:
+```
+cd /path/to/OpenGCRAM
+python3 gain_cell_compiler.py myconfig > log.txt
+```
+
+## Commands Summary
+This section includes all commands neceassry for setting up and runnning OpenGCRAM for your convenience. 
+```
+export CONDA_HOME="/path/to/conda/setup"
+export OPENRAM_HOME="$HOME/OpenGCRAM/compiler"
+export OPENRAM_TECH="$HOME/OpenGCRAM/technology"
+export OPENRAM_TMP="$HOME/OpenGCRAM/tmp"
+export PYTHONPATH=$OPENRAM_HOME
+export TSMC_CAL_DFM_PATH="/path/to/your/customized/pdk/Calibre/rcx/DFM/"
+conda activate your_OpenGCRAM_env_name
+cd /path/to/OpenGCRAM
+python3 gain_cell_compiler.py myconfig > log.txt
+```
