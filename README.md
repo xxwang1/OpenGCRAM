@@ -1,16 +1,17 @@
-![](https://raw.githubusercontent.com/VLSIDA/OpenRAM/stable/images/OpenRAM_logo_yellow_transparent.svg)
-# OpenRAM
+<!-- ![](https://raw.githubusercontent.com/VLSIDA/OpenRAM/stable/images/OpenRAM_logo_yellow_transparent.svg) -->
+# OpenGCRAM
 
 [![Python 3.5](https://img.shields.io/badge/Python-3.5-green.svg)](https://www.python.org/)
 [![License: BSD 3-clause](https://raw.githubusercontent.com/VLSIDA/OpenRAM/stable/images/license_badge.svg)](./LICENSE)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/openram?color=brightgreen&label=PyPI)](https://pypi.org/project/openram/)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/sfmth/openram-playground/blob/main/OpenRAM.ipynb)
 
-An open-source static random access memory (SRAM) compiler.
+Inspired by the OpenRAM SRAM compiler, OpenGCRAM is a gain-cell memory (GCRAM) compiler that can gen-
+erate GCRAM macro based on user-specified configurations.
 
 
 
-# What is OpenRAM?
+# What is OpenGCRAM?
 <img align="right" width="25%" src="https://raw.githubusercontent.com/VLSIDA/OpenRAM/stable/images/SCMOS_16kb_sram.jpg">
 
 OpenRAM is an award winning open-source Python framework to create the layout,

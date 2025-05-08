@@ -102,21 +102,3 @@ Commercial tools (optional):
 
 
 ## Contributors/Collaborators
-<!--<img align="right" height="120" src="../assets/images/logos/okstate.png">
-
-* Prof. Matthew Guthaus (UCSC)
-* Prof. James Stine & Dr. Samira Ataei (Oklahoma State University)
-* UCSC students:
-    * Bin Wu
-    * Hunter Nichols
-    * Michael Grimes
-    * Jennifer Sowash
-    * Jesse Cirimelli-Low
-    <img align="right" height="100" src="../assets/images/logos/vlsida.png">https://www.youtube.com/watch?v=rd5j8mG24H4&t=0s
-* Many other past students:
-    * Jeff Butera
-    * Tom Golubev
-    * Marcelo Sero
-    * Seokjoong Kim
-    * Sage Walker
--->

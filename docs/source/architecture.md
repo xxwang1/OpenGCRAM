@@ -7,6 +7,8 @@ This page of the documentation explains the architecture of OpenRAM.
 
 ## Table of Contents
 1. [SRAM Architecture](#sram-architecture)
+2. [ROM Architecture](#rom-architecture)
+3. [GCRAM Architecture](#gcram-architecture)
 
 
 
@@ -33,3 +35,24 @@ This page of the documentation explains the architecture of OpenRAM.
 * Column Pre-Decoder
 * Bitline Precharge(s)
 * Control Logic
+
+## GCRAM Architecture
+* Gain-cell Array
+    * Dual-port gain-cells
+* Read port:
+    * Address Decoder(s)
+    * Wordline Driver(s)
+    * Column Multiplexer(s)
+    * Bitline Predischarge(s)
+    * Sense Amplifier(s)
+    * Control Logic with Replica Bitline
+* Write Port:
+    * Address Decoder(s)
+    * Wordline Driver(s)
+    * Column Multiplexer(s)
+    * Bitline Precharge(s)
+    * Data DFF(s)
+    * Write Driver(s)
+    * Control Logic with Replica Bitline
+
+    ![GCRAM Architecture](../assets/images/architecture/GC_arct.png)
