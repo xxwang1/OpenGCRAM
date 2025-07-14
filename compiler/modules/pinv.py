@@ -162,6 +162,8 @@ class pinv(pgate):
             # The mults must be the same for easy connection of poly
             print("nmos_required_mults, pmos_required_mults = ", nmos_required_mults, pmos_required_mults)
             self.tx_mults = max(nmos_required_mults, pmos_required_mults)
+            # if OPTS.gc_type == "OS":
+                # self.tx_mults = min(nmos_required_mults, pmos_required_mults)
             print("self.tx_mults = ", self.tx_mults)
             # Recompute each mult width and check it isn't too small
             # This could happen if the height is narrow and the size is small
@@ -173,7 +175,9 @@ class pinv(pgate):
             # debug.check(self.nmos_width >= drc("minwidth_tx"),
             #            "Cannot finger NMOS transistors to fit cell height.")
             if self.nmos_width < drc("minwidth_tx"):
-                raise drc_error("Cannot finger NMOS transistors to fit cell height.")
+                # self.pmos_width = self.pmos_width * int(math.ceil(drc("minwidth_tx") / self.nmos_width))
+                self.nmos_width = drc("minwidth_tx")
+                # raise drc_error("Cannot finger NMOS transistors to fit cell height.")
 
             self.pmos_width = round_to_grid(self.pmos_width / self.tx_mults)
             #debug.check(self.pmos_width >= drc("minwidth_tx"),

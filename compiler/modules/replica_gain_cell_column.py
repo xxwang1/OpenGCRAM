@@ -94,7 +94,8 @@ class replica_gain_cell_column(gain_cell_base_array):
             else:
                 self.add_pin(wl_name, "INPUT")
         self.add_pin("vdd", "POWER")
-        self.add_pin("gnd", "GROUND")
+        if OPTS.gc_type == "Si":
+            self.add_pin("gnd", "GROUND")
 
     def add_modules(self):
         self.replica_cell = factory.create(module_type=OPTS.replica_gain_cell)
@@ -113,11 +114,11 @@ class replica_gain_cell_column(gain_cell_base_array):
             if (row == self.replica_bit) or (row >= self.row_start and row < self.row_end):
                 self.cell_inst.append(self.add_inst(name=name,
                                                     mod=self.replica_cell))
-                self.connect_inst(self.get_gain_cell_pins(row, 0))
+                self.connect_inst(self.get_gain_cell_pins(row, 0, cell="replica"))
             else:
                 self.cell_inst.append(self.add_inst(name=name,
                                                     mod=self.dummy_cell))
-                self.connect_inst(self.get_gain_cell_pins(row, 0))
+                self.connect_inst(self.get_gain_cell_pins(row, 0, cell="dummy"))
 
     def place_instances(self):
         # Flip the mirrors if we have an odd number of replica+dummy rows at the bottom
@@ -209,10 +210,15 @@ class replica_gain_cell_column(gain_cell_base_array):
                                     height=wwl_pin.height())
 
     def route_supplies(self):
-
-        for inst in self.cell_inst:
-            for pin_name in ["vdd", "gnd"]:
-                self.copy_layout_pin(inst, pin_name)
+        if OPTS.gc_type == "Si":
+            for inst in self.cell_inst:
+                for pin_name in ["vdd", "gnd"]:
+                    self.copy_layout_pin(inst, pin_name)
+        else:
+            if OPTS.gc_type == "OS":
+                for inst in self.cell_inst:
+                    for pin_name in ["vdd"]:
+                        self.copy_layout_pin(inst, pin_name)
 
     def get_bitline_names(self, port=None):
         if port == None:
@@ -226,7 +232,7 @@ class replica_gain_cell_column(gain_cell_base_array):
         else:
             return self.wordline_names[port]
 
-    def get_gain_cell_pins(self, row, col):
+    def get_gain_cell_pins(self, row, col, cell):
         """
         Creates a list of connections in the gain_cell,
         indexed by column and row, for instance use in gain_cell_array
@@ -240,8 +246,13 @@ class replica_gain_cell_column(gain_cell_base_array):
             gain_cell_pins.extend([x for x in self.get_wordline_names(port) if x.endswith("_{0}".format(row))])
         for port in self.write_ports:
             gain_cell_pins.extend([x for x in self.get_wordline_names(port) if x.endswith("_{0}".format(row))])
-        gain_cell_pins.append("vdd")
-        gain_cell_pins.append("gnd")
+        if OPTS.gc_type == "OS":
+            if cell == "replica":
+                gain_cell_pins.append("vdd")
+        else:
+            if OPTS.gc_type == "Si":
+                gain_cell_pins.append("vdd")
+                gain_cell_pins.append("gnd")
 
         return gain_cell_pins
 
@@ -255,8 +266,9 @@ class replica_gain_cell_column(gain_cell_base_array):
             gain_cell_pins.extend([x for x in self.get_bitline_names(port) if x.endswith("_{0}".format(col))])
         if len(self.edge_cell.get_pins("vdd")) > 0:
             gain_cell_pins.append("vdd")
-        if len(self.edge_cell.get_pins("gnd")) > 0:
-            gain_cell_pins.append("gnd")
+        if OPTS.gc_array == "Si":
+            if len(self.edge_cell.get_pins("gnd")) > 0:
+                gain_cell_pins.append("gnd")
 
         return gain_cell_pins
 

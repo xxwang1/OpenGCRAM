@@ -129,7 +129,8 @@ class replica_gain_cell_array(gain_cell_base_array):
         self.add_bitline_pins()
         self.add_wordline_pins()
         self.add_pin("vdd", "POWER")
-        self.add_pin("gnd", "GROUND")
+        if OPTS.gc_type == "Si":
+            self.add_pin("gnd", "GROUND")
 
     def add_bitline_pins(self):
         # The bit represents which port the rbl is for
@@ -216,7 +217,11 @@ class replica_gain_cell_array(gain_cell_base_array):
             array_wl.append(self.all_wordline_names[i + 1])
             array_wl.append(self.all_wordline_names[i])
         # self.connect_inst(self.all_bitline_names + self.all_wordline_names + self.supplies)
-        self.connect_inst(self.all_bitline_names + array_wl + self.supplies)
+        if OPTS.gc_type == "Si":
+            self.connect_inst(self.all_bitline_names + array_wl + self.supplies)
+        else:
+            if OPTS.gc_type =="OS":
+                self.connect_inst(self.all_bitline_names + array_wl)
 
         # Replica columns
         self.replica_col_insts = []
@@ -249,7 +254,11 @@ class replica_gain_cell_array(gain_cell_base_array):
                 wl[-2] = rwl
                 wl[-1] = wwl
                 print("repilca_gain_cell_array replica_column wl = ", wl)
-                self.connect_inst(bl + wl + self.supplies)
+                if OPTS.gc_type == "Si":
+                    self.connect_inst(bl + wl + self.supplies)
+                else:
+                    if OPTS.gc_type == "OS":
+                        self.connect_inst(bl + wl + ["vdd"])
             else:
                 self.replica_col_insts.append(None)
 
@@ -276,7 +285,11 @@ class replica_gain_cell_array(gain_cell_base_array):
                     # wl.append(self.rbl_wordline_names[i+1][0])
                 # self.connect_inst(self.all_bitline_names + self.rbl_wordline_names[port] + self.supplies)
                 print("replica_gain_cell_array self.rbl_wordline_names, wl = ", self.rbl_wordline_names, wl)
-                self.connect_inst(self.all_bitline_names + wl + self.supplies)
+                if OPTS.gc_type == "Si":
+                    self.connect_inst(self.all_bitline_names + wl + self.supplies)
+                else:
+                    if OPTS.gc_type == "OS":
+                        self.connect_inst(self.all_bitline_names + wl)
             else:
                 self.dummy_row_replica_insts.append(None)
 
@@ -422,9 +435,15 @@ class replica_gain_cell_array(gain_cell_base_array):
 
     def route_supplies(self):
         """ just copy supply pins from all instances """
-        for inst in self.insts:
-            for pin_name in ["vdd", "gnd"]:
-                self.copy_layout_pin(inst, pin_name)
+        if OPTS.gc_type == "Si":
+            for inst in self.insts:
+                for pin_name in ["vdd", "gnd"]:
+                    self.copy_layout_pin(inst, pin_name)
+        else:
+            if OPTS.gc_type == "OS":
+                for inst in self.replica_col_insts:
+                    for pin_name in ["vdd"]:
+                        self.copy_layout_pin(inst, pin_name)
 
     def analytical_power(self, corner, load):
         """Power of gain_cell array and bitline in nW."""

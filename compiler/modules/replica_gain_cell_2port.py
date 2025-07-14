@@ -20,7 +20,7 @@ class replica_gain_cell_2port(gain_cell_base):
     the technology library. """
 
     def __init__(self, name):
-        super().__init__(name, prop=props.gain_cell_2port)
+        super().__init__(name, prop=props.replica_gain_cell_2port)
         debug.info(2, "Create replica gain_cell object")
 
     def get_stage_effort(self, load):
