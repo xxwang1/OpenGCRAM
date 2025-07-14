@@ -246,6 +246,7 @@ class channel_route(design):
                                                       self.horizontal_pitch)
                         current_offset = vector(current_offset.x, net.max_value + self.horizontal_nonpref_pitch)
                     else:
+                        print("channel_route current_offset = ", current_offset)
                         self.add_horizontal_trunk_route(net.pins,
                                                         current_offset,
                                                         self.vertical_pitch)
@@ -311,6 +312,8 @@ class channel_route(design):
 
         # if we are less than a pitch, just create a non-preferred layer jog
         non_preferred_route = max_x - min_x <= pitch
+
+        # trunk_offset = trunk_offset - vector(0, 100 * self.m3_pitch)
 
         if non_preferred_route:
             half_layer_width = 0.5 * drc["minwidth_{0}".format(self.vertical_layer)]

@@ -1164,7 +1164,7 @@ class layout():
                                    height=height,
                                    snap_to_grid=snap_to_grid)
 
-    def add_layout_pin_rect_center(self, text, layer, offset, width=None, height=None, snap_to_grid=True):
+    def add_layout_pin_rect_center(self, text, layer, offset, width=None, height=None, snap_to_grid=True, add_rect=True):
         """ Creates a path like pin with center-line convention """
         if not width:
             width = drc["minwidth_{0}".format(layer)]
@@ -1221,7 +1221,7 @@ class layout():
         if snap_to_grid: ll_offset = ll_offset.snap_to_grid()
         else: ll_offset = vector(ini_offset_x, round_to_grid(ll_offset.y))
         print("add_layout_pin_rect_center offset, width, height = ", ll_offset, width, height)
-        return self.add_layout_pin(text, layer, ll_offset, width, height, snap_to_grid)
+        return self.add_layout_pin(text, layer, ll_offset, width, height, snap_to_grid, add_rect)
 
     def remove_layout_pin(self, text):
         """
@@ -1260,7 +1260,7 @@ class layout():
                             width=pin.width(),
                             height=pin.height())
 
-    def add_layout_pin(self, text, layer, offset, width=None, height=None, snap_to_grid=True):
+    def add_layout_pin(self, text, layer, offset, width=None, height=None, snap_to_grid=True, add_rect=True):
         """
         Create a labeled pin
         """
@@ -1348,11 +1348,13 @@ class layout():
             # Rounding errors may result in some duplicates.
             if new_pin_m not in self.pin_map[text]:
                 self.pin_map[text].add(new_pin_m)
-                self.add_label_pin(text, layer, offset, width=min_width, height=min_height, snap_to_grid=snap_to_grid)
+                if add_rect:
+                    self.add_label_pin(text, layer, offset, width=min_width, height=min_height, snap_to_grid=snap_to_grid)
         except KeyError:
             self.pin_map[text] = set()
             self.pin_map[text].add(new_pin_m)
-            self.add_label_pin(text, layer, offset, width=min_width, height=min_height, snap_to_grid=snap_to_grid)
+            if add_rect:
+                self.add_label_pin(text, layer, offset, width=min_width, height=min_height, snap_to_grid=snap_to_grid)
 
         
         # try:
@@ -2748,7 +2750,7 @@ class layout():
             elif add_vias:
                 self.copy_power_pin(pin, new_name=new_name, minarea=minarea, snap_to_grid=snap_to_grid)
 
-    def add_io_pin(self, instance, pin_name, new_name, start_layer=None, directions=None, minarea=False,multiple_via4=True):
+    def add_io_pin(self, instance, pin_name, new_name, start_layer=None, directions=None, add_rect=True, minarea=False,multiple_via4=True):
         """
         Add a signle input or output pin up to metal 3.
         """
@@ -2758,9 +2760,9 @@ class layout():
             start_layer = pin.layer
 
         # Just use the power pin function for now to save code
-        self.add_power_pin(new_name, pin.center(), start_layer=start_layer, directions=directions, minarea=minarea, multiple_via4=multiple_via4)
+        self.add_power_pin(new_name, pin.center(), start_layer=start_layer, directions=directions, add_rect=add_rect, minarea=minarea, multiple_via4=multiple_via4)
 
-    def add_power_pin(self, name, loc, directions=None, start_layer="m1", minarea=False, multiple_via4=True):
+    def add_power_pin(self, name, loc, directions=None, start_layer="m1", add_rect=True, minarea=False, multiple_via4=True):
         # Hack for min area
         if OPTS.tech_name == "sky130":
             min_area = drc["minarea_{}".format(self.pwr_grid_layers[1])]
@@ -2787,7 +2789,8 @@ class layout():
                                                    layer=start_layer,
                                                    offset=loc,
                                                    width=width,
-                                                   height=height)
+                                                   height=height,
+                                                   add_rect=add_rect)
         else:
             via = self.add_via_stack_center(from_layer=start_layer,
                                             to_layer=self.pwr_grid_layers[0],
@@ -2808,7 +2811,8 @@ class layout():
                                                   layer=self.pwr_grid_layers[0],
                                                   offset=loc,
                                                   width=width,
-                                                  height=height)
+                                                  height=height,
+                                                  add_rect=add_rect)
 
         return pin
 
@@ -3094,24 +3098,32 @@ class layout():
         width = (ur.x - ll.x) + 3 * self.supply_rail_pitch - supply_rail_spacing
 
         # LEFT vertical rails
-        offset = ll + vector(-2 * self.supply_rail_pitch,
-                             -2 * self.supply_rail_pitch)
+        offset = ll + vector(-3 * self.supply_rail_pitch,
+                             -3 * self.supply_rail_pitch)
         left_gnd_pin = self.add_layout_pin(text="gnd",
                                            layer="m2",
                                            offset=offset,
                                            width=self.supply_rail_width,
                                            height=height)
 
+        offset = ll + vector(-2 * self.supply_rail_pitch,
+                             -2 * self.supply_rail_pitch)
+        left_vdd_pin = self.add_layout_pin(text="vdd",
+                                           layer="m2",
+                                           offset=offset,
+                                           width=self.supply_rail_width,
+                                           height=height)
+        # 04/07/2025 add vddio
         offset = ll + vector(-1 * self.supply_rail_pitch,
                              -1 * self.supply_rail_pitch)
-        left_vdd_pin = self.add_layout_pin(text="vdd",
+        left_vddio_pin = self.add_layout_pin(text="vddio",
                                            layer="m2",
                                            offset=offset,
                                            width=self.supply_rail_width,
                                            height=height)
 
         # RIGHT vertical rails
-        offset = vector(ur.x, ll.y) + vector(0, -2 * self.supply_rail_pitch)
+        offset = vector(ur.x, ll.y) + vector(0, -3 * self.supply_rail_pitch)
         right_gnd_pin = self.add_layout_pin(text="gnd",
                                             layer="m2",
                                             offset=offset,
@@ -3119,32 +3131,48 @@ class layout():
                                             height=height)
 
         offset = vector(ur.x, ll.y) + vector(self.supply_rail_pitch,
-                                            -1 * self.supply_rail_pitch)
+                                            -2 * self.supply_rail_pitch)
         right_vdd_pin = self.add_layout_pin(text="vdd",
+                                            layer="m2",
+                                            offset=offset,
+                                            width=self.supply_rail_width,
+                                            height=height)
+        # 04/07/2025 add vddio
+        offset = vector(ur.x, ll.y) + vector(self.supply_rail_pitch,
+                                            -1 * self.supply_rail_pitch)
+        right_vddio_pin = self.add_layout_pin(text="vddio",
                                             layer="m2",
                                             offset=offset,
                                             width=self.supply_rail_width,
                                             height=height)
 
         # BOTTOM horizontal rails
-        offset = ll + vector(-2 * self.supply_rail_pitch,
-                             -2 * self.supply_rail_pitch)
+        offset = ll + vector(-3 * self.supply_rail_pitch,
+                             -3 * self.supply_rail_pitch)
         bottom_gnd_pin = self.add_layout_pin(text="gnd",
                                              layer="m1",
                                              offset=offset,
                                              width=width,
                                              height=self.supply_rail_width)
 
+        offset = ll + vector(-2 * self.supply_rail_pitch,
+                             -2 * self.supply_rail_pitch)
+        bottom_vdd_pin = self.add_layout_pin(text="vdd",
+                                             layer="m1",
+                                             offset=offset,
+                                             width=width,
+                                             height=self.supply_rail_width)
+        # 04/07/2025 add vddio
         offset = ll + vector(-1 * self.supply_rail_pitch,
                              -1 * self.supply_rail_pitch)
-        bottom_vdd_pin = self.add_layout_pin(text="vdd",
+        bottom_vddio_pin = self.add_layout_pin(text="vddio",
                                              layer="m1",
                                              offset=offset,
                                              width=width,
                                              height=self.supply_rail_width)
 
         # TOP horizontal rails
-        offset = vector(ll.x, ur.y) + vector(-2 * self.supply_rail_pitch,
+        offset = vector(ll.x, ur.y) + vector(-3 * self.supply_rail_pitch,
                                              0)
         top_gnd_pin = self.add_layout_pin(text="gnd",
                                           layer="m1",
@@ -3152,9 +3180,18 @@ class layout():
                                           width=width,
                                           height=self.supply_rail_width)
 
-        offset = vector(ll.x, ur.y) + vector(-1 * self.supply_rail_pitch,
+        offset = vector(ll.x, ur.y) + vector(-2 * self.supply_rail_pitch,
                                              self.supply_rail_pitch)
         top_vdd_pin = self.add_layout_pin(text="vdd",
+                                          layer="m1",
+                                          offset=offset,
+                                          width=width,
+                                          height=self.supply_rail_width)
+
+        # 04/07/2025 add vddio
+        offset = vector(ll.x, ur.y) + vector(-1 * self.supply_rail_pitch,
+                                             self.supply_rail_pitch)
+        top_vddio_pin = self.add_layout_pin(text="vddio",
                                           layer="m1",
                                           offset=offset,
                                           width=width,
@@ -3163,13 +3200,17 @@ class layout():
         # Remember these for connecting things in the design
         self.left_gnd_x_center = left_gnd_pin.cx()
         self.left_vdd_x_center = left_vdd_pin.cx()
+        self.left_vddio_x_center = left_vddio_pin.cx()
         self.right_gnd_x_center = right_gnd_pin.cx()
         self.right_vdd_x_center = right_vdd_pin.cx()
+        self.right_vddio_x_center = right_vddio_pin.cx()
 
         self.bottom_gnd_y_center = bottom_gnd_pin.cy()
         self.bottom_vdd_y_center = bottom_vdd_pin.cy()
+        self.bottom_vddio_y_center = bottom_vddio_pin.cy()
         self.top_gnd_y_center = top_gnd_pin.cy()
         self.top_vdd_y_center = top_vdd_pin.cy()
+        self.top_vddio_y_center = top_vddio_pin.cy()
 
         # Find the number of vias for this pitch
         self.supply_vias = 1
@@ -3190,7 +3231,11 @@ class layout():
                       vector(self.left_vdd_x_center, self.bottom_vdd_y_center),
                       vector(self.left_vdd_x_center, self.top_vdd_y_center),
                       vector(self.right_vdd_x_center, self.bottom_vdd_y_center),
-                      vector(self.right_vdd_x_center, self.top_vdd_y_center)]
+                      vector(self.right_vdd_x_center, self.top_vdd_y_center),
+                      vector(self.left_vddio_x_center, self.bottom_vddio_y_center),
+                      vector(self.left_vddio_x_center, self.top_vddio_y_center),
+                      vector(self.right_vddio_x_center, self.bottom_vddio_y_center),
+                      vector(self.right_vddio_x_center, self.top_vddio_y_center)]
 
         for pt in via_points:
             self.add_via_center(layers=self.m1_stack,

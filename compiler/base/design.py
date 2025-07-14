@@ -24,7 +24,7 @@ class design(gain_cell_hierarchy_design):
         # This allows us to use different GDS/spice circuits for hard cells instead of the default ones
         # Except bitcell names are generated automatically by the globals.py setup_bitcells routines
         # depending on the number of ports.
-
+        
         if name in props.names:
             if type(props.names[name]) is list:
                 num_ports = OPTS.num_rw_ports + OPTS.num_r_ports + OPTS.num_w_ports - 1
@@ -41,6 +41,7 @@ class design(gain_cell_hierarchy_design):
         if prop and prop.hard_cell:
             # The pins get added from the spice file, so just check
             # that they matched here
+            print("gain_cell_base name, cell_name = ", name, cell_name)
             debug.check(prop.port_names == list(self.pins),
                         "Custom cell pin names do not match spice file:\n{0} vs {1}".format(prop.port_names, list(self.pins)))
             self.add_pin_indices(prop.port_indices)

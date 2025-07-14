@@ -363,9 +363,9 @@ class instance(geometry):
 
         return (uVector, vVector, origin)
 
-    def reverse_transformation_bitcell(self, cell_name):
-        path = [] # path currently follwed in bitcell search
-        cell_paths = [] # saved paths to bitcells
+    def reverse_transformation_gain_cell(self, cell_name):
+        path = [] # path currently follwed in gain_cell search
+        cell_paths = [] # saved paths to gain_cells
         origin_offsets = [] # cell to bank offset
         SN_offsets = [] # Q to cell offet
         # Q_bar_offsets = [] # Q_bar to cell offset
@@ -391,12 +391,12 @@ class instance(geometry):
                 (normalized_rbl_offsets, normalized_wbl_offsets, rbl_names, wbl_names) = node.mod.get_normalized_bitline_offset()
 
                 for offset in range(len(normalized_rbl_offsets)):
-                    for port in range(len(rbl_names)):
-                        cell_rbl_meta.append([rbl_names[offset], row, col, port])
+                    # for port in self.read_ports:
+                    cell_rbl_meta.append([rbl_names[offset], row, col, 1])
 
                 for offset in range(len(normalized_wbl_offsets)):
-                    for port in range(len(wbl_names)):
-                        cell_wbl_meta.append([wbl_names[offset], row, col, port])
+                    # for port in self.write_ports:
+                    cell_wbl_meta.append([wbl_names[offset], row, col, 0])
 
                 if normalized_storage_nets == []:
                     debug.error("normalized storage nets should not be empty! Check if the GDS labels Q and Q_bar are correctly set on M1 of the cell",1)
