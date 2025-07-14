@@ -70,11 +70,7 @@ OpenRAM is licensed under the [BSD 3-Clause License](./LICENSE).
 
 # Contributors & Acknowledgment
 
-- [Matthew Guthaus] from [VLSIDA] created the OpenRAM project and is the lead architect.
-- [James Stine] from [VLSIARCH] co-founded the project.
-- Many students: Hunter Nichols, Michael Grimes, Jennifer Sowash, Yusu Wang, Joey Kunzler, Jesse Cirimelli-Low, Samira Ataei, Bin Wu, Brian Chen, Jeff Butera, Sage Walker
-
-If I forgot to add you, please let me know!
+Xinxin Wang, Lixian Yan, Shuhan Liu, Luke Upton, Zhuoqi Cai, Yiming Tan, Shengman Li, Koustav Jana, Peijing Li, Jesse Cirimelli-Low, Thierry Tambe, Matthew Guthaus and H.-S. Philip Wong
 
 
 
