@@ -102,15 +102,24 @@ class gain_cell_1bank(design, verilog, lef):
             self.vdd_name = spice["power"]
         except KeyError:
             self.vdd_name = "vdd"
+            self.vddio_name = "vddio"
         try:
             self.gnd_name = spice["ground"]
         except KeyError:
             self.gnd_name = "gnd"
-
-        self.add_pin(self.vdd_name, "POWER")
-        self.add_pin(self.gnd_name, "GROUND")
-        self.ext_supplies = [self.vdd_name, self.gnd_name]
-        self.ext_supply = {"vdd" : self.vdd_name, "gnd" : self.gnd_name}
+        if OPTS.level_shifter:
+            self.add_pin(self.vdd_name, "POWER")
+            self.add_pin(self.vddio_name, "POWER")
+            self.add_pin(self.gnd_name, "GROUND")
+            self.ext_supplies = [self.vdd_name, self.vddio_name, self.gnd_name]
+            self.ext_supply = {"vdd" : self.vdd_name, "vddio" : self.vddio_name, "gnd" : self.gnd_name}
+        else:
+            self.add_pin(self.vdd_name, "POWER")
+            self.add_pin(self.gnd_name, "GROUND")
+            self.ext_supplies = [self.vdd_name, self.gnd_name]
+            self.ext_supply = {"vdd" : self.vdd_name, "gnd" : self.gnd_name}
+        self.ext_supply_read = {"vdd" : self.vdd_name, "gnd" : self.gnd_name}
+        self.ext_supplies_read = [self.vdd_name, self.gnd_name]
 
     def add_global_pex_labels(self):
         """
@@ -253,7 +262,11 @@ class gain_cell_1bank(design, verilog, lef):
 
         # Copy the pins to the top level
         # This will either be used to route or left unconnected.
-        for pin_name in ["vdd", "gnd"]:
+        if OPTS.level_shifter:
+            pin_name_list = ["vdd", "vddio", "gnd"]
+        else:
+            pin_name_list = ["vdd", "gnd"]
+        for pin_name in pin_name_list:
             for inst in self.insts:
                 self.copy_power_pins(inst, pin_name, self.ext_supply[pin_name])
 
@@ -267,7 +280,7 @@ class gain_cell_1bank(design, verilog, lef):
         if OPTS.supply_pin_type in ["left", "right", "top", "bottom", "ring"]:
             # pass
             # Find the lowest leftest pin for vdd and gnd
-            for pin_name in ["vdd", "gnd"]:
+            for pin_name in pin_name_list:
                 # Copy the pin shape(s) to rectangles
                 for pin in self.get_pins(pin_name):
                     self.add_rect(pin.layer,
@@ -292,7 +305,7 @@ class gain_cell_1bank(design, verilog, lef):
             lowest_coord = self.find_lowest_coords()
 
             # Find the lowest leftest pin for vdd and gnd
-            for pin_name in ["vdd", "gnd"]:
+            for pin_name in pin_name_list:
                 # Copy the pin shape(s) to rectangles
                 for pin in self.get_pins(pin_name):
                     self.add_rect(pin.layer,
@@ -411,7 +424,10 @@ class gain_cell_1bank(design, verilog, lef):
                 pen = "p_en_bar{}".format(port)
             if port in self.read_ports:
                 ref = "ref{}".format(port)
-                pen = "p_en{}".format(port)
+                if OPTS.gc_type == "OS":
+                    pen = "p_en_bar{}".format(port)
+                elif OPTS.gc_type == "Si":
+                    pen = "p_en{}".format(port)
             if self.port_id[port] == "r":
                 self.control_bus_names[port].extend([sen, pen])
             elif self.port_id[port] == "w":
@@ -449,7 +465,20 @@ class gain_cell_1bank(design, verilog, lef):
                                                                          length=self.supply_bus_width)
             # The gnd rail must not be the entire width since we protrude the right-most vdd rail up for
             # the decoder in 4-bank gain_cells
-            self.horz_control_bus_positions.update(self.create_horizontal_bus(layer="m1",
+            if OPTS.level_shifter and port in self.write_ports:
+                self.horz_control_bus_positions = self.create_horizontal_bus(layer="m1",
+                                                                         pitch=self.m1_pitch,
+                                                                         offset=self.supply_bus_offset + vector(0, self.m1_pitch),
+                                                                         names=["vddio"],
+                                                                         length=self.supply_bus_width)
+
+                self.horz_control_bus_positions.update(self.create_horizontal_bus(layer="m1",
+                                                                              pitch=self.m1_pitch,
+                                                                              offset=self.supply_bus_offset + 2 * vector(0, self.m1_pitch),
+                                                                              names=["gnd"],
+                                                                              length=self.supply_bus_width))
+            else:
+                self.horz_control_bus_positions.update(self.create_horizontal_bus(layer="m1",
                                                                               pitch=self.m1_pitch,
                                                                               offset=self.supply_bus_offset + vector(0, self.m1_pitch),
                                                                               names=["gnd"],
@@ -465,7 +494,7 @@ class gain_cell_1bank(design, verilog, lef):
         self.gain_cell_dff = factory.create(module_type="gain_cell_dff")
 
         # Create the bank module (up to four are instantiated)
-        self.bank = factory.create("gain_cell_bank", sram_config=self.gain_cell_config, module_name="gain_cell_bank")
+        self.bank = factory.create("gain_cell_bank", gain_cell_config=self.gain_cell_config, module_name="gain_cell_bank")
 
         self.num_spare_cols = self.bank.num_spare_cols
 
@@ -540,7 +569,10 @@ class gain_cell_1bank(design, verilog, lef):
             if port in self.write_ports:
                 temp.append("p_en_bar{0}".format(port))
             if port in self.read_ports:
-                temp.append("p_en{0}".format(port))
+                if OPTS.gc_type == "OS":
+                    temp.append("p_en_bar{0}".format(port))
+                elif OPTS.gc_type == "Si":
+                    temp.append("p_en{0}".format(port))
         for port in self.write_ports:
             temp.append("w_en{0}".format(port))
             for bit in range(self.num_wmasks):
@@ -600,7 +632,7 @@ class gain_cell_1bank(design, verilog, lef):
                 inputs.append("addr{}[{}]".format(port, bit + self.col_addr_size))
                 outputs.append("a{}_{}".format(port, bit + self.col_addr_size))
 
-            self.connect_inst(inputs + outputs + ["clk_buf{}".format(port)] + self.ext_supplies)
+            self.connect_inst(inputs + outputs + ["clk_buf{}".format(port)] + self.ext_supplies_read)
 
         return insts
 
@@ -618,7 +650,7 @@ class gain_cell_1bank(design, verilog, lef):
                 inputs.append("addr{}[{}]".format(port, bit))
                 outputs.append("a{}_{}".format(port, bit))
 
-            self.connect_inst(inputs + outputs + ["clk_buf{}".format(port)] + self.ext_supplies)
+            self.connect_inst(inputs + outputs + ["clk_buf{}".format(port)] + self.ext_supplies_read)
 
         return insts
 
@@ -640,7 +672,7 @@ class gain_cell_1bank(design, verilog, lef):
                 inputs.append("din{}[{}]".format(port, bit))
                 outputs.append("bank_din{}_{}".format(port, bit))
 
-            self.connect_inst(inputs + outputs + ["clk_buf{}".format(port)] + self.ext_supplies)
+            self.connect_inst(inputs + outputs + ["clk_buf{}".format(port)] + self.ext_supplies_read)
 
         return insts
 
@@ -662,7 +694,7 @@ class gain_cell_1bank(design, verilog, lef):
                 inputs.append("wmask{}[{}]".format(port, bit))
                 outputs.append("bank_wmask{}_{}".format(port, bit))
 
-            self.connect_inst(inputs + outputs + ["clk_buf{}".format(port)] + self.ext_supplies)
+            self.connect_inst(inputs + outputs + ["clk_buf{}".format(port)] + self.ext_supplies_read)
 
         return insts
 
@@ -684,7 +716,7 @@ class gain_cell_1bank(design, verilog, lef):
                 inputs.append("spare_wen{}[{}]".format(port, bit))
                 outputs.append("bank_spare_wen{}_{}".format(port, bit))
 
-            self.connect_inst(inputs + outputs + ["clk_buf{}".format(port)] + self.ext_supplies)
+            self.connect_inst(inputs + outputs + ["clk_buf{}".format(port)] + self.ext_supplies_read)
 
         return insts
 
@@ -723,9 +755,12 @@ class gain_cell_1bank(design, verilog, lef):
             if port in self.write_ports:
                 temp.append("p_en_bar{}".format(port))
             if port in self.read_ports:
-                temp.append("p_en{}".format(port))
-            if port in self.read_ports: temp.extend(["rwl_en{}".format(port), "clk_buf{}".format(port)] + self.ext_supplies)
-            elif port in self.write_ports: temp.extend(["wwl_en{}".format(port), "clk_buf{}".format(port)] + self.ext_supplies)
+                if OPTS.gc_type == "OS":
+                    temp.append("p_en_bar{}".format(port))
+                elif OPTS.gc_type == "Si":
+                    temp.append("p_en{}".format(port))
+            if port in self.read_ports: temp.extend(["rwl_en{}".format(port), "clk_buf{}".format(port)] + self.ext_supplies_read)
+            elif port in self.write_ports: temp.extend(["wwl_en{}".format(port), "clk_buf{}".format(port)] + self.ext_supplies_read)
             self.connect_inst(temp)
 
         return insts

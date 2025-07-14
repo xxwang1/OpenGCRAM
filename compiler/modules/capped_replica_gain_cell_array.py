@@ -134,7 +134,8 @@ class capped_replica_gain_cell_array(gain_cell_base_array):
         self.add_bitline_pins()
         self.add_wordline_pins()
         self.add_pin("vdd", "POWER")
-        self.add_pin("gnd", "GROUND")
+        if OPTS.gc_type == "Si":
+            self.add_pin("gnd", "GROUND")
 
     def add_bitline_pins(self):
         # these four are only included for compatibility with other modules
@@ -167,7 +168,11 @@ class capped_replica_gain_cell_array(gain_cell_base_array):
 
     def create_instances(self):
         """ Create the module instances used in this design """
-        self.supplies = ["vdd", "gnd"]
+        if OPTS.gc_type == "Si":
+            self.supplies = ["vdd", "gnd"]
+        else:
+            if OPTS.gc_type == "OS":
+                self.supplies = ["vdd"]
 
         # Main array
         bl = []
@@ -190,12 +195,19 @@ class capped_replica_gain_cell_array(gain_cell_base_array):
         self.dummy_row_insts.append(self.add_inst(name="dummy_row_bot",
                                                   mod=self.col_cap_bottom))
         # self.connect_inst(self.bitline_pin_list + ["gnd"] * len(self.col_cap_bottom.get_wordline_names()) + self.supplies)
-        self.connect_inst(bl + ["gnd"] * len(self.col_cap_bottom.get_wordline_names()) + self.supplies)
+        if OPTS.gc_type == "Si":
+            self.connect_inst(bl + ["gnd"] * len(self.col_cap_bottom.get_wordline_names()) + self.supplies)
+        else:
+            if OPTS.gc_type == "OS":
+                self.connect_inst(bl + ["gnd"] * len(self.col_cap_bottom.get_wordline_names()))
         self.dummy_row_insts.append(self.add_inst(name="dummy_row_top",
                                                   mod=self.col_cap_top))
         # self.connect_inst(self.bitline_pin_list + ["gnd"] * len(self.col_cap_top.get_wordline_names()) + self.supplies)
-        self.connect_inst(bl + ["gnd"] * len(self.col_cap_top.get_wordline_names()) + self.supplies)
-
+        if OPTS.gc_type == "Si":
+            self.connect_inst(bl + ["gnd"] * len(self.col_cap_top.get_wordline_names()) + self.supplies)
+        else:
+            if OPTS.gc_type == "OS":
+                self.connect_inst(bl + ["gnd"] * len(self.col_cap_top.get_wordline_names()))
         # Left/right Dummy columns
         self.dummy_col_insts = []
         self.dummy_col_insts.append(self.add_inst(name="dummy_col_left",
@@ -219,13 +231,19 @@ class capped_replica_gain_cell_array(gain_cell_base_array):
                 # wl[-1] = wwl
         wl.extend(self.wordline_pin_list[-4:])
         # self.connect_inst(["dummy_left_" + bl for bl in self.row_cap_left.all_bitline_names] + self.wordline_pin_list + self.supplies)
-        
-        self.connect_inst(["dummy_left_" + bl for bl in self.row_cap_left.all_bitline_names] + wl + self.supplies)
+        if OPTS.gc_type == "Si":
+            self.connect_inst(["dummy_left_" + bl for bl in self.row_cap_left.all_bitline_names] + wl + self.supplies)
+        else:
+            if OPTS.gc_type == "OS":
+                self.connect_inst(["dummy_left_" + bl for bl in self.row_cap_left.all_bitline_names] + wl)
         self.dummy_col_insts.append(self.add_inst(name="dummy_col_right",
                                                     mod=self.row_cap_right))
         # self.connect_inst(["dummy_right_" + bl for bl in self.row_cap_right.all_bitline_names] + self.wordline_pin_list + self.supplies)
-        self.connect_inst(["dummy_right_" + bl for bl in self.row_cap_right.all_bitline_names] + wl + self.supplies)
-
+        if OPTS.gc_type == "Si":
+            self.connect_inst(["dummy_right_" + bl for bl in self.row_cap_right.all_bitline_names] + wl + self.supplies)
+        else:
+            if OPTS.gc_type == "OS":
+                self.connect_inst(["dummy_right_" + bl for bl in self.row_cap_right.all_bitline_names] + wl)
         # gain_cell array needed for some offset calculations
         self.gain_cell_array_inst = self.replica_gain_cell_array.gain_cell_array_inst
 
@@ -365,7 +383,11 @@ class capped_replica_gain_cell_array(gain_cell_base_array):
         gnd_dir = gain_cell.gnd_dir
 
         # vdd/gnd are only connected in the perimeter cells
-        supply_insts = self.dummy_col_insts + self.dummy_row_insts
+        if OPTS.gc_type == "Si":
+            supply_insts = self.dummy_col_insts + self.dummy_row_insts
+        else:
+            if OPTS.gc_type == "OS":
+                supply_insts = []
 
         # For the wordlines
         top_bot_mult = 1
@@ -394,7 +416,7 @@ class capped_replica_gain_cell_array(gain_cell_base_array):
 
         for inst in supply_insts:
             print("capped_replica_gain_cell_array route_supplies inst = ", inst)
-            print("capped_replica_gain_cell_array route_supplies inst.get_pins(vdd) = ", inst.get_pins("vdd"))
+            # print("capped_replica_gain_cell_array route_supplies inst.get_pins(vdd) = ", inst.get_pins("vdd"))
             for pin in inst.get_pins("vdd"):
                 if vdd_dir == "V":
                     self.connect_side_pin(pin, "top", self.top_vdd_locs[0].y)

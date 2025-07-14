@@ -71,8 +71,9 @@ class gain_cell_base_array(design):
                 self.add_pin(wl_name, "INOUT")
             else:
                 self.add_pin(wl_name, "INPUT")
-        self.add_pin("vdd", "POWER")
-        self.add_pin("gnd", "GROUND")
+        if OPTS.gc_type == "Si":
+            self.add_pin("vdd", "POWER")
+            self.add_pin("gnd", "GROUND")
 
     def get_gain_cell_pins(self, row, col):
         """
@@ -92,8 +93,9 @@ class gain_cell_base_array(design):
             gain_cell_pins.extend([x for x in self.get_wordline_names(port) if x.endswith("_{0}".format(row))])
         for port in self.write_ports:
             gain_cell_pins.extend([x for x in self.get_wordline_names(port) if x.endswith("_{0}".format(row))])
-        gain_cell_pins.append("vdd")
-        gain_cell_pins.append("gnd")
+        if OPTS.gc_type == "Si":
+            gain_cell_pins.append("vdd")
+            gain_cell_pins.append("gnd")
 
         return gain_cell_pins
 
@@ -192,9 +194,10 @@ class gain_cell_base_array(design):
                                     height=wwl_pin.height())
 
     def route_supplies(self):
-        for inst in self.cell_inst.values():
-            for pin_name in ["vdd", "gnd"]:
-                self.copy_layout_pin(inst, pin_name)
+        if OPTS.gc_type == "Si":
+            for inst in self.cell_inst.values():
+                for pin_name in ["vdd", "gnd"]:
+                    self.copy_layout_pin(inst, pin_name)
 
     def add_layout_pins(self):
         """ Add the layout pins """
@@ -208,6 +211,8 @@ class gain_cell_base_array(design):
         if self.cell.mirror.y and (col + col_offset) % 2:
             tempx = xoffset + self.cell.width
             dir_y = True
+        if OPTS.gc_type == "OS":
+            dir_y = False
         return (tempx, dir_y)
 
     def _adjust_y_offset(self, yoffset, row, row_offset):
@@ -216,6 +221,8 @@ class gain_cell_base_array(design):
         # If we mirror the current cell on the x axis adjust the y position
         if self.cell.mirror.x and (row + row_offset) % 2:
             tempy = yoffset + self.cell.height
+            dir_x = True
+        if OPTS.gc_type == "OS":
             dir_x = True
         return (tempy, dir_x)
 

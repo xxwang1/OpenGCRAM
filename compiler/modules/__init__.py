@@ -105,6 +105,7 @@ from .sense_amp_array import *
 from .gain_cell_sense_amp_array import *
 from .sense_amp import *
 from .gain_cell_sense_amp import *
+from .gain_cell_wwlls import *
 from .tri_gate_array import *
 from .tri_gate import *
 from .wordline_buffer_array import *

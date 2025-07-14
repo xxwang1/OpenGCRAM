@@ -42,6 +42,8 @@ class gain_cell_port_address(design):
         self.add_modules()
         self.create_row_decoder()
         self.create_wordline_driver()
+        if OPTS.level_shifter and self.port in self.write_ports:
+            self.create_wwlls()
         if self.has_rbl:
             self.create_rbl_driver()
 
@@ -72,6 +74,8 @@ class gain_cell_port_address(design):
             elif self.port in self.write_ports: self.add_pin("rbl_wwl", "OUTPUT")
 
         self.add_pin("vdd", "POWER")
+        if OPTS.level_shifter and self.port in self.write_ports:
+            self.add_pin("vddio", "POWER")
         self.add_pin("gnd", "GROUND")
 
     def route_layout(self):
@@ -84,17 +88,28 @@ class gain_cell_port_address(design):
         """ Propagate all vdd/gnd pins up to this level for all modules """
         if self.has_rbl:
             if layer_props.wordline_driver.vertical_supply:
-                self.copy_layout_pin(self.rbl_driver_inst, "vdd")
+                if OPTS.level_shifter and self.port in self.write_ports:
+                    self.copy_layout_pin(self.rbl_driver_inst, "vdd", "vddio")
+                else:
+                    self.copy_layout_pin(self.rbl_driver_inst, "vdd")
             else:
                 rbl_pos = self.rbl_driver_inst.get_pin("vdd").rc()
                 self.add_power_pin("vdd", rbl_pos, minarea=True)
-                self.add_path("m4", [rbl_pos, self.wordline_driver_array_inst.get_pins("vdd")[0].rc()])
-
-        self.copy_layout_pin(self.wordline_driver_array_inst, "vdd")
+                if OPTS.level_shifter == None or self.port in self.read_ports:
+                    self.add_path("m4", [rbl_pos, self.wordline_driver_array_inst.get_pins("vdd")[0].rc()])
+        if OPTS.level_shifter and self.port in self.write_ports:
+            self.copy_layout_pin(self.wordline_driver_array_inst, "vddio")
+        else:
+            self.copy_layout_pin(self.wordline_driver_array_inst, "vdd")
         self.copy_layout_pin(self.wordline_driver_array_inst, "gnd")
 
         self.copy_layout_pin(self.row_decoder_inst, "vdd")
         self.copy_layout_pin(self.row_decoder_inst, "gnd")
+
+        if OPTS.level_shifter and self.port in self.write_ports:
+            self.copy_layout_pin(self.wwlls_inst, "vdd", "vdd")
+            self.copy_layout_pin(self.wwlls_inst, "vddio", "vddio")
+            self.copy_layout_pin(self.wwlls_inst, "gnd", "gnd")
 
         # Also connect the B input of the RBL and_dec to vdd
         if self.has_rbl:
@@ -102,7 +117,10 @@ class gain_cell_port_address(design):
                 rbl_b_pin = self.rbl_driver_inst.get_pin("B")
                 rbl_loc = rbl_b_pin.center() - vector(3 * self.m1_pitch, 0)
                 self.add_path(rbl_b_pin.layer, [rbl_b_pin.center(), rbl_loc])
-                self.add_power_pin("vdd", rbl_loc, start_layer=rbl_b_pin.layer,minarea=True)
+                if OPTS.level_shifter and self.port in self.write_ports:
+                    self.add_power_pin("vddio", rbl_loc, start_layer=rbl_b_pin.layer,minarea=True)
+                else:
+                    self.add_power_pin("vdd", rbl_loc, start_layer=rbl_b_pin.layer,minarea=True)
 
     def route_pins(self):
         for row in range(self.addr_size):
@@ -117,7 +135,8 @@ class gain_cell_port_address(design):
         if self.has_rbl:
             if self.port in self.read_ports: self.copy_layout_pin(self.rbl_driver_inst, "Z", "rbl_rwl")
             elif self.port in self.write_ports: self.copy_layout_pin(self.rbl_driver_inst, "Z", "rbl_wwl")
-
+        # if OPTS.level_shifter and self.port in self.write_ports:
+        #     self.copy_layout_pin(self.wwlls_inst, )
     def route_internal(self):
         for row in range(self.num_rows):
             # The pre/post is to access the pin from "outside" the cell to avoid DRCs
@@ -157,12 +176,37 @@ class gain_cell_port_address(design):
         else:
             wl_en_offset = en_pos
 
-        if self.port in self.read_ports: self.add_layout_pin_rect_center(text="rwl_en",
-                                        layer=en_pin.layer,
-                                        offset=wl_en_offset)
-        elif self.port in self.write_ports: self.add_layout_pin_rect_center(text="wwl_en",
-                                        layer=en_pin.layer,
-                                        offset=wl_en_offset)
+        if OPTS.level_shifter and self.port in self.write_ports:
+            en_shifted_pin = self.wwlls_inst.get_pin("we_shifted")
+            en_shifted_pos = en_shifted_pin.center()
+            en_shifted_offset = en_shifted_pos
+            en_in_pin = self.wwlls_inst.get_pin("we_clk")
+            en_in_pos = en_in_pin.center()
+            en_in_offset = en_in_pos
+            self.add_via_stack_center(from_layer=en_shifted_pin.layer,
+                                      to_layer=en_pin.layer,
+                                      offset=en_shifted_pos)
+            if self.has_rbl:
+                self.add_zjog(layer=en_pin.layer,
+                          start=en_shifted_pos,
+                          end=rbl_in_pos,
+                          first_direction="H")
+            else:
+                self.add_zjog(layer=en_pin.layer,
+                          start=en_shifted_pos,
+                          end=en_pos,
+                          first_direction="H")
+        if OPTS.level_shifter and self.port in self.write_ports:
+            self.add_layout_pin_rect_center(text="wwl_en",
+                                        layer=en_in_pin.layer,
+                                        offset=en_in_offset)
+        else:
+            if self.port in self.read_ports: self.add_layout_pin_rect_center(text="rwl_en",
+                                            layer=en_pin.layer,
+                                            offset=wl_en_offset)
+            elif self.port in self.write_ports: self.add_layout_pin_rect_center(text="wwl_en",
+                                            layer=en_pin.layer,
+                                            offset=wl_en_offset)
 
     def add_modules(self):
 
@@ -173,7 +217,8 @@ class gain_cell_port_address(design):
                                                     rows=self.num_rows,
                                                     cols=self.num_cols,
                                                     port=self.port)
-
+        if OPTS.level_shifter and self.port in self.write_ports:
+            self.gain_cell_wwlls = factory.create(module_type="gain_cell_wwlls")
         local_array_size = OPTS.local_array_size
         if local_array_size > 0:
             driver_size = max(int(self.num_cols / local_array_size), 1)
@@ -230,7 +275,10 @@ class gain_cell_port_address(design):
                                                 mod=self.rbl_driver)
 
             temp = []
-            temp.append("wwl_en")
+            if OPTS.level_shifter and self.port in self.write_ports:
+                temp.append("we_shifted")
+            else:
+                temp.append("wwl_en")
             if OPTS.local_array_size == 0:
                 temp.append("vdd")
             temp.append("rbl_wwl")
@@ -254,8 +302,29 @@ class gain_cell_port_address(design):
         elif self.port in self.write_ports:
             for row in range(self.num_rows):
                 temp.append("wwl_{0}".format(row))
-            temp.append("wwl_en")
+            if OPTS.level_shifter and self.port in self.write_ports:
+                temp.append("we_shifted")
+            else:
+                temp.append("wwl_en")
+        if OPTS.level_shifter and self.port in self.write_ports:
+            temp.append("vddio")
+        else:
+            temp.append("vdd")
+        temp.append("gnd")
+        self.connect_inst(temp)
+
+    def create_wwlls(self):
+        """ Create the Wordline Level Shifter """
+        """port: we_clk web we_shifted"""
+        self.wwlls_inst = self.add_inst(name="gain_cell_wwlls",
+                                        mod=self.gain_cell_wwlls)
+
+        temp = []
+        temp.append("wwl_en")
+        temp.append("web")
+        temp.append("we_shifted")
         temp.append("vdd")
+        temp.append("vddio")
         temp.append("gnd")
         self.connect_inst(temp)
 
@@ -269,6 +338,8 @@ class gain_cell_port_address(design):
 
         wordline_driver_array_offset = vector(self.row_decoder_inst.rx(), 0)
         self.wordline_driver_array_inst.place(wordline_driver_array_offset)
+        
+
 
         if self.has_rbl:
             # This m6_pitch corresponds to the offset space for jog routing in the
@@ -287,3 +358,6 @@ class gain_cell_port_address(design):
 
         self.height = self.row_decoder.height
         self.width = self.wordline_driver_array_inst.rx()
+
+        if OPTS.level_shifter and self.port in self.write_ports:
+            self.wwlls_inst.place(row_decoder_offset, "MX")

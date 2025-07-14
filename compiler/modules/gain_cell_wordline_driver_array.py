@@ -28,6 +28,11 @@ class gain_cell_wordline_driver_array(design):
         self.rows = rows
         self.cols = cols
         self.port = port
+        
+        if OPTS.level_shifter and (self.port in self.write_ports):
+            self.power_name = "vddio"
+        else:
+            self.power_name = "vdd"
         self.create_netlist()
         if not OPTS.netlist_only:
             self.create_layout()
@@ -72,7 +77,7 @@ class gain_cell_wordline_driver_array(design):
             for i in range(self.rows):
                 self.add_pin("wwl_{0}".format(i), "OUTPUT")
         self.add_pin("en", "INPUT")
-        self.add_pin("vdd", "POWER")
+        self.add_pin(self.power_name, "POWER")
         self.add_pin("gnd", "GROUND")
 
     def add_modules(self):
@@ -89,20 +94,19 @@ class gain_cell_wordline_driver_array(design):
         """
         Add vertical power rails.
         """
-
         if self.port in self.read_ports:
             if layer_props.wordline_driver.vertical_supply:
-                self.route_vertical_pins("vdd", self.rwld_inst)
+                self.route_vertical_pins(self.power_name, self.rwld_inst)
                 self.route_vertical_pins("gnd", self.rwld_inst)
             else:
-                self.route_vertical_pins("vdd", self.rwld_inst, xside="rx",)
+                self.route_vertical_pins(self.power_name, self.rwld_inst, xside="rx",)
                 self.route_vertical_pins("gnd", self.rwld_inst, xside="lx",)
         elif self.port in self.write_ports:
             if layer_props.wordline_driver.vertical_supply:
-                self.route_vertical_pins("vdd", self.wwld_inst)
+                self.route_vertical_pins(self.power_name, self.wwld_inst)
                 self.route_vertical_pins("gnd", self.wwld_inst)
             else:
-                self.route_vertical_pins("vdd", self.wwld_inst, xside="rx",)
+                self.route_vertical_pins(self.power_name, self.wwld_inst, xside="rx",)
                 self.route_vertical_pins("gnd", self.wwld_inst, xside="lx",)
 
 
@@ -119,7 +123,7 @@ class gain_cell_wordline_driver_array(design):
                 self.connect_inst(["in_{0}".format(row),
                                 "en",
                                 "rwl_{0}".format(row),
-                                "vdd", "gnd"])
+                                self.power_name, "gnd"])
         elif self.port in self.write_ports:
             for row in range(self.rows):
                 name_and = "wwl_driver_and{}".format(row)
@@ -130,7 +134,7 @@ class gain_cell_wordline_driver_array(design):
                 self.connect_inst(["in_{0}".format(row),
                                 "en",
                                 "wwl_{0}".format(row),
-                                "vdd", "gnd"])
+                                self.power_name, "gnd"])
 
     def place_drivers(self):
         if self.port in self.read_ports:

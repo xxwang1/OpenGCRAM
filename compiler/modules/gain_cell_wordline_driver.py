@@ -81,7 +81,10 @@ class gain_cell_wordline_driver(design):
         self.add_pin("A", "INPUT")
         self.add_pin("B", "INPUT")
         self.add_pin("Z", "OUTPUT")
-        self.add_pin("vdd", "POWER")
+        if OPTS.level_shifter and self.port in self.write_ports:
+            self.add_pin("vddio", "POWER")
+        else:
+            self.add_pin("vdd", "POWER")
         self.add_pin("gnd", "GROUND")
 
     def create_insts(self):
@@ -91,14 +94,20 @@ class gain_cell_wordline_driver(design):
         elif self.port in self.write_ports:
             self.nand_inst = self.add_inst(name="wwld_nand",
                                        mod=self.nand)
-        self.connect_inst(["A", "B", "zb_int", "vdd", "gnd"])
+        if OPTS.level_shifter and self.port in self.write_ports:
+            self.connect_inst(["A", "B", "zb_int", "vddio", "gnd"])
+        else:
+            self.connect_inst(["A", "B", "zb_int", "vdd", "gnd"])
         if self.port in self.read_ports:
             self.driver_inst = self.add_inst(name="rwl_driver",
                                          mod=self.driver)
         elif self.port in self.write_ports:
             self.driver_inst = self.add_inst(name="wwl_driver",
                                          mod=self.driver)
-        self.connect_inst(["zb_int", "Z", "vdd", "gnd"])
+        if OPTS.level_shifter and self.port in self.write_ports:
+            self.connect_inst(["zb_int", "Z", "vddio", "gnd"])
+        else:
+            self.connect_inst(["zb_int", "Z", "vdd", "gnd"])
 
     def place_insts(self):
         # Add NAND to the right
@@ -109,8 +118,12 @@ class gain_cell_wordline_driver(design):
 
     def route_supply_rails(self):
         """ Add vdd/gnd rails to the top, (middle), and bottom. """
+        if OPTS.level_shifter and self.port in self.write_ports:
+            power_name = "vddio"
+        else:
+            power_name = "vdd"
         if layer_props.wordline_driver.vertical_supply:
-            for name in ["vdd", "gnd"]:
+            for name in [power_name, "gnd"]:
                 for inst in [self.nand_inst, self.driver_inst]:
                     self.copy_layout_pin(inst, name)
         else:
@@ -120,7 +133,7 @@ class gain_cell_wordline_driver(design):
                                             width=self.width)
 
             y_offset = self.height
-            self.add_layout_pin_rect_center(text="vdd",
+            self.add_layout_pin_rect_center(text=power_name,
                                             layer=self.route_layer,
                                             offset=vector(0.5 * self.width, y_offset),
                                             width=self.width)

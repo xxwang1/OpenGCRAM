@@ -23,10 +23,10 @@ class gain_cell_bank(design):
     This can create up to two ports in any combination: rw, w, r.
     """
 
-    def __init__(self, sram_config, name=""):
+    def __init__(self, gain_cell_config, name=""):
 
-        self.sram_config = sram_config
-        sram_config.set_local_config(self)
+        self.gain_cell_config = gain_cell_config
+        gain_cell_config.set_local_config(self)
         if self.write_size != self.word_size:
             self.num_wmasks = int(ceil(self.word_size / self.write_size))
         else:
@@ -38,7 +38,7 @@ class gain_cell_bank(design):
         if name == "":
             name = "bank_{0}_{1}".format(self.word_size, self.num_words)
         super().__init__(name)
-        debug.info(2, "create sram of size {0} with {1} words".format(self.word_size,
+        debug.info(2, "create gain_cell of size {0} with {1} words".format(self.word_size,
                                                                       self.num_words))
 
         # The local control signals are gated when we have bank select logic,
@@ -107,7 +107,10 @@ class gain_cell_bank(design):
             if port in self.write_ports:
                 self.add_pin("p_en_bar{0}".format(port), "INPUT")
             if port in self.read_ports:
-                self.add_pin("p_en{0}".format(port), "INPUT")
+                if OPTS.gc_type == "OS":
+                    self.add_pin("p_en_bar{0}".format(port), "INPUT")
+                else:
+                    self.add_pin("p_en{0}".format(port), "INPUT")
         for port in self.write_ports:
             self.add_pin("w_en{0}".format(port), "INPUT")
             for bit in range(self.num_wmasks):
@@ -121,6 +124,8 @@ class gain_cell_bank(design):
             self.add_pin("wwl_en{0}".format(port), "INPUT")
         
         self.add_pin("vdd", "POWER")
+        if OPTS.level_shifter:
+            self.add_pin("vddio", "POWER")
         self.add_pin("gnd", "GROUND")
 
     def route_layout(self):
@@ -150,6 +155,7 @@ class gain_cell_bank(design):
             pin_offset = pin_pos + vector(0, self.m3_pitch)
             # wbl_pin_offset = wbl_pin_pos + vector(0, self.m3_pitch)
             left_right_offset = vector(self.max_x_offset, pin_offset.y)
+            array_left_right_offset = vector(self.gain_cell_array_inst.rx(), pin_offset.y)
             # wbl_left_right_offset = vector(self.max_x_offset, wbl_pin_offset.y)
         else:
             bl_pin = self.port_data_inst[port].get_pin("rbl_wbl")
@@ -163,7 +169,8 @@ class gain_cell_bank(design):
         if port in self.read_ports:
             self.add_layout_pin_segment_center(text="rbl_rbl_{0}_{0}".format(port),
                                            layer="m3",
-                                           start=left_right_offset,
+                                        #    start=left_right_offset,
+                                           start=array_left_right_offset,
                                            end=pin_offset)
         else:
             self.add_layout_pin_segment_center(text="rbl_wbl_{0}_{0}".format(port),
@@ -250,7 +257,7 @@ class gain_cell_bank(design):
 
         # LOWER LEFT QUADRANT
         # Place the col decoder left aligned with wordline driver
-        # This is also placed so that it's supply rails do not align with the SRAM-level
+        # This is also placed so that it's supply rails do not align with the gain_cell-level
         # control logic to allow control signals to easily pass over in M3
         # by placing 1 1/4 a cell pitch down because both power connections and inputs/outputs
         # may be routed in M3 or M4
@@ -292,7 +299,7 @@ class gain_cell_bank(design):
         # UPPER RIGHT QUADRANT
         # Place the col decoder right aligned with wordline driver
         # Above the gain_cell array with a well spacing
-        # This is also placed so that it's supply rails do not align with the SRAM-level
+        # This is also placed so that it's supply rails do not align with the gain_cell-level
         # control logic to allow control signals to easily pass over in M3
         # by placing 1 1/4 a cell pitch down because both power connections and inputs/outputs
         # may be routed in M3 or M4
@@ -355,7 +362,10 @@ class gain_cell_bank(design):
             self.input_control_signals.append(["p_en_bar{}".format(port_num), "w_en{}".format(port_num)])
             port_num += 1
         for port in range(OPTS.num_r_ports):
-            self.input_control_signals.append(["p_en{}".format(port_num), "s_en{}".format(port_num), "ref{}".format(port_num)])
+            if OPTS.gc_type == "OS":
+                self.input_control_signals.append(["p_en_bar{}".format(port_num), "s_en{}".format(port_num), "ref{}".format(port_num)])
+            else:
+                self.input_control_signals.append(["p_en{}".format(port_num), "s_en{}".format(port_num), "ref{}".format(port_num)])
             port_num += 1
 
         # Number of control lines in the bus for each port
@@ -432,7 +442,7 @@ class gain_cell_bank(design):
         self.bit_offsets = self.get_column_offsets()
         for port in self.all_ports:
             self.port_data.append(factory.create(module_type="gain_cell_port_data",
-                                                 sram_config=self.sram_config,
+                                                 gain_cell_config=self.gain_cell_config,
                                                  port=port,
                                                  has_rbl=self.has_rbl,
                                                  bit_offsets=self.bit_offsets))
@@ -453,9 +463,15 @@ class gain_cell_bank(design):
         temp.extend(self.gain_cell_array.get_wordline_names())
         if len(self.all_ports) > 1 and self.has_rbl:
             temp.append("rbl_rwl_1_1")
-
-        temp.append("vdd")
-        temp.append("gnd")
+        if OPTS.gc_type == "Si":
+            temp.append("vdd")
+            temp.append("gnd")
+        else:
+            if OPTS.gc_type == "Hybrid":
+                temp.append("vdd")
+                temp.append("gnd")
+            if OPTS.gc_type == "OS":
+                temp.append("vdd")
         if 'vpb' in self.gain_cell_array_inst.mod.pins and 'vnb' in self.gain_cell_array_inst.mod.pins:
             temp.append('vpb')
             temp.append('vnb')
@@ -495,15 +511,28 @@ class gain_cell_bank(design):
             if port in self.write_ports:
                 temp.append("p_en_bar{0}".format(port))
             if port in self.read_ports:
-                temp.append("p_en{0}".format(port))
+                if OPTS.gc_type == "OS":
+                    temp.append("p_en_bar{0}".format(port))
+                else:
+                    temp.append("p_en{0}".format(port))
             if port in self.write_ports:
                 temp.append("w_en{0}".format(port))
                 for bit in range(self.num_wmasks):
                     temp.append("bank_wmask{0}_{1}".format(port, bit))
                 for bit in range(self.num_spare_cols):
                     temp.append("bank_spare_wen{0}_{1}".format(port, bit))
-                
-            temp.extend(["vdd", "gnd"])
+            if OPTS.gc_type == "OS" or OPTS.gc_type == "Hybrid":
+                if port in self.write_ports and OPTS.level_shifter:
+                    if OPTS.gc_type == "Hybrid":
+                        temp.extend(["vdd", "vddio", "gnd"])   
+                    else:
+                        temp.extend(["vdd", "gnd"])  
+                else:
+                    temp.extend(["vdd", "gnd"]) 
+            else:
+                temp.extend(["vdd", "gnd"])
+
+            # temp.extend(["vdd", "gnd"])
             self.connect_inst(temp)
 
     def place_port_data(self, offsets):
@@ -540,7 +569,17 @@ class gain_cell_bank(design):
             if self.has_rbl:
                 if port in self.write_ports: temp.append("rbl_wwl_{0}_{1}".format(port, port))
                 elif port in self.read_ports: temp.append("rbl_rwl_{0}_{1}".format(port, port))
-            temp.extend(["vdd", "gnd"])
+            # temp.extend(["vdd", "gnd"])
+            if OPTS.gc_type == "Si" or OPTS.gc_type == "Hybrid":
+                if port in self.write_ports and OPTS.level_shifter:
+                    temp.extend(["vdd", "vddio", "gnd"])   
+                else:
+                     temp.extend(["vdd", "gnd"]) 
+            elif OPTS.gc_type == "OS":
+                if port in self.write_ports:
+                    temp.extend(["vdd", "vddio", "gnd"])
+                else:
+                    temp.extend(["vdd", "gnd"])
             self.connect_inst(temp)
 
     def place_port_address(self, offsets):
@@ -584,7 +623,11 @@ class gain_cell_bank(design):
                 temp.append("addr{0}_{1}".format(port, bit))
             for bit in range(self.num_col_addr_lines):
                 temp.append("sel{0}_{1}".format(port, bit))
-            temp.extend(["vdd", "gnd"])
+            # temp.extend(["vdd", "gnd"])
+            if OPTS.gc_type == "Si":
+                temp.extend(["vdd", "gnd"]) 
+            elif OPTS.gc_type == "OS" or OPTS.gc_type == "Hybrid":
+                temp.extend(["vdd", "vddio", "gnd"])
             self.connect_inst(temp)
 
     def place_column_decoder(self, offsets):
@@ -647,6 +690,8 @@ class gain_cell_bank(design):
 
         for inst in all_insts:
             self.copy_layout_pin(inst, "vdd")
+            if OPTS.level_shifter and inst == self.port_address_inst[0]:
+                self.copy_layout_pin(inst, "vddio")
             self.copy_layout_pin(inst, "gnd")
 
         if 'vpb' in self.gain_cell_array_inst.mod.pins and 'vnb' in self.gain_cell_array_inst.mod.pins:
@@ -673,8 +718,12 @@ class gain_cell_bank(design):
             bank_sel_signals = ["clk_buf", "w_en", "p_en_bar", "bank_sel"]
             gated_bank_sel_signals = ["gated_clk_buf", "gated_w_en", "gated_p_en_bar"]
         else:
-            bank_sel_signals = ["clk_buf", "s_en", "p_en", "bank_sel", "ref"]
-            gated_bank_sel_signals = ["gated_clk_buf", "gated_s_en", "gated_p_en", "gated_ref"]
+            if OPTS.gc_type == "OS":
+                bank_sel_signals = ["clk_buf", "s_en", "p_en_bar", "bank_sel", "ref"]
+                gated_bank_sel_signals = ["gated_clk_buf", "gated_s_en", "gated_p_en_bar", "gated_ref"]
+            else:
+                bank_sel_signals = ["clk_buf", "s_en", "p_en", "bank_sel", "ref"]
+                gated_bank_sel_signals = ["gated_clk_buf", "gated_s_en", "gated_p_en", "gated_ref"]
 
         copy_control_signals = self.input_control_signals[port] + ["bank_sel{}".format(port)]
         for signal in range(len(copy_control_signals)):
@@ -1085,7 +1134,11 @@ class gain_cell_bank(design):
             connection.append((self.prefix + "p_en_bar{}".format(port),
                             self.port_data_inst[port].get_pin("p_en_bar")))
         if port in self.read_ports:
-            connection.append((self.prefix + "p_en{}".format(port),
+            if OPTS.gc_type == "OS":
+                connection.append((self.prefix + "p_en_bar{}".format(port),
+                            self.port_data_inst[port].get_pin("p_en_bar")))
+            else:
+                connection.append((self.prefix + "p_en{}".format(port),
                             self.port_data_inst[port].get_pin("p_en")))
 
         if port in self.write_ports:
@@ -1119,7 +1172,17 @@ class gain_cell_bank(design):
         """
         for port in self.read_ports:
             if self.port_data[port]:
+                # if OPTS.gc_type == "Si":
+                #     self.port_data[port].graph_exclude_predischarge()
+                # else:
                 self.port_data[port].graph_exclude_precharge()
+    def graph_exclude_predischarge(self):
+        """
+        Precharge adds a loop between bitlines, can be excluded to reduce complexity
+        """
+        for port in self.read_ports:
+            if self.port_data[port]:
+                self.port_data[port].graph_exclude_predischarge()
 
     def get_cell_name(self, inst_name, row, col):
         """

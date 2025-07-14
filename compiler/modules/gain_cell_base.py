@@ -17,6 +17,7 @@ class gain_cell_base(design):
     Base gain_cell parameters to be over-riden.
     """
     def __init__(self, name, cell_name=None, prop=None):
+        
         design.__init__(self, name, cell_name, prop)
 
         # Set the gain_cell specific properties

@@ -29,7 +29,7 @@ class gain_cell_precharge_array(design):
         self.gain_cell_rbl = gain_cell_bl
         # self.gain_cell_br = gain_cell_br
         self.column_offset = column_offset
-        # self.pc_spacing = 1.12
+
         if OPTS.tech_name == "sky130":
             self.en_bar_layer = "m3"
         else:
@@ -51,8 +51,9 @@ class gain_cell_precharge_array(design):
         """Adds pins for spice file"""
         for i in range(self.columns):
             # These are outputs from the precharge only
-            self.add_pin(self.gain_cell_rbl+"_{0}".format(i), "OUTPUT")
+            # self.add_pin("bl_{0}".format(i), "OUTPUT")
             # self.add_pin("br_{0}".format(i), "OUTPUT")
+            self.add_pin(self.gain_cell_rbl+"_{0}".format(i), "OUTPUT")
         self.add_pin("en_bar", "INPUT")
         self.add_pin("vdd", "POWER")
 
@@ -65,7 +66,6 @@ class gain_cell_precharge_array(design):
         self.place_insts()
 
         self.width = self.offsets[-1] + self.pc_cell.width
-        # self.width = self.offsets[-1] + self.pc_spacing
         self.height = self.pc_cell.height
 
         self.add_layout_pins()
@@ -92,19 +92,18 @@ class gain_cell_precharge_array(design):
         for i in range(len(self.local_insts)):
             inst = self.local_insts[i]
             self.copy_layout_pin(inst, self.gain_cell_rbl, self.gain_cell_rbl+"_{0}".format(i))
+            # self.copy_layout_pin(inst, "bl", "bl_{0}".format(i))
             # self.copy_layout_pin(inst, "br", "br_{0}".format(i))
 
     def route_supplies(self):
-        print("Gain Cell precharge array routing supplies")
         self.route_horizontal_pins("vdd", snap_to_grid=True)
-        print("Gain Cell precharge array routing supplies end")
+
     def create_insts(self):
         """Creates a precharge array by horizontally tiling the precharge cell"""
         self.local_insts = []
         for i in range(self.columns):
             name = "pre_column_{0}".format(i)
             offset = vector(self.pc_cell.width * i, 0)
-            # offset = vector(self.pc_spacing * i, 0)
             inst = self.add_inst(name=name,
                                  mod=self.pc_cell,
                                  offset=offset)
@@ -117,13 +116,11 @@ class gain_cell_precharge_array(design):
         # Default to single spaced columns
         if not self.offsets:
             self.offsets = [n * self.pc_cell.width for n in range(self.columns)]
-        # self.offsets = [n * self.pc_spacing for n in range(self.columns)]
 
         for i, xoffset in enumerate(self.offsets):
             if self.cell.mirror.y and (i + self.column_offset) % 2:
                 mirror = "MY"
                 tempx = xoffset + self.pc_cell.width
-                # tempx = xoffset + self.pc_spacing
             else:
                 mirror = ""
                 tempx = xoffset

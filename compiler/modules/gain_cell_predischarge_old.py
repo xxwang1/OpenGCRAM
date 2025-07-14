@@ -27,8 +27,7 @@ class gain_cell_predischarge(design):
 
         self.gain_cell = factory.create(module_type=OPTS.gain_cell)
         self.beta = parameter["beta"]
-        # self.ptx_width = self.beta * parameter["min_tx_size"]
-        self.ptx_width = parameter["min_tx_size"]
+        self.ptx_width = self.beta * parameter["min_tx_size"]
         self.ptx_mults = 1
         if(cell_props.use_strap == True and OPTS.num_ports == 1):
             strap = factory.create(module_type=cell_props.strap_module, version=cell_props.strap_version)
@@ -96,10 +95,10 @@ class gain_cell_predischarge(design):
         Adds a gnd rail at the top of the cell
         """
 
-        nmos_pin = self.upper_nmos1_inst.get_pin("S")
+        nmos_pin = self.upper_nmos1_inst.get_pin("D")
         nmos_pos = nmos_pin.center()
         self.add_path(nmos_pin.layer, [nmos_pos, self.well_contact_pos])
-        nmos_pos_lower = self.lower_nmos_inst.get_pin("S").center()
+        nmos_pos_lower = self.lower_nmos_inst.get_pin("D").center()
         self.add_path(nmos_pin.layer, [nmos_pos, nmos_pos_lower])
         self.add_layout_pin_rect_center(text="gnd",
                                         layer=nmos_pin.layer,
@@ -131,7 +130,7 @@ class gain_cell_predischarge(design):
         self.initial_yoffset = self.nmos.active_offset.y + self.m2_pitch
         # Compute the other nmos2 location,
         # but determining offset to overlap the source and drain pins
-        overlap_offset = self.nmos.get_pin("S").ll() - self.nmos.get_pin("D").ll()
+        overlap_offset = self.nmos.get_pin("D").ll() - self.nmos.get_pin("S").ll()
 
         # adds the lower nmos to layout
         self.lower_nmos_position = vector(self.well_enclose_active + 0.5 * self.m1_width,
@@ -220,7 +219,7 @@ class gain_cell_predischarge(design):
                         self.active_contact.height + \
                         self.pwell_extend_active + \
                         via.height * 1.5
-        self.well_contact_pos = (self.upper_nmos1_inst.get_pin("S").center().scale(1, 0) + \
+        self.well_contact_pos = (self.upper_nmos1_inst.get_pin("D").center().scale(1, 0) + \
                                 vector(0, offset_height)).snap_to_grid()
 
         print("place pwell and contact well_contact_pos = ", self.well_contact_pos)
@@ -250,8 +249,7 @@ class gain_cell_predischarge(design):
         layer_pitch = getattr(self, "{}_pitch".format(self.bitline_layer))
 
         # adds the BL
-        # self.rbl_xoffset = layer_pitch
-        self.rbl_xoffset = self.width - layer_pitch
+        self.rbl_xoffset = layer_pitch
         top_pos = vector(self.rbl_xoffset, self.height)
         pin_pos = vector(self.rbl_xoffset, 0)
         self.add_path(self.bitline_layer, [top_pos, pin_pos])
@@ -261,8 +259,7 @@ class gain_cell_predischarge(design):
                                                          end=top_pos)
 
         # adds the BR
-        # self.gnd_xoffset = self.width - layer_pitch
-        self.gnd_xoffset = layer_pitch
+        self.gnd_xoffset = self.width - layer_pitch
         top_pos = vector(self.gnd_xoffset, self.height)
         pin_pos = vector(self.gnd_xoffset, 0)
         self.add_path(self.bitline_layer, [top_pos, pin_pos])
@@ -276,14 +273,14 @@ class gain_cell_predischarge(design):
         Connect the bitlines to the devices
         """
         self.add_bitline_contacts()
-        self.connect_nmos(self.lower_nmos_inst.get_pin("D"),
-                          self.rbl_xoffset)
         self.connect_nmos(self.lower_nmos_inst.get_pin("S"),
+                          self.rbl_xoffset)
+        self.connect_nmos(self.lower_nmos_inst.get_pin("D"),
                           self.gnd_xoffset)
 
-        self.connect_nmos(self.upper_nmos1_inst.get_pin("D"),
-                          self.rbl_xoffset)
         self.connect_nmos(self.upper_nmos1_inst.get_pin("S"),
+                          self.rbl_xoffset)
+        self.connect_nmos(self.upper_nmos1_inst.get_pin("D"),
                           self.gnd_xoffset)
 
     def add_bitline_contacts(self):
@@ -292,7 +289,7 @@ class gain_cell_predischarge(design):
         """
 
         # BL
-        for lower_pin in [self.lower_nmos_inst.get_pin("D"), self.lower_nmos_inst.get_pin("S")]:
+        for lower_pin in [self.lower_nmos_inst.get_pin("S"), self.lower_nmos_inst.get_pin("D")]:
             self.add_via_stack_center(from_layer=lower_pin.layer,
                                       to_layer=self.bitline_layer,
                                       offset=lower_pin.center(),
@@ -300,13 +297,13 @@ class gain_cell_predischarge(design):
                                       min_area=True)
 
         # BR
-        # for upper_pin in [self.upper_nmos1_inst.get_pin("D"), self.upper_nmos2_inst.get_pin("S")]:
+        # for upper_pin in [self.upper_nmos1_inst.get_pin("S"), self.upper_nmos2_inst.get_pin("D")]:
         #     self.add_via_stack_center(from_layer=upper_pin.layer,
         #                               to_layer=self.bitline_layer,
         #                               offset=upper_pin.center(),
         #                               directions=("V", "V"),
         #                               min_area=True)
-        for upper_pin in [self.upper_nmos1_inst.get_pin("D")]:
+        for upper_pin in [self.upper_nmos1_inst.get_pin("S")]:
             self.add_via_stack_center(from_layer=upper_pin.layer,
                                       to_layer=self.bitline_layer,
                                       offset=upper_pin.center(),
