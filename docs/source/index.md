@@ -89,7 +89,7 @@ Commercial tools (optional):
   includes:
     * Technology's specific information
     * Technology's rules such as DRC rules and the GDS layer map
-    * Custom designed library cells (6T, sense amp, DFF) to improve the SRAM
+    * Custom designed library cells (2T Gain Cell, sense amp, DFF) to improve the GCRAM
       density.
 * For technologies that have specific design requirements, such as specialized
   well contacts, the user can include helper functions in the technology
