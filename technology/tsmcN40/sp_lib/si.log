@@ -1,0 +1,421 @@
+Virtuoso Framework License (111) was checked out successfully. Total checkout time was 0.03s.
+MPS timeout is set to '60' seconds.
+*WARNING* LIB basic from File /cad/tsmc/tcbn40lpbwp/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwp_120b/cds.lib Line 3 redefines
+LIB basic from File /cad/cadence/IC.6.18.320_lnx86/tools.lnx86/dfII/etc/cdsDotLibs/composer/cds.lib
+Insert UNDEFINE basic
+before DEFINE basic
+    in /cad/tsmc/tcbn40lpbwp/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwp_120b/cds.lib
+Or remove or comment out DEFINE basic
+    in /cad/cadence/IC.6.18.320_lnx86/tools.lnx86/dfII/etc/cdsDotLibs/composer/cds.lib
+to suppress this warning message.
+*WARNING* LIB analogLib from File /cad/tsmc/tcbn40lpbwp/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwp_120b/cds.lib Line 4 redefines
+LIB analogLib from File /cad/cadence/IC.6.18.320_lnx86/tools.lnx86/dfII/etc/cdsDotLibs/artist/cds.lib
+Insert UNDEFINE analogLib
+before DEFINE analogLib
+    in /cad/tsmc/tcbn40lpbwp/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwp_120b/cds.lib
+Or remove or comment out DEFINE analogLib
+    in /cad/cadence/IC.6.18.320_lnx86/tools.lnx86/dfII/etc/cdsDotLibs/artist/cds.lib
+to suppress this warning message.
+*WARNING* LIB analogLib from File /home/shliu98/tcbn40ulpbwp40_c170815_130a/cdk/tcbn40ulpbwp40_c170815_130a/cds.lib Line 1 redefines
+LIB analogLib from File /cad/tsmc/tcbn40lpbwp/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwp_120b/cds.lib
+Insert UNDEFINE analogLib
+before DEFINE analogLib
+    in /home/shliu98/tcbn40ulpbwp40_c170815_130a/cdk/tcbn40ulpbwp40_c170815_130a/cds.lib
+Or remove or comment out DEFINE analogLib
+    in /cad/tsmc/tcbn40lpbwp/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwp_120b/cds.lib
+to suppress this warning message.
+*WARNING* LIB basic from File /home/shliu98/tcbn40ulpbwp40_c170815_130a/cdk/tcbn40ulpbwp40_c170815_130a/cds.lib Line 2 redefines
+LIB basic from File /cad/tsmc/tcbn40lpbwp/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwp_120b/cds.lib
+Insert UNDEFINE basic
+before DEFINE basic
+    in /home/shliu98/tcbn40ulpbwp40_c170815_130a/cdk/tcbn40ulpbwp40_c170815_130a/cds.lib
+Or remove or comment out DEFINE basic
+    in /cad/tsmc/tcbn40lpbwp/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwp_120b/cds.lib
+to suppress this warning message.
+*WARNING* LIB basic from File /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib Line 7 redefines
+LIB basic from File /home/shliu98/tcbn40ulpbwp40_c170815_130a/cdk/tcbn40ulpbwp40_c170815_130a/cds.lib
+Insert UNDEFINE basic
+before DEFINE basic
+    in /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+Or remove or comment out DEFINE basic
+    in /home/shliu98/tcbn40ulpbwp40_c170815_130a/cdk/tcbn40ulpbwp40_c170815_130a/cds.lib
+to suppress this warning message.
+*WARNING* LIB analogLib from File /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib Line 8 redefines
+LIB analogLib from File /home/shliu98/tcbn40ulpbwp40_c170815_130a/cdk/tcbn40ulpbwp40_c170815_130a/cds.lib
+Insert UNDEFINE analogLib
+before DEFINE analogLib
+    in /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+Or remove or comment out DEFINE analogLib
+    in /home/shliu98/tcbn40ulpbwp40_c170815_130a/cdk/tcbn40ulpbwp40_c170815_130a/cds.lib
+to suppress this warning message.
+*WARNING* LIB cdsDefTechLib from File /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib Line 5 redefines
+LIB cdsDefTechLib from File /cad/cadence/IC.6.18.320_lnx86/share/cdssetup/dfII/cds.lib
+Insert UNDEFINE cdsDefTechLib
+before DEFINE cdsDefTechLib
+    in /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib
+Or remove or comment out DEFINE cdsDefTechLib
+    in /cad/cadence/IC.6.18.320_lnx86/share/cdssetup/dfII/cds.lib
+to suppress this warning message.
+*WARNING* '/sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib', Line 9: Cannot find file '/tsmc40r/organized_pdk/N40ULP/TSMCHOME/digital/Back_End/cdk/tcbn40ulpbwp40lvt_c170815_130a/tcbn40ulpbwp40lvt_c170815'.
+*WARNING* '/sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib', Line 9: Skipping: '/tsmc40r/organized_pdk/N40ULP/TSMCHOME/digital/Back_End/cdk/tcbn40ulpbwp40lvt_c170815_130a/tcbn40ulpbwp40lvt_c170815'
+*WARNING* '/sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib', Line 10: Cannot find file '/tsmc40r/organized_pdk/N40ULP/TSMCHOME/digital/Back_End/cdk/tcbn40ulpbwp50_c170815_130a/tcbn40ulpbwp50_c170815'.
+*WARNING* '/sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib', Line 10: Skipping: '/tsmc40r/organized_pdk/N40ULP/TSMCHOME/digital/Back_End/cdk/tcbn40ulpbwp50_c170815_130a/tcbn40ulpbwp50_c170815'
+*WARNING* '/sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib', Line 11: Cannot find file '/tsmc40r/organized_pdk/N40ULP/TSMCHOME/digital/Back_End/cdk/tcbn40ulpbwp50lvt_c170815_130a/tcbn40ulpbwp50lvt_c170815'.
+*WARNING* '/sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib', Line 11: Skipping: '/tsmc40r/organized_pdk/N40ULP/TSMCHOME/digital/Back_End/cdk/tcbn40ulpbwp50lvt_c170815_130a/tcbn40ulpbwp50lvt_c170815'
+*WARNING* LIB avTech from File /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib Line 16 redefines
+LIB avTech from File /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+Insert UNDEFINE avTech
+before DEFINE avTech
+    in /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib
+Or remove or comment out DEFINE avTech
+    in /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+to suppress this warning message.
+*WARNING* '/sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib', Line 22: Cannot find file '/home/chwang9/5x1u/cds.lib'.
+*WARNING* '/sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib', Line 22: Skipping: '/home/chwang9/5x1u/cds.lib'
+*WARNING* LIB wldecoder from File /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib Line 27 redefines
+LIB wldecoder from the same file (defined earlier.)
+*WARNING* LIB basic from File /sim/shliu98/TCAM/chwang/5x1u/cds.lib Line 4 redefines
+LIB basic from File /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+Insert UNDEFINE basic
+before DEFINE basic
+    in /sim/shliu98/TCAM/chwang/5x1u/cds.lib
+Or remove or comment out DEFINE basic
+    in /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+to suppress this warning message.
+*WARNING* LIB analogLib from File /sim/shliu98/TCAM/chwang/5x1u/cds.lib Line 5 redefines
+LIB analogLib from File /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+Insert UNDEFINE analogLib
+before DEFINE analogLib
+    in /sim/shliu98/TCAM/chwang/5x1u/cds.lib
+Or remove or comment out DEFINE analogLib
+    in /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+to suppress this warning message.
+*WARNING* LIB tsmcN40 from File /sim/shliu98/TCAM/chwang/5x1u/cds.lib Line 6 redefines
+LIB tsmcN40 from File /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+Insert UNDEFINE tsmcN40
+before DEFINE tsmcN40
+    in /sim/shliu98/TCAM/chwang/5x1u/cds.lib
+Or remove or comment out DEFINE tsmcN40
+    in /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+to suppress this warning message.
+*WARNING* LIB avTech from File /sim/shliu98/TCAM/chwang/5x1u/cds.lib Line 7 redefines
+LIB avTech from File /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib
+Insert UNDEFINE avTech
+before DEFINE avTech
+    in /sim/shliu98/TCAM/chwang/5x1u/cds.lib
+Or remove or comment out DEFINE avTech
+    in /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib
+to suppress this warning message.
+*WARNING* LIB tphn40lpgv2od3_sl from File /sim/shliu98/TCAM/chwang/5x1u/cds.lib Line 13 redefines
+LIB tphn40lpgv2od3_sl from File /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+Insert UNDEFINE tphn40lpgv2od3_sl
+before DEFINE tphn40lpgv2od3_sl
+    in /sim/shliu98/TCAM/chwang/5x1u/cds.lib
+Or remove or comment out DEFINE tphn40lpgv2od3_sl
+    in /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+to suppress this warning message.
+*WARNING* LIB sense from File /sim/shliu98/TCAM/chwang/5x1u/cds.lib Line 28 redefines
+LIB sense from File /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib
+Insert UNDEFINE sense
+before DEFINE sense
+    in /sim/shliu98/TCAM/chwang/5x1u/cds.lib
+Or remove or comment out DEFINE sense
+    in /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib
+to suppress this warning message.
+*WARNING* LIB module from File /sim/shliu98/TCAM/chwang/5x1u/cds.lib Line 29 redefines
+LIB module from File /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib
+Insert UNDEFINE module
+before DEFINE module
+    in /sim/shliu98/TCAM/chwang/5x1u/cds.lib
+Or remove or comment out DEFINE module
+    in /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib
+to suppress this warning message.
+*WARNING* LIB peripheral from File /sim/shliu98/TCAM/chwang/5x1u/cds.lib Line 30 redefines
+LIB peripheral from File /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib
+Insert UNDEFINE peripheral
+before DEFINE peripheral
+    in /sim/shliu98/TCAM/chwang/5x1u/cds.lib
+Or remove or comment out DEFINE peripheral
+    in /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib
+to suppress this warning message.
+*WARNING* '/sim/shliu98/TCAM/chwang/5x1u/cds.lib', Line 32: Cannot find file '/home/weichen9/5x1u/TN40CMSP015K3_1_3_2A/cds.lib'.
+*WARNING* '/sim/shliu98/TCAM/chwang/5x1u/cds.lib', Line 32: Skipping: '/home/weichen9/5x1u/TN40CMSP015K3_1_3_2A/cds.lib'
+*WARNING* LIB tsmcN40 from File /sim/xxwang1/cds.lib Line 15 redefines
+LIB tsmcN40 from File /sim/shliu98/TCAM/chwang/5x1u/cds.lib
+Insert UNDEFINE tsmcN40
+before DEFINE tsmcN40
+    in /sim/xxwang1/cds.lib
+Or remove or comment out DEFINE tsmcN40
+    in /sim/shliu98/TCAM/chwang/5x1u/cds.lib
+to suppress this warning message.
+*WARNING* The directory: '/sim/xxwang1/asap7_test' does not exist
+	but was defined in libFile '/sim/xxwang1/cds.lib' for Lib 'asap7_test'.
+*WARNING* The directory: '/sim/xxwang1/$PDK_DIR/asap7ssc7p5t_05' does not exist
+	but was defined in libFile '/sim/xxwang1/cds.lib' for Lib 'asap7ssc7p5t'.
+*WARNING* The directory: '/sim/xxwang1/$PDK_DIR/cdslib/asap7_TechLib' does not exist
+	but was defined in libFile '/sim/xxwang1/cds.lib' for Lib 'asap7_TechLib'.
+*WARNING* The directory: '/sim/xxwang1/$CDS/tools/dfII/samples/cdslib/sample' does not exist
+	but was defined in libFile '/sim/xxwang1/cds.lib' for Lib 'sample'.
+*WARNING* The directory: '/sim/xxwang1/testxxx' does not exist
+	but was defined in libFile '/sim/xxwang1/cds.lib' for Lib 'testxxx'.
+*WARNING* The directory: '/home/weichen9/5x1u/TN40CMSP015K3_1_3_2A/peripheral' does not exist
+	but was defined in libFile '/sim/shliu98/TCAM/chwang/5x1u/cds.lib' for Lib 'peripheral'.
+*WARNING* The directory: '/home/weichen9/5x1u/TN40CMSP015K3_1_3_2A/module' does not exist
+	but was defined in libFile '/sim/shliu98/TCAM/chwang/5x1u/cds.lib' for Lib 'module'.
+*WARNING* The directory: '/home/weichen9/5x1u/TN40CMSP015K3_1_3_2A/sense' does not exist
+	but was defined in libFile '/sim/shliu98/TCAM/chwang/5x1u/cds.lib' for Lib 'sense'.
+*WARNING* The directory: '/tsmc40r/pdk/ams/6x2z/TN40CMSP015K3_1_3_2A/Calibre/drc' does not exist
+	but was defined in libFile '/sim/shliu98/TCAM/chwang/5x1u/cds.lib' for Lib 'DRC_Rule'.
+*WARNING* The directory: '/tsmc40r/pdk/2019.06.27_TSMC/tphn40lpgv2od3_sl_210b/tphn40lpgv2od3_sl_210a_cdku9lm/TSMCHOME/digital/Back_End/cdk/tphn40lpgv2od3_sl_210a_oa/mt_2/9lm/tphn40lpgv2od3_sl' does not exist
+	but was defined in libFile '/sim/shliu98/TCAM/chwang/5x1u/cds.lib' for Lib 'tphn40lpgv2od3_sl'.
+*WARNING* The directory: '/tsmc40r/pdk/2019.05.21_TSMC/tcbn40lpbwp_200a/tcbn40lpbwp_120b_cdk/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwp_120b_oa/tcbn40lpbwp' does not exist
+	but was defined in libFile '/sim/shliu98/TCAM/chwang/5x1u/cds.lib' for Lib 'tcbn40lpbwp'.
+*WARNING* The directory: '/tsmc40r/pdk/2019.05.21_TSMC/tcbn40lpbwplvt_200a/tcbn40lpbwplvt_120b_cdk/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwplvt_120b_oa/tcbn40lpbwplvt' does not exist
+	but was defined in libFile '/sim/shliu98/TCAM/chwang/5x1u/cds.lib' for Lib 'tcbn40lpbwplvt'.
+*WARNING* The directory: '/tsmc40r/pdk/2019.05.21_TSMC/tcbn40lpbwphvt_200a/tcbn40lpbwphvt_120b_cdk/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwphvt_120b_oa/tcbn40lpbwphvt' does not exist
+	but was defined in libFile '/sim/shliu98/TCAM/chwang/5x1u/cds.lib' for Lib 'tcbn40lpbwphvt'.
+*WARNING* The directory: '/tools/cadence/Assura/4.1_USR2_HF9/lnx86/tools/assura/etc/avtech/avTech' does not exist
+	but was defined in libFile '/sim/shliu98/TCAM/chwang/5x1u/cds.lib' for Lib 'avTech'.
+*WARNING* The directory: '/tsmc40r/pdk/2020.01.22_TSMC/tcbn40ulpbwp40_c170815_130d/tcbn40ulpbwp40_c170815_130d/tcbn40ulpbwp40_c170815_130a_cdk/TSMCHOME/digital/Back_End/cdk/tcbn40ulpbwp40_c170815_130a/tcbn40ulpbwp40_c170815' does not exist
+	but was defined in libFile '/sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib' for Lib 'tsmc40svt'.
+*WARNING* LIB basic from File /cad/tsmc/tcbn40lpbwp/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwp_120b/cds.lib Line 3 redefines
+LIB basic from File /cad/cadence/IC.6.18.320_lnx86/tools.lnx86/dfII/etc/cdsDotLibs/composer/cds.lib
+Insert UNDEFINE basic
+before DEFINE basic
+    in /cad/tsmc/tcbn40lpbwp/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwp_120b/cds.lib
+Or remove or comment out DEFINE basic
+    in /cad/cadence/IC.6.18.320_lnx86/tools.lnx86/dfII/etc/cdsDotLibs/composer/cds.lib
+to suppress this warning message.
+*WARNING* LIB analogLib from File /cad/tsmc/tcbn40lpbwp/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwp_120b/cds.lib Line 4 redefines
+LIB analogLib from File /cad/cadence/IC.6.18.320_lnx86/tools.lnx86/dfII/etc/cdsDotLibs/artist/cds.lib
+Insert UNDEFINE analogLib
+before DEFINE analogLib
+    in /cad/tsmc/tcbn40lpbwp/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwp_120b/cds.lib
+Or remove or comment out DEFINE analogLib
+    in /cad/cadence/IC.6.18.320_lnx86/tools.lnx86/dfII/etc/cdsDotLibs/artist/cds.lib
+to suppress this warning message.
+*WARNING* LIB analogLib from File /home/shliu98/tcbn40ulpbwp40_c170815_130a/cdk/tcbn40ulpbwp40_c170815_130a/cds.lib Line 1 redefines
+LIB analogLib from File /cad/tsmc/tcbn40lpbwp/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwp_120b/cds.lib
+Insert UNDEFINE analogLib
+before DEFINE analogLib
+    in /home/shliu98/tcbn40ulpbwp40_c170815_130a/cdk/tcbn40ulpbwp40_c170815_130a/cds.lib
+Or remove or comment out DEFINE analogLib
+    in /cad/tsmc/tcbn40lpbwp/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwp_120b/cds.lib
+to suppress this warning message.
+*WARNING* LIB basic from File /home/shliu98/tcbn40ulpbwp40_c170815_130a/cdk/tcbn40ulpbwp40_c170815_130a/cds.lib Line 2 redefines
+LIB basic from File /cad/tsmc/tcbn40lpbwp/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwp_120b/cds.lib
+Insert UNDEFINE basic
+before DEFINE basic
+    in /home/shliu98/tcbn40ulpbwp40_c170815_130a/cdk/tcbn40ulpbwp40_c170815_130a/cds.lib
+Or remove or comment out DEFINE basic
+    in /cad/tsmc/tcbn40lpbwp/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwp_120b/cds.lib
+to suppress this warning message.
+*WARNING* LIB basic from File /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib Line 7 redefines
+LIB basic from File /home/shliu98/tcbn40ulpbwp40_c170815_130a/cdk/tcbn40ulpbwp40_c170815_130a/cds.lib
+Insert UNDEFINE basic
+before DEFINE basic
+    in /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+Or remove or comment out DEFINE basic
+    in /home/shliu98/tcbn40ulpbwp40_c170815_130a/cdk/tcbn40ulpbwp40_c170815_130a/cds.lib
+to suppress this warning message.
+*WARNING* LIB analogLib from File /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib Line 8 redefines
+LIB analogLib from File /home/shliu98/tcbn40ulpbwp40_c170815_130a/cdk/tcbn40ulpbwp40_c170815_130a/cds.lib
+Insert UNDEFINE analogLib
+before DEFINE analogLib
+    in /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+Or remove or comment out DEFINE analogLib
+    in /home/shliu98/tcbn40ulpbwp40_c170815_130a/cdk/tcbn40ulpbwp40_c170815_130a/cds.lib
+to suppress this warning message.
+*WARNING* LIB cdsDefTechLib from File /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib Line 5 redefines
+LIB cdsDefTechLib from File /cad/cadence/IC.6.18.320_lnx86/share/cdssetup/dfII/cds.lib
+Insert UNDEFINE cdsDefTechLib
+before DEFINE cdsDefTechLib
+    in /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib
+Or remove or comment out DEFINE cdsDefTechLib
+    in /cad/cadence/IC.6.18.320_lnx86/share/cdssetup/dfII/cds.lib
+to suppress this warning message.
+*WARNING* '/sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib', Line 9: Cannot find file '/tsmc40r/organized_pdk/N40ULP/TSMCHOME/digital/Back_End/cdk/tcbn40ulpbwp40lvt_c170815_130a/tcbn40ulpbwp40lvt_c170815'.
+*WARNING* '/sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib', Line 9: Skipping: '/tsmc40r/organized_pdk/N40ULP/TSMCHOME/digital/Back_End/cdk/tcbn40ulpbwp40lvt_c170815_130a/tcbn40ulpbwp40lvt_c170815'
+*WARNING* '/sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib', Line 10: Cannot find file '/tsmc40r/organized_pdk/N40ULP/TSMCHOME/digital/Back_End/cdk/tcbn40ulpbwp50_c170815_130a/tcbn40ulpbwp50_c170815'.
+*WARNING* '/sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib', Line 10: Skipping: '/tsmc40r/organized_pdk/N40ULP/TSMCHOME/digital/Back_End/cdk/tcbn40ulpbwp50_c170815_130a/tcbn40ulpbwp50_c170815'
+*WARNING* '/sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib', Line 11: Cannot find file '/tsmc40r/organized_pdk/N40ULP/TSMCHOME/digital/Back_End/cdk/tcbn40ulpbwp50lvt_c170815_130a/tcbn40ulpbwp50lvt_c170815'.
+*WARNING* '/sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib', Line 11: Skipping: '/tsmc40r/organized_pdk/N40ULP/TSMCHOME/digital/Back_End/cdk/tcbn40ulpbwp50lvt_c170815_130a/tcbn40ulpbwp50lvt_c170815'
+*WARNING* LIB avTech from File /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib Line 16 redefines
+LIB avTech from File /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+Insert UNDEFINE avTech
+before DEFINE avTech
+    in /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib
+Or remove or comment out DEFINE avTech
+    in /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+to suppress this warning message.
+*WARNING* '/sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib', Line 22: Cannot find file '/home/chwang9/5x1u/cds.lib'.
+*WARNING* '/sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib', Line 22: Skipping: '/home/chwang9/5x1u/cds.lib'
+*WARNING* LIB wldecoder from File /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib Line 27 redefines
+LIB wldecoder from the same file (defined earlier.)
+*WARNING* LIB basic from File /sim/shliu98/TCAM/chwang/5x1u/cds.lib Line 4 redefines
+LIB basic from File /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+Insert UNDEFINE basic
+before DEFINE basic
+    in /sim/shliu98/TCAM/chwang/5x1u/cds.lib
+Or remove or comment out DEFINE basic
+    in /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+to suppress this warning message.
+*WARNING* LIB analogLib from File /sim/shliu98/TCAM/chwang/5x1u/cds.lib Line 5 redefines
+LIB analogLib from File /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+Insert UNDEFINE analogLib
+before DEFINE analogLib
+    in /sim/shliu98/TCAM/chwang/5x1u/cds.lib
+Or remove or comment out DEFINE analogLib
+    in /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+to suppress this warning message.
+*WARNING* LIB tsmcN40 from File /sim/shliu98/TCAM/chwang/5x1u/cds.lib Line 6 redefines
+LIB tsmcN40 from File /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+Insert UNDEFINE tsmcN40
+before DEFINE tsmcN40
+    in /sim/shliu98/TCAM/chwang/5x1u/cds.lib
+Or remove or comment out DEFINE tsmcN40
+    in /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+to suppress this warning message.
+*WARNING* LIB avTech from File /sim/shliu98/TCAM/chwang/5x1u/cds.lib Line 7 redefines
+LIB avTech from File /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib
+Insert UNDEFINE avTech
+before DEFINE avTech
+    in /sim/shliu98/TCAM/chwang/5x1u/cds.lib
+Or remove or comment out DEFINE avTech
+    in /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib
+to suppress this warning message.
+*WARNING* LIB tphn40lpgv2od3_sl from File /sim/shliu98/TCAM/chwang/5x1u/cds.lib Line 13 redefines
+LIB tphn40lpgv2od3_sl from File /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+Insert UNDEFINE tphn40lpgv2od3_sl
+before DEFINE tphn40lpgv2od3_sl
+    in /sim/shliu98/TCAM/chwang/5x1u/cds.lib
+Or remove or comment out DEFINE tphn40lpgv2od3_sl
+    in /sim/shliu98/TCAM/haitongl/TN40CMSP015K3_1_3_2A/cds.lib
+to suppress this warning message.
+*WARNING* LIB sense from File /sim/shliu98/TCAM/chwang/5x1u/cds.lib Line 28 redefines
+LIB sense from File /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib
+Insert UNDEFINE sense
+before DEFINE sense
+    in /sim/shliu98/TCAM/chwang/5x1u/cds.lib
+Or remove or comment out DEFINE sense
+    in /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib
+to suppress this warning message.
+*WARNING* LIB module from File /sim/shliu98/TCAM/chwang/5x1u/cds.lib Line 29 redefines
+LIB module from File /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib
+Insert UNDEFINE module
+before DEFINE module
+    in /sim/shliu98/TCAM/chwang/5x1u/cds.lib
+Or remove or comment out DEFINE module
+    in /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib
+to suppress this warning message.
+*WARNING* LIB peripheral from File /sim/shliu98/TCAM/chwang/5x1u/cds.lib Line 30 redefines
+LIB peripheral from File /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib
+Insert UNDEFINE peripheral
+before DEFINE peripheral
+    in /sim/shliu98/TCAM/chwang/5x1u/cds.lib
+Or remove or comment out DEFINE peripheral
+    in /sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib
+to suppress this warning message.
+*WARNING* '/sim/shliu98/TCAM/chwang/5x1u/cds.lib', Line 32: Cannot find file '/home/weichen9/5x1u/TN40CMSP015K3_1_3_2A/cds.lib'.
+*WARNING* '/sim/shliu98/TCAM/chwang/5x1u/cds.lib', Line 32: Skipping: '/home/weichen9/5x1u/TN40CMSP015K3_1_3_2A/cds.lib'
+*WARNING* LIB tsmcN40 from File /sim/xxwang1/cds.lib Line 15 redefines
+LIB tsmcN40 from File /sim/shliu98/TCAM/chwang/5x1u/cds.lib
+Insert UNDEFINE tsmcN40
+before DEFINE tsmcN40
+    in /sim/xxwang1/cds.lib
+Or remove or comment out DEFINE tsmcN40
+    in /sim/shliu98/TCAM/chwang/5x1u/cds.lib
+to suppress this warning message.
+*WARNING* The directory: '/sim/xxwang1/asap7_test' does not exist
+	but was defined in libFile '/sim/xxwang1/cds.lib' for Lib 'asap7_test'.
+*WARNING* The directory: '/sim/xxwang1/$PDK_DIR/asap7ssc7p5t_05' does not exist
+	but was defined in libFile '/sim/xxwang1/cds.lib' for Lib 'asap7ssc7p5t'.
+*WARNING* The directory: '/sim/xxwang1/$PDK_DIR/cdslib/asap7_TechLib' does not exist
+	but was defined in libFile '/sim/xxwang1/cds.lib' for Lib 'asap7_TechLib'.
+*WARNING* The directory: '/sim/xxwang1/$CDS/tools/dfII/samples/cdslib/sample' does not exist
+	but was defined in libFile '/sim/xxwang1/cds.lib' for Lib 'sample'.
+*WARNING* The directory: '/sim/xxwang1/testxxx' does not exist
+	but was defined in libFile '/sim/xxwang1/cds.lib' for Lib 'testxxx'.
+*WARNING* The directory: '/home/weichen9/5x1u/TN40CMSP015K3_1_3_2A/peripheral' does not exist
+	but was defined in libFile '/sim/shliu98/TCAM/chwang/5x1u/cds.lib' for Lib 'peripheral'.
+*WARNING* The directory: '/home/weichen9/5x1u/TN40CMSP015K3_1_3_2A/module' does not exist
+	but was defined in libFile '/sim/shliu98/TCAM/chwang/5x1u/cds.lib' for Lib 'module'.
+*WARNING* The directory: '/home/weichen9/5x1u/TN40CMSP015K3_1_3_2A/sense' does not exist
+	but was defined in libFile '/sim/shliu98/TCAM/chwang/5x1u/cds.lib' for Lib 'sense'.
+*WARNING* The directory: '/tsmc40r/pdk/ams/6x2z/TN40CMSP015K3_1_3_2A/Calibre/drc' does not exist
+	but was defined in libFile '/sim/shliu98/TCAM/chwang/5x1u/cds.lib' for Lib 'DRC_Rule'.
+*WARNING* The directory: '/tsmc40r/pdk/2019.06.27_TSMC/tphn40lpgv2od3_sl_210b/tphn40lpgv2od3_sl_210a_cdku9lm/TSMCHOME/digital/Back_End/cdk/tphn40lpgv2od3_sl_210a_oa/mt_2/9lm/tphn40lpgv2od3_sl' does not exist
+	but was defined in libFile '/sim/shliu98/TCAM/chwang/5x1u/cds.lib' for Lib 'tphn40lpgv2od3_sl'.
+*WARNING* The directory: '/tsmc40r/pdk/2019.05.21_TSMC/tcbn40lpbwp_200a/tcbn40lpbwp_120b_cdk/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwp_120b_oa/tcbn40lpbwp' does not exist
+	but was defined in libFile '/sim/shliu98/TCAM/chwang/5x1u/cds.lib' for Lib 'tcbn40lpbwp'.
+*WARNING* The directory: '/tsmc40r/pdk/2019.05.21_TSMC/tcbn40lpbwplvt_200a/tcbn40lpbwplvt_120b_cdk/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwplvt_120b_oa/tcbn40lpbwplvt' does not exist
+	but was defined in libFile '/sim/shliu98/TCAM/chwang/5x1u/cds.lib' for Lib 'tcbn40lpbwplvt'.
+*WARNING* The directory: '/tsmc40r/pdk/2019.05.21_TSMC/tcbn40lpbwphvt_200a/tcbn40lpbwphvt_120b_cdk/TSMCHOME/digital/Back_End/cdk/tcbn40lpbwphvt_120b_oa/tcbn40lpbwphvt' does not exist
+	but was defined in libFile '/sim/shliu98/TCAM/chwang/5x1u/cds.lib' for Lib 'tcbn40lpbwphvt'.
+*WARNING* The directory: '/tools/cadence/Assura/4.1_USR2_HF9/lnx86/tools/assura/etc/avtech/avTech' does not exist
+	but was defined in libFile '/sim/shliu98/TCAM/chwang/5x1u/cds.lib' for Lib 'avTech'.
+*WARNING* The directory: '/tsmc40r/pdk/2020.01.22_TSMC/tcbn40ulpbwp40_c170815_130d/tcbn40ulpbwp40_c170815_130d/tcbn40ulpbwp40_c170815_130a_cdk/TSMCHOME/digital/Back_End/cdk/tcbn40ulpbwp40_c170815_130a/tcbn40ulpbwp40_c170815' does not exist
+	but was defined in libFile '/sim/shliu98/TCAM/weichen9/TN40CMSP015K3_1_3_2A/cds.lib' for Lib 'tsmc40svt'.
+Initializing from libInit.il for library tsmcN40...
+   --  /cad/tsmc/PDK_N40_2022/1p6m_4x1z/tsmcN40/../skill/Patch/v1.5_2b4_tsmcN40_0.cxt
+   --  /cad/tsmc/PDK_N40_2022/1p6m_4x1z/tsmcN40/../skill/Patch/v1.5_2b4_tsmcN40_1.cxt
+   --  /cad/tsmc/PDK_N40_2022/1p6m_4x1z/tsmcN40/../skill/Patch/v1.5_2b4_tsmcN40_2.cxt
+   --  /cad/tsmc/PDK_N40_2022/1p6m_4x1z/tsmcN40/../skill/Patch/v1.5_2b4_tsmcN40_3.cxt
+   --  /cad/tsmc/PDK_N40_2022/1p6m_4x1z/tsmcN40/../skill/Patch/v1.5_2b4_tsmcN40_4.cxt
+   --  /cad/tsmc/PDK_N40_2022/1p6m_4x1z/tsmcN40/../skill/Patch/v1.5_2b4_tsmcN40_5.cxt
+   --  /cad/tsmc/PDK_N40_2022/1p6m_4x1z/tsmcN40/../skill/Patch/v1.5_2b4_tsmcN40_6.cxt
+   --  tsmcN40_38.cxt
+   --  tsmcN40_36.cxt
+   --  tsmcN40_31.cxt
+   --  tsmcN40_tcf.cxt
+   --  tsmcN40_4.cxt
+   --  tsmc_LDE.cxt
+   --  tsmcN40_3.cxt
+   --  tsmcN40_12.cxt
+   --  tsmcDNA_utility.cxt
+   --  tsmcN40Toolmom2.cxt
+   --  tsmcN40_15.cxt
+   --  tsmcTool2.cxt
+   --  tsmcN40_20.cxt
+   --  tsmcN40_27.cxt
+   --  tsmcN40_29.cxt
+   --  tsmcN40_2.cxt
+   --  tsmcN40_5.cxt
+   --  tsmcN40_30.cxt
+   --  tsmcN40_37.cxt
+   --  tsmcN40_39.cxt
+   --  tsmcN40_28.cxt
+   --  tsmcN40_26.cxt
+   --  tsmcN40_21.cxt
+   --  tsmcN40Toolmom3.cxt
+   --  tsmcN40_14.cxt
+   --  tsmcN40_13.cxt
+   --  tsmcN40_22.cxt
+   --  tsmcN40_25.cxt
+   --  tsmcN40_10.cxt
+   --  tsmcN40_17.cxt
+   --  tsmcN40_19.cxt
+   --  tsmcN40_6.cxt
+   --  tsmcN40_1.cxt
+   --  tsmcN40_8.cxt
+   --  tsmcN40_34.cxt
+   --  tsmcN40_33.cxt
+   --  tsmcN40_18.cxt
+   --  tsmcN40_16.cxt
+   --  tsmcN40_11.cxt
+   --  tsmcN40_24.cxt
+   --  tsmcN40_23.cxt
+   --  tsmcSim_cdf_api.cxt
+   --  tsmcN40Toolmom.cxt
+   --  tsmcN40Tool.cxt
+   --  tsmcN40_40.cxt
+   --  tsmcN40_32.cxt
+   --  tsmcN40_35.cxt
+   --  tsmcN40_9.cxt
+   --  tsmcN40_0.cxt
+   --  tsmcN40_7.cxt
+   --  tsmcN40_tif.cxt
+   --  tsmc_esti.ile
+Loading hnlInit.cxt 
+Running Artist Hierarchical Netlisting ...
+End netlisting Nov 10 19:35:48 2024

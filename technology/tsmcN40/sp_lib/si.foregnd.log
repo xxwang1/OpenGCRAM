@@ -1,0 +1,110 @@
+si: simSetDef().... _auCdlGetOldInstName is initialized to "nil".
+si: simSetDef().... preserveRES is already set to t. Redefinition to nil is
+ignored.
+si: simSetDef().... preserveCAP is already set to t. Redefinition to nil is
+ignored.
+si: simSetDef().... preserveDIO is already set to t. Redefinition to nil is
+ignored.
+si: simSetDef().... preserveALL is already set to t. Redefinition to nil is
+ignored.
+si: simSetDef().... checkRESVAL is already set to t. Redefinition to nil is
+ignored.
+si: simSetDef().... checkRESSIZE is initialized to "nil".
+si: simSetDef().... checkCAPVAL is already set to t. Redefinition to nil is
+ignored.
+si: simSetDef().... checkCAPAREA is initialized to "nil".
+si: simSetDef().... checkDIOPERI is already set to t. Redefinition to nil is
+ignored.
+si: simSetDef().... checkDIOAREA is already set to t. Redefinition to nil is
+ignored.
+si: simSetDef().... displayPININFO is already set to t. Redefinition to nil is
+ignored.
+si: simSetDef().... allowNetNamesBeginningWithDigits is initialized to "nil".
+si: simSetDef().... resistorModel is already set to "". Redefinition to nil is
+ignored.
+si: simSetDef().... simPinGlobals is initialized to "nil".
+si: simSetDef().... auCdlPrintEmptySUBCKT is initialized to "nil".
+si: simSetDef().... auCdlSkipMEGA is initialized to "nil".
+si: simSetDef().... auCdlDisableBlkBox is initialized to "nil".
+si: simSetDef().... auCdlSetTopLevelEvalMode is initialized to "nil".
+si: simSetDef().... auCdlModuleNameMapFunc is initialized to "nil".
+si: simSetDef().... simNetNamePrefix is initialized to "nil".
+si: simSetDef().... hnlMaxLineLength is initialized to "nil".
+si: simSetDef().... hnlMaxLineLength is initialized to "nil".
+si: simSetDef().... auCdlPrintXNamePrefix is initialized to "nil".
+si: simSetDef().... simPrintInhConnAttributes is initialized to "nil".
+si: simSetDef().... auCdlDisplayPinMap is initialized to "nil".
+si: simSetDef().... hnlMergeShortedNets is initialized to "nil".
+si: simSetDef().... cdlPrintComments is initialized to "nil".
+si: simSetDef().... auCdlCDFPinCntrl is initialized to "nil".
+si: simSetDef().... auCdlPrintGlobalStmtInFooter is initialized to "nil".
+si: simSetDef().... auCdlPrintModelEquals is initialized to "nil".
+si: simSetDef().... auCdlModelPrintingStyle is initialized to "nil".
+si: simSetDef().... auCdlTermOrderStr is initialized to "nil".
+si: simSetDef().... auCdlCheckLDD is initialized to "nil".
+si: simSetDef().... checkLDD is initialized to "nil".
+si: simSetDef().... pinMAP is initialized to "nil".
+si: simSetDef().... auCdlReplaceAngleBracketsWithSquare is initialized to
+"nil".
+si: simSetDef().... preserveBangInNetlist is initialized to "nil".
+si: simSetDef().... auCdlFnlPrintTopCellPort is initialized to "nil".
+si: simSetDef().... auCdlEnableNetlistInclusion is initialized to "nil".
+si: simSetDef().... auCdlPrintIncFileAtFooter is initialized to "nil".
+si: simSetDef().... simInstViewListTable is initialized to "nil".
+si: simSetDef().... simInstStopListTable is initialized to "nil".
+si: simSetDef().... auCdlPrintNetsetForStoppingCell is initialized to "nil".
+si: simSetDef().... _auCdlGetOldInstName is initialized to "nil".
+si: simSetDef().... preserveRES is already set to t. Redefinition to nil is
+ignored.
+si: simSetDef().... preserveCAP is already set to t. Redefinition to nil is
+ignored.
+si: simSetDef().... preserveDIO is already set to t. Redefinition to nil is
+ignored.
+si: simSetDef().... preserveALL is already set to t. Redefinition to nil is
+ignored.
+si: simSetDef().... checkRESVAL is already set to t. Redefinition to nil is
+ignored.
+si: simSetDef().... checkRESSIZE is initialized to "nil".
+si: simSetDef().... checkCAPVAL is already set to t. Redefinition to nil is
+ignored.
+si: simSetDef().... checkCAPAREA is initialized to "nil".
+si: simSetDef().... checkDIOPERI is already set to t. Redefinition to nil is
+ignored.
+si: simSetDef().... checkDIOAREA is already set to t. Redefinition to nil is
+ignored.
+si: simSetDef().... displayPININFO is already set to t. Redefinition to nil is
+ignored.
+si: simSetDef().... allowNetNamesBeginningWithDigits is initialized to "nil".
+si: simSetDef().... resistorModel is already set to "". Redefinition to nil is
+ignored.
+si: simSetDef().... simPinGlobals is initialized to "nil".
+si: simSetDef().... auCdlPrintEmptySUBCKT is initialized to "nil".
+si: simSetDef().... auCdlSkipMEGA is initialized to "nil".
+si: simSetDef().... auCdlDisableBlkBox is initialized to "nil".
+si: simSetDef().... auCdlSetTopLevelEvalMode is initialized to "nil".
+si: simSetDef().... auCdlModuleNameMapFunc is initialized to "nil".
+si: simSetDef().... simNetNamePrefix is initialized to "nil".
+si: simSetDef().... hnlMaxLineLength is initialized to "nil".
+si: simSetDef().... hnlMaxLineLength is initialized to "nil".
+si: simSetDef().... auCdlPrintXNamePrefix is initialized to "nil".
+si: simSetDef().... simPrintInhConnAttributes is initialized to "nil".
+si: simSetDef().... auCdlDisplayPinMap is initialized to "nil".
+si: simSetDef().... hnlMergeShortedNets is initialized to "nil".
+si: simSetDef().... cdlPrintComments is initialized to "nil".
+si: simSetDef().... auCdlCDFPinCntrl is initialized to "nil".
+si: simSetDef().... auCdlPrintGlobalStmtInFooter is initialized to "nil".
+si: simSetDef().... auCdlPrintModelEquals is initialized to "nil".
+si: simSetDef().... auCdlModelPrintingStyle is initialized to "nil".
+si: simSetDef().... auCdlTermOrderStr is initialized to "nil".
+si: simSetDef().... auCdlCheckLDD is initialized to "nil".
+si: simSetDef().... checkLDD is initialized to "nil".
+si: simSetDef().... pinMAP is initialized to "nil".
+si: simSetDef().... auCdlReplaceAngleBracketsWithSquare is initialized to
+"nil".
+si: simSetDef().... preserveBangInNetlist is initialized to "nil".
+si: simSetDef().... auCdlFnlPrintTopCellPort is initialized to "nil".
+si: simSetDef().... auCdlEnableNetlistInclusion is initialized to "nil".
+si: simSetDef().... auCdlPrintIncFileAtFooter is initialized to "nil".
+si: simSetDef().... simInstViewListTable is initialized to "nil".
+si: simSetDef().... simInstStopListTable is initialized to "nil".
+si: simSetDef().... auCdlPrintNetsetForStoppingCell is initialized to "nil".

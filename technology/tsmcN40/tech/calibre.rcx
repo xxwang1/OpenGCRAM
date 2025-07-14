@@ -29014,7 +29014,7 @@ PEX IDEAL XCELL                YES
 UNIT CAPACITANCE ff
 UNIT RESISTANCE OHM
 // Unzip RC techfile and include "rules" file here.
-include ./rules
+include /sim/xxwang1/Calibre/rcx/rules
 
 PEX ALIAS tndiff  d_tndiff_hv s_tndiff_hv d_tndiff_dehv s_tndiff_dehv cg_drain comso tndiff_sbd tndiff_jfet
 PEX ALIAS tpdiff  d_tpdiff_hv s_tpdiff_hv tpdiff_sbd tpdiff_jfet
