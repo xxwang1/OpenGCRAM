@@ -35,12 +35,16 @@ class supply_router(router):
         # Save pin names
         self.vdd_name = vdd_name
         self.gnd_name = gnd_name
+        if OPTS.level_shifter:
+            vddio_name = "vddio"
 
         # Prepare gdsMill to find pins and blockages
         self.prepare_gds_reader()
 
         # Find pins to be routed
         self.find_pins(vdd_name)
+        if OPTS.level_shifter:
+            self.find_pins(vddio_name)
         self.find_pins(gnd_name)
 
         # Find blockages and vias
@@ -53,10 +57,15 @@ class supply_router(router):
 
         # Add side pins
         if self.pin_type in ["top", "bottom", "right", "left"]:
+            
             self.add_side_pin(vdd_name)
+            if OPTS.level_shifter:
+                self.add_side_pin(vddio_name)
             self.add_side_pin(gnd_name)
         elif self.pin_type == "ring":
             self.add_ring_pin(vdd_name)
+            if OPTS.level_shifter:
+                self.add_ring_pin(vddio_name)
             self.add_ring_pin(gnd_name)
         else:
             debug.warning("Side supply pins aren't created.")
@@ -69,6 +78,8 @@ class supply_router(router):
         # Route vdd and gnd
         routed_count = 0
         routed_max = len(self.pins[vdd_name]) + len(self.pins[gnd_name])
+        if OPTS.level_shifter:
+            routed_max += len(self.pins[vddio_name])
         fake_pins_ll_x_m5 = []
         fake_pins_ll_y_m5 = []
         fake_pins_ur_x_m5 = []
@@ -92,7 +103,11 @@ class supply_router(router):
                 fake_pins_ur_x_m6.append(ur.x)
                 fake_pins_ur_y_m6.append(ur.y)
 
-        for pin_name in [vdd_name, gnd_name]:
+        if OPTS.level_shifter:
+            pin_name_list = [vdd_name, vddio_name, gnd_name]
+        else:
+            pin_name_list = [vdd_name, gnd_name]
+        for pin_name in pin_name_list:
             pins = self.pins[pin_name]
             # Route closest pins according to the minimum spanning tree
             source_list = []
@@ -109,6 +124,8 @@ class supply_router(router):
                     g = graph(self)
                     print("source, target = ", source, target)
                     print("self.new_pins[vdd_name] =", self.new_pins[vdd_name])
+                    if OPTS.level_shifter:
+                        print("self.new_pins[vddio_name] =", self.new_pins[vddio_name])
                     print("self.new_pins[gnd_name] =", self.new_pins[gnd_name])
                     print("self.fake_pins =", self.fake_pins)
                     print("fake_pins_ll_y_m5 = ", fake_pins_ll_y_m5)
@@ -246,15 +263,27 @@ class supply_router(router):
         ll, ur = self.bbox
         vertical = side in ["left", "right"]
         inner = pin_name == self.gnd_name
-
+        if OPTS.level_shifter:
+            middle = pin_name == self.vdd_name
+        else:
+            middle = False
         # Calculate wires' wideness
         wideness = self.track_wire * num_vias + self.track_space * (num_vias - 1)
 
         # Calculate the offset for the inner ring
-        if inner:
-            margin = wideness * 2
+        if OPTS.level_shifter:
+            if inner:
+            
+                margin = wideness * 2
+            elif middle:
+                margin = 0
+            else:
+                margin = wideness * (-2)
         else:
-            margin = 0
+            if inner:
+                margin = wideness * 2
+            else:
+                margin = 0
 
         # Calculate the lower left coordinate
         if side == "top":
@@ -274,11 +303,22 @@ class supply_router(router):
         else:
             shape_width = shape.x
             shape_height = wideness
-        if inner:
-            if vertical:
-                shape_height -= margin * 2
-            else:
-                shape_width -= margin * 2
+        # if inner:
+        #     if OPTS.level_shifter:
+        #         if vertical:
+        #             shape_height -= margin * 4
+        #         else:
+        #             shape_width -= margin * 4
+        #     else:
+        #         if vertical:
+        #             shape_height -= margin * 2
+        #         else:
+        #             shape_width -= margin * 2
+        # if middle:
+        if vertical:
+            shape_height -= margin * 2
+        else:
+            shape_width -= margin * 2
 
         # Add this new pin
         layer = self.get_layer(int(vertical))
