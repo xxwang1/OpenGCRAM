@@ -80,17 +80,8 @@ class dummy_gain_cell_array(gain_cell_base_array):
                 self.add_pin(wl_name, "INOUT")
             else:
                 self.add_pin(wl_name, "INPUT")
-        # for port in self.read_ports:
-        #     self.add_pin(self.get_bitline_names()[port], "INOUT")
-        # for port in self.write_ports:
-        #     self.add_pin(self.get_bitline_names()[port], "INPUT")
-        # for port in self.read_ports:
-        #     self.add_pin(self.get_wordline_names()[port], "INOUT")
-        # for port in self.write_ports:
-        #     self.add_pin(self.get_wordline_names()[port], "INPUT")
-        if OPTS.gc_type == "Si":
-            self.add_pin("vdd", "POWER")
-            self.add_pin("gnd", "GROUND")
+        self.add_pin("vdd", "POWER")
+        self.add_pin("gnd", "GROUND")
 
     def add_layout_pins(self):
         """ Add the layout pins """
@@ -167,10 +158,8 @@ class dummy_gain_cell_array(gain_cell_base_array):
         for row in range(self.row_size):
             for col in range(self.column_size):
                 inst = self.cell_inst[row, col]
-                if OPTS.gc_type == "Si":
-                    for pin_name in ["vdd", "gnd"]:
-                        self.copy_layout_pin(inst, pin_name)
-                        
+                for pin_name in ["vdd", "gnd"]:
+                    self.copy_layout_pin(inst, pin_name)
 
     def input_load(self):
         # FIXME: This appears to be old code from previous characterization. Needs to be updated.

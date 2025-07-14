@@ -183,7 +183,7 @@ class delay(simulation):
                                                            meas.targ_name_no_port))
             self.dout_volt_meas[-1].meta_str = meas.meta_str
 
-            if OPTS.use_pex: #and OPTS.pex_exe[0] != 'calibre':
+            if OPTS.use_pex and OPTS.pex_exe[0] != 'calibre':
                 self.sen_meas = delay_measure("delay_sen", self.clk_frmt, self.sen_name, "FALL", "RISE", measure_scale=1e9)
             else:
                 self.sen_meas = delay_measure("delay_sen", self.clk_frmt, self.sen_name + "{}", "FALL", "RISE", measure_scale=1e9)
@@ -237,7 +237,7 @@ class delay(simulation):
             storage_names = cell_inst.mod.get_storage_net_names()
         debug.check(len(storage_names) == 2, ("Only inverting/non-inverting storage nodes"
                                               "supported for characterization. Storage nets={0}").format(storage_names))
-        if OPTS.use_pex: #and OPTS.pex_exe[0] != "calibre":
+        if OPTS.use_pex and OPTS.pex_exe[0] != "calibre":
             bank_num = self.sram.get_bank_num(self.sram.name, bit_row, bit_col)
             q_name = "bitcell_Q_b{0}_r{1}_c{2}".format(bank_num, bit_row, bit_col)
             qbar_name = "bitcell_Q_bar_b{0}_r{1}_c{2}".format(bank_num, bit_row, bit_col)
@@ -266,6 +266,10 @@ class delay(simulation):
         debug.info(2, "self.graph.all_paths = {0}".format(self.graph.all_paths))
         sen_paths = [path for path in self.graph.all_paths if sen_and_port in path]
         bl_paths = [path for path in self.graph.all_paths if bl_and_port in path]
+        print("sen_and_port = ", sen_and_port)
+        print("sen_paths = ", sen_paths)
+        print("bl_and_port = ", bl_and_port)
+        print("bl_paths = ", bl_paths)
         debug.check(len(sen_paths)==1, 'Found {0} paths which contain the s_en net.'.format(len(sen_paths)))
         debug.check(len(bl_paths)==1, 'Found {0} paths which contain the bitline net.'.format(len(bl_paths)))
         sen_path = sen_paths[0]
@@ -493,13 +497,9 @@ class delay(simulation):
         # generate control signals
         self.sf.write("\n* Generation of control signals\n")
         for port in self.all_ports:
-            # self.stim.gen_constant(sig_name="CSB{0}".format(port), v_val=self.vdd_voltage)
-            if port in self.write_ports:
+            self.stim.gen_constant(sig_name="CSB{0}".format(port), v_val=self.vdd_voltage)
+            if port in self.readwrite_ports:
                 self.stim.gen_constant(sig_name="WEB{0}".format(port), v_val=self.vdd_voltage)
-            elif port in self.read_ports:
-                self.stim.gen_constant(sig_name="CSB{0}".format(port), v_val=self.vdd_voltage)
-            # if port in self.readwrite_ports:
-            #     self.stim.gen_constant(sig_name="WEB{0}".format(port), v_val=self.vdd_voltage)
 
         self.sf.write("\n* Generation of global clock signal\n")
         for port in self.all_ports:
@@ -1557,13 +1557,9 @@ class delay(simulation):
         """ Generates the control signals """
 
         for port in self.all_ports:
-            # self.stim.gen_pwl("CSB{0}".format(port), self.cycle_times, self.csb_values[port], self.period, self.slew, 0.05)
-            if port in self.write_ports:
-                self.stim.gen_pwl("WEB{0}".format(port), self.cycle_times, self.web_values[port], self.period, self.slew, 0.05)
-            elif port in self.read_ports:
-                self.stim.gen_pwl("CSB{0}".format(port), self.cycle_times, self.csb_values[port], self.period, self.slew, 0.05)
+            self.stim.gen_pwl("CSB{0}".format(port), self.cycle_times, self.csb_values[port], self.period, self.slew, 0.05)
             if port in self.readwrite_ports:
-                # self.stim.gen_pwl("WEB{0}".format(port), self.cycle_times, self.web_values[port], self.period, self.slew, 0.05)
+                self.stim.gen_pwl("WEB{0}".format(port), self.cycle_times, self.web_values[port], self.period, self.slew, 0.05)
                 if self.sram.num_wmasks:
                     for bit in range(self.sram.num_wmasks):
                         self.stim.gen_pwl("WMASK{0}_{1}".format(port, bit), self.cycle_times, self.wmask_values[port][bit], self.period, self.slew, 0.05)

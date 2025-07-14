@@ -21,12 +21,12 @@ class delay_chain(design):
     Usually, this will be constant, but it could have varied fanout.
     """
 
-    def __init__(self, name, fanout_list, port):
+    def __init__(self, name, fanout_list):
         """init function"""
         super().__init__(name)
         debug.info(1, "creating delay chain {0}".format(str(fanout_list)))
         self.add_comment("fanouts: {0}".format(str(fanout_list)))
-        self.port = port
+
         # Two fanouts are needed so that we can route the vdd/gnd connections
         for f in fanout_list:
             debug.check(f>=2, "Must have >=2 fanouts for each stage.")
@@ -66,18 +66,16 @@ class delay_chain(design):
         """ Add the pins of the delay chain"""
         self.add_pin("in", "INPUT")
         self.add_pin("out", "OUTPUT")
-        if self.port in self.read_ports:
-            self.add_pin("out_bar", "OUTPUT")
         self.add_pin("vdd", "POWER")
         self.add_pin("gnd", "GROUND")
 
     def add_modules(self):
 
-        self.gain_cell_dff = factory.create(module_type="gain_cell_dff_buf")
-        gain_cell_dff_height = self.gain_cell_dff.height
+        self.dff = factory.create(module_type="dff_buf")
+        dff_height = self.dff.height
 
         self.inv = factory.create(module_type="pinv",
-                                  height=gain_cell_dff_height)
+                                  height=dff_height)
 
     def create_inverters(self):
         """ Create the inverters and connect them based on the stage list """
@@ -93,14 +91,10 @@ class delay_chain(design):
             # Hook up the driver
             if stage_num + 1 == self.rows:
                 stageout_name = "out"
-            elif stage_num + 2 == self.rows:
-                stageout_name = "out_bar"
             else:
                 stageout_name = "dout_{}".format(stage_num + 1)
             if stage_num == 0:
                 stagein_name = "in"
-            elif stage_num + 1 == self.rows:
-                stagein_name = "out_bar"
             else:
                 stagein_name = "dout_{}".format(stage_num)
             self.connect_inst([stagein_name, stageout_name, "vdd", "gnd"])
@@ -277,13 +271,3 @@ class delay_chain(design):
         self.add_layout_pin_rect_center(text="out",
                                         layer="m1",
                                         offset=a_pin.center())
-        if self.port in self.read_ports:
-            second_last_driver_inst = self.driver_inst_list[-2]
-            a_pin = self.load_inst_map[second_last_driver_inst][-1].get_pin("A")
-            self.add_via_stack_center(from_layer=a_pin.layer,
-                                    to_layer="m1",
-                                    offset=a_pin.center(),
-                                    min_area=False)
-            self.add_layout_pin_rect_center(text="out_bar",
-                                            layer="m1",
-                                            offset=a_pin.center())

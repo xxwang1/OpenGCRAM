@@ -35,16 +35,12 @@ class supply_router(router):
         # Save pin names
         self.vdd_name = vdd_name
         self.gnd_name = gnd_name
-        if OPTS.level_shifter:
-            vddio_name = "vddio"
 
         # Prepare gdsMill to find pins and blockages
         self.prepare_gds_reader()
 
         # Find pins to be routed
         self.find_pins(vdd_name)
-        if OPTS.level_shifter:
-            self.find_pins(vddio_name)
         self.find_pins(gnd_name)
 
         # Find blockages and vias
@@ -57,15 +53,10 @@ class supply_router(router):
 
         # Add side pins
         if self.pin_type in ["top", "bottom", "right", "left"]:
-            
             self.add_side_pin(vdd_name)
-            if OPTS.level_shifter:
-                self.add_side_pin(vddio_name)
             self.add_side_pin(gnd_name)
         elif self.pin_type == "ring":
             self.add_ring_pin(vdd_name)
-            if OPTS.level_shifter:
-                self.add_ring_pin(vddio_name)
             self.add_ring_pin(gnd_name)
         else:
             debug.warning("Side supply pins aren't created.")
@@ -78,8 +69,6 @@ class supply_router(router):
         # Route vdd and gnd
         routed_count = 0
         routed_max = len(self.pins[vdd_name]) + len(self.pins[gnd_name])
-        if OPTS.level_shifter:
-            routed_max += len(self.pins[vddio_name])
         fake_pins_ll_x_m5 = []
         fake_pins_ll_y_m5 = []
         fake_pins_ur_x_m5 = []
@@ -103,11 +92,7 @@ class supply_router(router):
                 fake_pins_ur_x_m6.append(ur.x)
                 fake_pins_ur_y_m6.append(ur.y)
 
-        if OPTS.level_shifter:
-            pin_name_list = [vdd_name, vddio_name, gnd_name]
-        else:
-            pin_name_list = [vdd_name, gnd_name]
-        for pin_name in pin_name_list:
+        for pin_name in [vdd_name, gnd_name]:
             pins = self.pins[pin_name]
             # Route closest pins according to the minimum spanning tree
             source_list = []
@@ -120,34 +105,42 @@ class supply_router(router):
                 if (source, target) in source_target_pair_list or (target, source) in source_target_pair_list:
                     pass
                 else:
-                    source_target_pair_list.append((source, target))
-                    g = graph(self)
-                    print("source, target = ", source, target)
-                    print("self.new_pins[vdd_name] =", self.new_pins[vdd_name])
-                    if OPTS.level_shifter:
-                        print("self.new_pins[vddio_name] =", self.new_pins[vddio_name])
-                    print("self.new_pins[gnd_name] =", self.new_pins[gnd_name])
-                    print("self.fake_pins =", self.fake_pins)
-                    print("fake_pins_ll_y_m5 = ", fake_pins_ll_y_m5)
-                    print("fake_pins_ll_x_m5 = ", fake_pins_ll_x_m5)
-                    print("fake_pins_ll_y_m6 = ", fake_pins_ll_y_m6)
-                    print("fake_pins_ll_x_m6 = ", fake_pins_ll_x_m6)
-                    g.create_graph(source, target)
-                    
-                    # Find the shortest path from source to target
-                    path = g.find_shortest_path()
-                    print("path = ", path)
-                    if path == None:
-                        source_cp = source
-                        source = target
-                        target = source_cp
+                    flag = 1
+                    flag_ = 1
+                    for (source_p, target_p) in source_target_pair_list:
+                        if abs(source.x - source_p.x) < self.via5_width and abs(source.y - source_p.y) < self.via5_width \
+                            and abs(target.x - target_p.x) < self.via5_width and abs(target.y - target_p.y) < self.via5_width:
+                            flag = 0
+                        elif abs(source.x - target_p.x) < self.via5_width and abs(source.y - target_p.y) < self.via5_width \
+                            and abs(target.x - source_p.x) < self.via5_width and abs(target.y - source_p.y) < self.via5_width:
+                            flag = 0
+                        if abs(source.x - source_p.x) < self.via5_width and abs(source.y - source_p.y) < self.via5_width \
+                            or abs(target.x - target_p.x) < self.via5_width and abs(target.y - target_p.y) < self.via5_width:
+                            flag_ = 0
+                        elif abs(source.x - target_p.x) < self.via5_width and abs(source.y - target_p.y) < self.via5_width \
+                            or abs(target.x - source_p.x) < self.via5_width and abs(target.y - source_p.y) < self.via5_width:
+                            flag_ = 0
+                    if flag==0:
+                        pass
+                    else:
+                        g = graph(self)
+                        print("source, target = ", source, target)
+                        print("self.new_pins[vdd_name] =", self.new_pins[vdd_name])
+                        print("self.new_pins[gnd_name] =", self.new_pins[gnd_name])
+                        print("self.fake_pins =", self.fake_pins)
+                        print("fake_pins_ll_y_m5 = ", fake_pins_ll_y_m5)
+                        print("fake_pins_ll_x_m5 = ", fake_pins_ll_x_m5)
+                        print("fake_pins_ll_y_m6 = ", fake_pins_ll_y_m6)
+                        print("fake_pins_ll_x_m6 = ", fake_pins_ll_x_m6)
                         g.create_graph(source, target)
+                        
+                        # Find the shortest path from source to target
                         path = g.find_shortest_path()
+                        print("path = ", path)
 
-                    sub_via_list_from = []
-                    sub_via_list_to = []
-                    sub_via_index = []
-                    if path:
+                        sub_via_list_from = []
+                        sub_via_list_to = []
+                        sub_via_index = []
                         for i in range(len(path) - 1):
                             direction = path[i].get_direction(path[i+1])
                             if direction == (1, 1):
@@ -156,13 +149,11 @@ class supply_router(router):
                                 sub_via_index.append(i)
                         via_list_from.append(sub_via_list_from)
                         via_list_to.append(sub_via_list_to)
-                    # If no path is found, throw an error
-                    if path is None:
-                        self.write_debug_gds(gds_name="{}error.gds".format(OPTS.openram_temp), g=g, source=source, target=target)
-                        pass
-                        # debug.error("Couldn't route from {} to {}.".format(source, target), -1)
-                    # Create the path shapes on layout
-                    if path:
+                        # If no path is found, throw an error
+                        if path is None:
+                            self.write_debug_gds(gds_name="{}error.gds".format(OPTS.openram_temp), g=g, source=source, target=target)
+                            debug.error("Couldn't route from {} to {}.".format(source, target), -1)
+                        # Create the path shapes on layout
                         source_ll, source_ur = source.rect
                         target_ll, target_ur = target.rect
                         # if (source_ur.x - source_ll.x >=18 or source_ur.y - source_ll.y >= 18) or (target_ur.x - target_ll.x >=18 or target_ur.y - target_ll.y >= 18):
@@ -246,15 +237,18 @@ class supply_router(router):
                             #     elif target.layer=="m6": multiple_via5="TH"
                         else: multiple_via5=False
                         # multiple_via5=False
-                        new_wires, new_vias = self.add_path(path, multiple_via5=multiple_via5)
-                        # Find the recently added shapes
-                        self.find_blockages(pin_name, new_wires)
-                        self.find_vias(new_vias)
-                        # Report routed count
-                        routed_count += 1
-                        source_list.append(source)
-                        target_list.append(target)
-                        debug.info(2, "Routed {} of {} supply pins".format(routed_count, routed_max))
+                        if multiple_via5 and flag_ == 0:
+                            pass
+                        else:
+                            new_wires, new_vias = self.add_path(path, multiple_via5=multiple_via5)
+                            # Find the recently added shapes
+                            self.find_blockages(pin_name, new_wires)
+                            self.find_vias(new_vias)
+                            # Report routed count
+                            routed_count += 1
+                            source_list.append(source)
+                            target_list.append(target)
+                            debug.info(2, "Routed {} of {} supply pins".format(routed_count, routed_max))
 
 
     def add_side_pin(self, pin_name, side, num_vias=3, num_fake_pins=4):
@@ -263,27 +257,15 @@ class supply_router(router):
         ll, ur = self.bbox
         vertical = side in ["left", "right"]
         inner = pin_name == self.gnd_name
-        if OPTS.level_shifter:
-            middle = pin_name == self.vdd_name
-        else:
-            middle = False
+
         # Calculate wires' wideness
         wideness = self.track_wire * num_vias + self.track_space * (num_vias - 1)
 
         # Calculate the offset for the inner ring
-        if OPTS.level_shifter:
-            if inner:
-            
-                margin = wideness * 2
-            elif middle:
-                margin = 0
-            else:
-                margin = wideness * (-2)
+        if inner:
+            margin = wideness * 2
         else:
-            if inner:
-                margin = wideness * 2
-            else:
-                margin = 0
+            margin = 0
 
         # Calculate the lower left coordinate
         if side == "top":
@@ -303,22 +285,11 @@ class supply_router(router):
         else:
             shape_width = shape.x
             shape_height = wideness
-        # if inner:
-        #     if OPTS.level_shifter:
-        #         if vertical:
-        #             shape_height -= margin * 4
-        #         else:
-        #             shape_width -= margin * 4
-        #     else:
-        #         if vertical:
-        #             shape_height -= margin * 2
-        #         else:
-        #             shape_width -= margin * 2
-        # if middle:
-        if vertical:
-            shape_height -= margin * 2
-        else:
-            shape_width -= margin * 2
+        if inner:
+            if vertical:
+                shape_height -= margin * 2
+            else:
+                shape_width -= margin * 2
 
         # Add this new pin
         layer = self.get_layer(int(vertical))

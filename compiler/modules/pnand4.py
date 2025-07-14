@@ -250,21 +250,21 @@ class pnand4(pgate):
                                      "A",
                                      position="left")
 
-        self.inputB_yoffset = self.inputA_yoffset + self.m1_pitch * 1.25
+        self.inputB_yoffset = self.inputA_yoffset + self.m1_pitch * 2
         bpin = self.route_input_gate(self.pmos2_inst,
                                      self.nmos2_inst,
                                      self.inputB_yoffset,
                                      "B",
                                      position="center")
 
-        self.inputC_yoffset = self.inputB_yoffset + self.m1_pitch * 1.25
+        self.inputC_yoffset = self.inputB_yoffset + self.m1_pitch * 2
         cpin = self.route_input_gate(self.pmos3_inst,
                                      self.nmos3_inst,
                                      self.inputC_yoffset,
                                      "C",
                                      position="right")
 
-        self.inputD_yoffset = self.inputC_yoffset + self.m1_pitch * 1.25
+        self.inputD_yoffset = self.inputC_yoffset + self.m1_pitch * 2
         dpin = self.route_input_gate(self.pmos4_inst,
                                      self.nmos4_inst,
                                      self.inputD_yoffset,

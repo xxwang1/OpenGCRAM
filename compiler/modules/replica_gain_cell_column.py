@@ -11,33 +11,33 @@ from openram import OPTS
 from .gain_cell_base_array import gain_cell_base_array
 
 
-class replica_gain_cell_column(gain_cell_base_array):
+class replica_column(gain_cell_base_array):
     """
     Generate a replica bitline column for the replica array.
     Rows is the total number of rows in the main array.
-    rbl is a tuple with the number of left and right replica bitlines.
+    rrbl is a tuple with the number of left and right replica bitlines.
     Replica bit specifies which replica column this is (to determine where to put the
     replica cell relative to the bottom (including the dummy bit at 0).
     """
 
-    def __init__(self, name, rows, rbl, replica_bit, column_offset=0):
+    def __init__(self, name, rows, rrbl, replica_bit, column_offset=0):
         # Used for pin names and properties
         self.cell = factory.create(module_type=OPTS.gain_cell)
         # Row size is the number of rows with word lines
-        self.row_size = sum(rbl) + rows
+        self.row_size = sum(rrbl) + rows
         # Start of regular word line rows
-        self.row_start = rbl[0]
+        self.row_start = rrbl[0]
         # End of regular word line rows
         self.row_end = self.row_start + rows
         super().__init__(rows=self.row_size, cols=1, column_offset=column_offset, name=name)
 
         self.rows = rows
-        self.left_rbl = rbl[0]
-        self.right_rbl = rbl[1]
+        self.left_rrbl = rrbl[0]
+        self.right_rrbl = rrbl[1]
         self.replica_bit = replica_bit
 
         # Total size includes the replica rows
-        self.total_size = self.left_rbl + rows + self.right_rbl
+        self.total_size = self.left_rrbl + rows + self.right_rrbl
 
         self.column_offset = column_offset
 
@@ -94,8 +94,7 @@ class replica_gain_cell_column(gain_cell_base_array):
             else:
                 self.add_pin(wl_name, "INPUT")
         self.add_pin("vdd", "POWER")
-        if OPTS.gc_type == "Si":
-            self.add_pin("gnd", "GROUND")
+        self.add_pin("gnd", "GROUND")
 
     def add_modules(self):
         self.replica_cell = factory.create(module_type=OPTS.replica_gain_cell)
@@ -114,16 +113,16 @@ class replica_gain_cell_column(gain_cell_base_array):
             if (row == self.replica_bit) or (row >= self.row_start and row < self.row_end):
                 self.cell_inst.append(self.add_inst(name=name,
                                                     mod=self.replica_cell))
-                self.connect_inst(self.get_gain_cell_pins(row, 0, cell="replica"))
+                self.connect_inst(self.get_gain_cell_pins(row, 0))
             else:
                 self.cell_inst.append(self.add_inst(name=name,
                                                     mod=self.dummy_cell))
-                self.connect_inst(self.get_gain_cell_pins(row, 0, cell="dummy"))
+                self.connect_inst(self.get_gain_cell_pins(row, 0))
 
     def place_instances(self):
         # Flip the mirrors if we have an odd number of replica+dummy rows at the bottom
         # so that we will start with mirroring rather than not mirroring
-        rbl_offset = (self.left_rbl) % 2
+        rrbl_offset = (self.left_rrbl) % 2
 
         # if our gain_cells are mirrored on the y axis, check if we are in global
         # column that needs to be flipped.
@@ -134,10 +133,10 @@ class replica_gain_cell_column(gain_cell_base_array):
             xoffset = self.replica_cell.width
 
         for row in range(self.total_size):
-            # name = "bit_r{0}_{1}".format(row, "rbl")
-            dir_x = self.cell.mirror.x and (row + rbl_offset) % 2
+            # name = "bit_r{0}_{1}".format(row, "rrbl")
+            dir_x = self.cell.mirror.x and (row + rrbl_offset) % 2
 
-            offset = vector(xoffset, self.cell.height * (row + (row + rbl_offset) % 2))
+            offset = vector(xoffset, self.cell.height * (row + (row + rrbl_offset) % 2))
 
             if dir_x and dir_y:
                 dir_key = "XY"
@@ -167,16 +166,14 @@ class replica_gain_cell_column(gain_cell_base_array):
         #                         height=self.height)
 
         for port in self.all_ports:
-            if port in self.read_ports: 
-                rbl_pin = self.cell_inst[0].get_pin(self.cell.get_rbl_name(port))
-                self.add_layout_pin(text="rbl_{0}_{1}".format(port, 0),
+            rbl_pin = self.cell_inst[0].get_pin(self.cell.get_rbl_name(port))
+            self.add_layout_pin(text="rbl_{0}_{1}".format(port, col),
                                 layer=rbl_pin.layer,
                                 offset=rbl_pin.ll().scale(1, 0),
                                 width=rbl_pin.width(),
                                 height=self.height)
-            elif port in self.write_ports:
-                wbl_pin = self.cell_inst[0].get_pin(self.cell.get_wbl_name(port))
-                self.add_layout_pin(text="wbl_{0}_{1}".format(port, 0),
+            wbl_pin = self.cell_inst[0].get_pin(self.cell.get_wbl_name(port))
+            self.add_layout_pin(text="wbl_{0}_{1}".format(port, col),
                                 layer=wbl_pin.layer,
                                 offset=wbl_pin.ll().scale(1, 0),
                                 width=wbl_pin.width(),
@@ -193,66 +190,42 @@ class replica_gain_cell_column(gain_cell_base_array):
         
         
         for port in self.all_ports:
-            for row in range(self.total_size):
-                if port in self.read_ports:
-                    rwl_pin = self.cell_inst[row].get_pin(self.cell.get_rwl_name(port))
-                    self.add_layout_pin(text="rwl_{0}_{1}".format(port, row),
-                                    layer=rwl_pin.layer,
-                                    offset=rwl_pin.ll().scale(0, 1),
-                                    width=self.width,
-                                    height=rwl_pin.height())
-                elif port in self.write_ports:
-                    wwl_pin = self.cell_inst[row].get_pin(self.cell.get_wwl_name(port))
-                    self.add_layout_pin(text="wwl_{0}_{1}".format(port, row),
-                                    layer=wwl_pin.layer,
-                                    offset=wwl_pin.ll().scale(0, 1),
-                                    width=self.width,
-                                    height=wwl_pin.height())
+            rwl_pin = self.cell_inst[row].get_pin(self.cell.get_rwl_name(port))
+            self.add_layout_pin(text="rwl_{0}_{1}".format(port, row),
+                                layer=rwl_pin.layer,
+                                offset=rwl_pin.ll().scale(0, 1),
+                                width=self.width,
+                                height=rwl_pin.height())
+            wwl_pin = self.cell_inst[row].get_pin(self.cell.get_wwl_name(port))
+            self.add_layout_pin(text="wwl_{0}_{1}".format(port, row),
+                                layer=wwl_pin.layer,
+                                offset=wwl_pin.ll().scale(0, 1),
+                                width=self.width,
+                                height=wwl_pin.height())
 
     def route_supplies(self):
-        if OPTS.gc_type == "Si":
-            for inst in self.cell_inst:
-                for pin_name in ["vdd", "gnd"]:
-                    self.copy_layout_pin(inst, pin_name)
-        else:
-            if OPTS.gc_type == "OS":
-                for inst in self.cell_inst:
-                    for pin_name in ["vdd"]:
-                        self.copy_layout_pin(inst, pin_name)
+
+        for inst in self.cell_inst:
+            for pin_name in ["vdd", "gnd"]:
+                self.copy_layout_pin(inst, pin_name)
 
     def get_bitline_names(self, port=None):
         if port == None:
             return self.all_bitline_names
         else:
             return self.bitline_names[port]
-    
-    def get_wordline_names(self, port=None):
-        if port == None:
-            return self.all_wordline_names
-        else:
-            return self.wordline_names[port]
 
-    def get_gain_cell_pins(self, row, col, cell):
+    def get_gain_cell_pins(self, row, col):
         """
         Creates a list of connections in the gain_cell,
         indexed by column and row, for instance use in gain_cell_array
         """
         gain_cell_pins = []
-        for port in self.read_ports:
+        for port in self.all_ports:
             gain_cell_pins.extend([x for x in self.get_bitline_names(port) if x.endswith("_{0}".format(col))])
-        for port in self.write_ports:
-            gain_cell_pins.extend([x for x in self.get_bitline_names(port) if x.endswith("_{0}".format(col))])
-        for port in self.read_ports:
-            gain_cell_pins.extend([x for x in self.get_wordline_names(port) if x.endswith("_{0}".format(row))])
-        for port in self.write_ports:
-            gain_cell_pins.extend([x for x in self.get_wordline_names(port) if x.endswith("_{0}".format(row))])
-        if OPTS.gc_type == "OS":
-            if cell == "replica":
-                gain_cell_pins.append("vdd")
-        else:
-            if OPTS.gc_type == "Si":
-                gain_cell_pins.append("vdd")
-                gain_cell_pins.append("gnd")
+        gain_cell_pins.extend([x for x in self.all_wordline_names if x.endswith("_{0}".format(row))])
+        gain_cell_pins.append("vdd")
+        gain_cell_pins.append("gnd")
 
         return gain_cell_pins
 
@@ -266,9 +239,8 @@ class replica_gain_cell_column(gain_cell_base_array):
             gain_cell_pins.extend([x for x in self.get_bitline_names(port) if x.endswith("_{0}".format(col))])
         if len(self.edge_cell.get_pins("vdd")) > 0:
             gain_cell_pins.append("vdd")
-        if OPTS.gc_array == "Si":
-            if len(self.edge_cell.get_pins("gnd")) > 0:
-                gain_cell_pins.append("gnd")
+        if len(self.edge_cell.get_pins("gnd")) > 0:
+            gain_cell_pins.append("gnd")
 
         return gain_cell_pins
 

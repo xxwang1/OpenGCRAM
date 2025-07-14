@@ -11,7 +11,7 @@ from openram import OPTS
 
 class sram_factory:
     """
-    This is a factory pattern to create modules for usage in an gain_cell.
+    This is a factory pattern to create modules for usage in an SRAM.
     Since GDSII has a flat namespace, it requires modules to have unique
     names if their layout differs. This module ensures that any module
     with different layouts will have different names. It also ensures that
@@ -40,7 +40,6 @@ class sram_factory:
         overridden = False
         try:
             from openram.tech import tech_modules
-            print("module_type = ", module_type)
             real_module_type = tech_modules[module_type]
             # If we are given a list of modules, it is indexed by number of ports starting from 1
             if type(real_module_type) is list:
@@ -107,8 +106,8 @@ class sram_factory:
                 # Dynamically load the module
                 if real_module_type == "contact":
                     c  = importlib.import_module("openram.base.contact")
-                elif real_module_type == "gain_cell":
-                    c = importlib.import_module("openram.gain_cell")
+                elif real_module_type == "sram":
+                    c = importlib.import_module("openram.sram")
                 else:
                     c  = importlib.import_module("openram.modules."+real_module_type)
             except ModuleNotFoundError:
@@ -151,9 +150,6 @@ class sram_factory:
         # kwargs_str = "kwargs={}".format(str(kwargs))
         # import debug
         # debug.info(0, "New module:" + type_str + name_str + kwargs_str)
-        print("mod = ", mod)
-        print("module_name = ", module_name)
-        # print("kwargs = ", **kwargs)
         obj = mod(name=module_name, **kwargs)
         self.objects[real_module_type].append((kwargs, obj))
         return obj

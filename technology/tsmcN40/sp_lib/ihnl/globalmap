@@ -1,8 +1,0 @@
-CADENCE IHNL11140
-$model
-OpenRAM/gain_cell_ref_gen/schematic gain_cell_ref_gen
-$endmodel
-$net
-$endnet
-$param
-$endparam

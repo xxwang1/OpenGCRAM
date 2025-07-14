@@ -14,21 +14,21 @@ from openram.base import vector
 from openram.base import logical_effort, convert_farad_to_relative_c
 from openram.tech import drc, spice
 from openram.sram_factory import factory
-from .gain_cell_control_logic_logic_base import gain_cell_control_logic_logic_base
+from .control_logic_base import control_logic_base
 
 
-class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
+class control_logic_delay(control_logic_base):
     """
-    Dynamically generated gain_cell_control_logic logic for the total gain_cell circuit.
+    Dynamically generated Control logic for the total SRAM circuit.
     Variant: delay-based
     """
 
-    def __init__(self, num_rows, words_per_row, word_size, spare_columns=None, gain_cell=None, port_type="rw", name=""):
+    def __init__(self, num_rows, words_per_row, word_size, spare_columns=None, sram=None, port_type="rw", name=""):
         """ Constructor """
-        super().__init__(num_rows, words_per_row, word_size, spare_columns, gain_cell, port_type, name)
+        super().__init__(num_rows, words_per_row, word_size, spare_columns, sram, port_type, name)
 
     def add_pins(self):
-        """ Add the pins to the gain_cell_control_logic logic module. """
+        """ Add the pins to the control logic module. """
         self.add_pin_list(self.input_list + ["clk"], "INPUT")
         self.add_pin_list(self.output_list, "OUTPUT")
         self.add_pin("vdd", "POWER")
@@ -37,78 +37,68 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
     def add_modules(self):
         """ Add all the required modules """
 
-        self.gain_cell_dff = factory.create(module_type="gain_cell_dff_buf")
-        gain_cell_dff_height = self.gain_cell_dff.height
+        self.dff = factory.create(module_type="dff_buf")
+        dff_height = self.dff.height
 
-        self.ctrl_gain_cell_dff_array = factory.create(module_type="gain_cell_dff_buf_array",
-                                             rows=self.num_gain_cell_control_logic_signals,
+        self.ctrl_dff_array = factory.create(module_type="dff_buf_array",
+                                             rows=self.num_control_signals,
                                              columns=1)
 
         self.and2 = factory.create(module_type="pand2",
                                    size=12,
-                                   height=gain_cell_dff_height)
+                                   height=dff_height)
 
         # clk_buf drives a flop for every address
         addr_flops = math.log(self.num_words, 2) + math.log(self.words_per_row, 2)
-        # plus data flops and gain_cell_control_logic flops
-        num_flops = addr_flops + self.word_size + self.num_spare_cols + self.num_gain_cell_control_logic_signals
+        # plus data flops and control flops
+        num_flops = addr_flops + self.word_size + self.num_spare_cols + self.num_control_signals
         # each flop internally has a FO 5 approximately
-        # plus about 5 fanouts for the gain_cell_control_logic logic
+        # plus about 5 fanouts for the control logic
         clock_fanout = 5 * num_flops + 5
         self.clk_buf_driver = factory.create(module_type="pdriver",
                                              fanout=clock_fanout,
-                                             height=gain_cell_dff_height)
+                                             height=dff_height)
 
         # We will use the maximum since this same value is used to size the wl_en
         # and the p_en_bar drivers
         # max_fanout = max(self.num_rows, self.num_cols)
 
         # wl_en drives every row in the bank
-        # this calculation is from the rbl gain_cell_control_logic logic, it may not be optimal in this circuit
+        # this calculation is from the rbl control logic, it may not be optimal in this circuit
         size_list = [max(int(self.num_rows / 9), 1), max(int(self.num_rows / 3), 1)]
         self.wl_en_driver = factory.create(module_type="pdriver",
                                            size_list=size_list,
-                                           height=gain_cell_dff_height)
+                                           height=dff_height)
 
         # this is the weak timing signal that feeds wl_en_driver
         self.wl_en_and = factory.create(module_type="pand2",
                                         size=1,
-                                        height=gain_cell_dff_height)
+                                        height=dff_height)
 
         # w_en drives every write driver
         self.wen_and = factory.create(module_type="pand3",
                                       size=self.word_size + 8,
-                                      height=gain_cell_dff_height)
+                                      height=dff_height)
 
         # s_en drives every sense amp
         self.sen_and3 = factory.create(module_type="pand3",
                                        size=self.word_size + self.num_spare_cols,
-                                       height=gain_cell_dff_height)
+                                       height=dff_height)
 
         # used to generate inverted signals with low fanout
         self.inv = factory.create(module_type="pinv",
                                   size=1,
-                                  height=gain_cell_dff_height)
+                                  height=dff_height)
 
         # p_en_bar drives every column in the bitcell array
         # but it is sized the same as the wl_en driver with
         # prepended 3 inverter stages to guarantee it is slower and odd polarity
-        if self.port_type == "w":
-            self.p_en_bar_driver = factory.create(module_type="pdriver",
+        self.p_en_bar_driver = factory.create(module_type="pdriver",
                                               fanout=self.num_cols,
-                                              height=gain_cell_dff_height)
-        if self.port_type == "r":
-            if OPTS.gc_type == "OS":
-                self.p_en_bar_driver = factory.create(module_type="pdriver",
-                                              fanout=self.num_cols,
-                                              height=gain_cell_dff_height)
-            elif OPTS.gc_type == "Si":
-                self.p_en_driver = factory.create(module_type="pdriver",
-                                              fanout=self.num_cols,
-                                              height=gain_cell_dff_height)
+                                              height=dff_height)
 
         self.nand2 = factory.create(module_type="pnand2",
-                                    height=gain_cell_dff_height)
+                                    height=dff_height)
 
         # TODO: compute the delay chain pinouts using elmore delay
         # self.compute_delay_chain_size()
@@ -142,13 +132,7 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
         pen_cap_ff = self.num_cols * (3 * spice["min_tx_gate_c"] + spice["wire_unit_c"] * 1e15 * wordline_area)
         pen_cap = convert_farad_to_relative_c(pen_cap_ff)
         # number of stages in the p_en driver
-        if self.port_type == "w":
-            pen_stages = self.p_en_bar_driver.num_stages
-        if self.port_type == "r":
-            if OPTS.gc_type == "OS":
-                pen_stages = self.p_en_bar_driver.num_stages
-            elif OPTS.gc_type == "Si":
-                pen_stages = self.p_en_driver.num_stages
+        pen_stages = self.p_en_bar_driver.num_stages
 
         inverter_stage_delay = logical_effort("inv", 1, 1, OPTS.delay_chain_fanout_per_stage, 1, True).get_absolute_delay()
         # model precharge as a minimum sized inverter with the bitline as its load
@@ -169,47 +153,42 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
         delays = [None] * 5
         # keepout between p_en rising and wl_en falling
         delays[0] = (wlen_signal_delay + wordline_delay) / inverter_stage_delay # could possibly subtract pen_signal_delay?
-        delays[0] = int(delays[0] * OPTS.delay_gain_cell_control_logic_scaling_factor)
+        delays[0] = int(delays[0] * OPTS.delay_control_scaling_factor)
         # round up to nearest even integer
         delays[0] += delays[0] % 2
         delays[2] = delays[0] + (pen_signal_delay + precharge_delay) / inverter_stage_delay
-        delays[2] *= OPTS.delay_gain_cell_control_logic_scaling_factor
+        delays[2] *= OPTS.delay_control_scaling_factor
         # round up to nearest odd integer
         delays[2] = int(1 - (2 * ((1 - delays[2]) // 2)))
         # delays[1] can be any even value less than delays[2]
         delays[1] = delays[2] - 1
         # keepout between p_en falling and wl_en rising
         delays[3] = delays[2] + pen_signal_delay / inverter_stage_delay
-        delays[3] *= OPTS.delay_gain_cell_control_logic_scaling_factor
+        delays[3] *= OPTS.delay_control_scaling_factor
         delays[3] = int(1 - (2 * ((1 - delays[3]) // 2)))
         delays[4] = delays[3] + (wlen_signal_delay + wordline_delay + bitline_vth_delay) / inverter_stage_delay
-        delays[4] *= OPTS.delay_gain_cell_control_logic_scaling_factor
+        delays[4] *= OPTS.delay_control_scaling_factor
         delays[4] = int(1 - (2 * ((1 - delays[4]) // 2)))
         self.delay_chain_pinout_list = delays
-        # FIXME: fanout should be used to gain_cell_control_logic delay chain height
+        # FIXME: fanout should be used to control delay chain height
         # for now, use default/user-defined fanout constant
         self.delay_chain_fanout_list = self.delay_chain_pinout_list[-1] * [OPTS.delay_chain_fanout_per_stage]
 
     def setup_signal_busses(self):
         """ Setup bus names, determine the size of the busses etc """
 
-        # List of input gain_cell_control_logic signals
+        # List of input control signals
         if self.port_type == "rw":
             self.input_list = ["csb", "web"]
         else:
-            if self.port_type == "r":
-                self.input_list = ["csb"]
-            if self.port_type == "w":
-                self.input_list = ["web"]
-        if self.port_type == "rw":
-            self.gain_cell_dff_output_list = ["cs_bar", "cs", "we_bar", "we"]
-        else:
-            if self.port_type == "r":
-                self.gain_cell_dff_output_list = ["cs_bar", "cs"]
-            if self.port_type == "w":
-                self.gain_cell_dff_output_list = ["we_bar", "we"]
+            self.input_list = ["csb"]
 
-        # list of output gain_cell_control_logic signals (for making a vertical bus)
+        if self.port_type == "rw":
+            self.dff_output_list = ["cs_bar", "cs", "we_bar", "we"]
+        else:
+            self.dff_output_list = ["cs_bar", "cs"]
+
+        # list of output control signals (for making a vertical bus)
         if self.port_type == "rw":
             self.internal_bus_list = ["glitch1", "glitch2", "delay0", "delay1", "delay2", "delay3", "delay4", "gated_clk_bar", "gated_clk_buf", "we", "we_bar", "clk_buf", "cs"]
         else:
@@ -224,24 +203,15 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
             self.output_list = ["s_en"]
         else:
             self.output_list = ["w_en"]
-        if self.port_type == "w":
-            self.output_list.append("p_en_bar")
-        if self.port_type == "r":
-            if OPTS.gc_type == "OS":
-                self.output_list.append("p_en_bar")
-            elif OPTS.gc_type == "Si":
-                self.output_list.append("p_en")
-        if self.port_type == "r":
-            self.output_list.append("rwl_en")
-        if self.port_type == "w":
-            self.output_list.append("wwl_en")
+        self.output_list.append("p_en_bar")
+        self.output_list.append("wl_en")
         self.output_list.append("clk_buf")
 
         self.supply_list = ["vdd", "gnd"]
 
     def create_instances(self):
         """ Create all the instances """
-        self.create_gain_cell_dffs()
+        self.create_dffs()
         self.create_clk_buf_row()
         self.create_gated_clk_bar_row()
         self.create_gated_clk_buf_row()
@@ -253,8 +223,6 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
         if (self.port_type == "rw") or (self.port_type == "r"):
             self.create_sen_row()
         self.create_pen_row()
-        if self.port_type == "r":
-            self.create_ref_gen()
 
     def place_logic_rows(self):
         row = 0
@@ -277,16 +245,13 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
         self.place_glitch1_row(row)
         row += 1
         self.place_glitch2_row(row)
-        row +=1
-        if self.port_type == "r":
-            self.place_ref_gen(row)
 
-        self.gain_cell_control_logic_center_y = self.glitch2_nand_inst.uy() + self.m3_pitch
+        self.control_center_y = self.glitch2_nand_inst.uy() + self.m3_pitch
 
     def route_all(self):
         """ Routing between modules """
         self.route_rails()
-        self.route_gain_cell_dffs()
+        self.route_dffs()
         self.route_wlen()
         if (self.port_type == "rw") or (self.port_type == "w"):
             self.route_wen()
@@ -336,14 +301,14 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
     # glitch0 is placed in place_pen_row()
 
     def place_glitch1_row(self, row):
-        x_offset = self.gain_cell_control_logic_x_offset
+        x_offset = self.control_x_offset
 
         x_offset = self.place_util(self.glitch1_nand_inst, x_offset, row)
 
         self.row_end_inst.append(self.glitch1_nand_inst)
 
     def place_glitch2_row(self, row):
-        x_offset = self.gain_cell_control_logic_x_offset
+        x_offset = self.control_x_offset
 
         x_offset = self.place_util(self.glitch2_nand_inst, x_offset, row)
 
@@ -359,25 +324,16 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
         self.connect_vertical_bus(glitch2_map, self.glitch2_nand_inst, self.input_bus)
 
     def create_wlen_row(self):
-        if self.port_type == "r":
-            self.wl_en_unbuf_and_inst = self.add_inst(name="and_rwl_en_unbuf",
-                                                    mod=self.wl_en_and)
-            self.connect_inst(["cs", "glitch1", "rwl_en_unbuf", "vdd", "gnd"])
+        self.wl_en_unbuf_and_inst = self.add_inst(name="and_wl_en_unbuf",
+                                                  mod=self.wl_en_and)
+        self.connect_inst(["cs", "glitch1", "wl_en_unbuf", "vdd", "gnd"])
 
-            self.wl_en_driver_inst=self.add_inst(name="buf_rwl_en",
-                                        mod=self.wl_en_driver)
-            self.connect_inst(["rwl_en_unbuf", "rwl_en", "vdd", "gnd"])
-        if self.port_type == "w":
-            self.wl_en_unbuf_and_inst = self.add_inst(name="and_wwl_en_unbuf",
-                                                    mod=self.wl_en_and)
-            self.connect_inst(["we", "glitch1", "wwl_en_unbuf", "vdd", "gnd"])
-
-            self.wl_en_driver_inst=self.add_inst(name="buf_wwl_en",
-                                        mod=self.wl_en_driver)
-            self.connect_inst(["wwl_en_unbuf", "wwl_en", "vdd", "gnd"])
+        self.wl_en_driver_inst=self.add_inst(name="buf_wl_en",
+                                      mod=self.wl_en_driver)
+        self.connect_inst(["wl_en_unbuf", "wl_en", "vdd", "gnd"])
 
     def place_wlen_row(self, row):
-        x_offset = self.gain_cell_control_logic_x_offset
+        x_offset = self.control_x_offset
 
         x_offset = self.place_util(self.wl_en_unbuf_and_inst, x_offset, row)
         x_offset = self.place_util(self.wl_en_driver_inst, x_offset+self.nwell_enclose_implant, row)
@@ -385,10 +341,7 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
         self.row_end_inst.append(self.wl_en_driver_inst)
 
     def route_wlen(self):
-        if self.port_type == "r":
-            in_map = zip(["A", "B"], ["cs", "glitch1"])
-        elif self.port_type == "w":
-            in_map = zip(["A", "B"], ["we", "glitch1"])
+        in_map = zip(["A", "B"], ["cs", "glitch1"])
         self.connect_vertical_bus(in_map, self.wl_en_unbuf_and_inst, self.input_bus)
 
         out_pin = self.wl_en_unbuf_and_inst.get_pin("Z")
@@ -400,43 +353,20 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
         self.add_via_stack_center(from_layer=out_pin.layer,
                                   to_layer=in_pin.layer,
                                   offset=in_pin.center())
-        if self.port_type == "r":
-            self.connect_output(self.wl_en_driver_inst, "Z", "rwl_en")
-        if self.port_type == "w":
-            self.connect_output(self.wl_en_driver_inst, "Z", "wwl_en")
+        self.connect_output(self.wl_en_driver_inst, "Z", "wl_en")
 
     def create_pen_row(self):
-        if self.port_type == "w":
-            self.p_en_bar_driver_inst=self.add_inst(name="buf_p_en_bar",
-                                                    mod=self.p_en_bar_driver)
-            self.connect_inst(["glitch0", "p_en_bar", "vdd", "gnd"])
-        if self.port_type == "r":
-            if OPTS.gc_type == "OS":
-                self.p_en_bar_driver_inst=self.add_inst(name="buf_p_en_bar",
-                                                    mod=self.p_en_bar_driver)
-                self.connect_inst(["glitch0", "p_en_bar", "vdd", "gnd"])
-            elif OPTS.gc_type == "Si":
-                self.p_en_driver_inst=self.add_inst(name="buf_p_en",
-                                                        mod=self.p_en_driver)
-                self.connect_inst(["glitch0", "p_en", "vdd", "gnd"])
+        self.p_en_bar_driver_inst=self.add_inst(name="buf_p_en_bar",
+                                                mod=self.p_en_bar_driver)
+        self.connect_inst(["glitch0", "p_en_bar", "vdd", "gnd"])
 
     def place_pen_row(self, row):
-        x_offset = self.gain_cell_control_logic_x_offset
+        x_offset = self.control_x_offset
 
         x_offset = self.place_util(self.glitch0_nand_inst, x_offset, row)
-        if self.port_type == "w":
-            x_offset = self.place_util(self.p_en_bar_driver_inst, x_offset+self.nwell_enclose_implant, row)
+        x_offset = self.place_util(self.p_en_bar_driver_inst, x_offset+self.nwell_enclose_implant, row)
 
-            self.row_end_inst.append(self.p_en_bar_driver_inst)
-        if self.port_type == "r":
-            if OPTS.gc_type == "OS":
-                x_offset = self.place_util(self.p_en_bar_driver_inst, x_offset+self.nwell_enclose_implant, row)
-
-                self.row_end_inst.append(self.p_en_bar_driver_inst)
-            elif OPTS.gc_type == "Si":
-                x_offset = self.place_util(self.p_en_driver_inst, x_offset+self.nwell_enclose_implant, row)
-
-                self.row_end_inst.append(self.p_en_driver_inst)
+        self.row_end_inst.append(self.p_en_bar_driver_inst)
 
     def route_pen(self):
         in_map = zip(["A", "B"], ["delay0", "delay2"])
@@ -444,27 +374,15 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
 
         out_pin = self.glitch0_nand_inst.get_pin("Z") # same code here as wl_en, refactor?
         out_pos = out_pin.center()
-        if self.port_type == "w":
-            in_pin = self.p_en_bar_driver_inst.get_pin("A")
-        if self.port_type == "r":
-            if OPTS.gc_type == "OS":
-                in_pin = self.p_en_bar_driver_inst.get_pin("A")
-            elif OPTS.gc_type == "Si":
-                in_pin = self.p_en_driver_inst.get_pin("A")
+        in_pin = self.p_en_bar_driver_inst.get_pin("A")
         in_pos = in_pin.center()
         mid1 = vector(in_pos.x, out_pos.y)
         self.add_path(out_pin.layer, [out_pos, mid1, in_pos])
         self.add_via_stack_center(from_layer=out_pin.layer,
                                   to_layer=in_pin.layer,
                                   offset=in_pin.center())
-        if self.port_type == "w":
-            self.connect_output(self.p_en_bar_driver_inst, "Z", "p_en_bar")
-        if self.port_type == "r":
-            if OPTS.gc_type == "OS":
-                self.connect_output(self.p_en_bar_driver_inst, "Z", "p_en_bar")
-            elif OPTS.gc_type == "Si":
-                self.connect_output(self.p_en_driver_inst, "Z", "p_en")
 
+        self.connect_output(self.p_en_bar_driver_inst, "Z", "p_en_bar")
 
     def create_sen_row(self):
         if self.port_type=="rw":
@@ -477,7 +395,7 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
         self.connect_inst(["glitch2", "gated_clk_bar", input_name, "s_en", "vdd", "gnd"])
 
     def place_sen_row(self, row):
-        x_offset = self.gain_cell_control_logic_x_offset
+        x_offset = self.control_x_offset
 
         x_offset = self.place_util(self.s_en_gate_inst, x_offset, row)
 
@@ -503,17 +421,14 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
         if self.port_type == "rw":
             input_name = "we"
         else:
-            if self.port_type == "r":
-                input_name = "cs"
-            if self.port_type == "r":
-                input_name = "we"
+            input_name = "cs"
 
         self.w_en_gate_inst = self.add_inst(name="and_w_en",
                                             mod=self.wen_and)
         self.connect_inst([input_name, "glitch1", "glitch2_bar", "w_en", "vdd", "gnd"])
 
     def place_wen_row(self, row):
-        x_offset = self.gain_cell_control_logic_x_offset
+        x_offset = self.control_x_offset
 
         x_offset = self.place_util(self.glitch2_bar_inv_inst, x_offset, row)
         x_offset = self.place_util(self.w_en_gate_inst, x_offset+self.nwell_enclose_implant, row)
@@ -537,10 +452,7 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
         if self.port_type == "rw":
             input_name = "we"
         else:
-            if self.port_type == "r":
-                input_name = "cs"
-            if self.port_type == "w":
-                input_name = "we"
+            input_name = "cs"
 
         # This is the second gate over, so it needs to be on M3
         wen_map = zip(["A", "B"], [input_name, "glitch1"])

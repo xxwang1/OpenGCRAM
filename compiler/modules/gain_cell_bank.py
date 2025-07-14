@@ -15,7 +15,7 @@ from openram.tech import layer_properties as layer_props
 from openram import OPTS
 
 
-class gain_cell_bank(design):
+class bank(design):
     """
     Dynamically generated a single bank including gain_cell array,
     hierarchical_decoder, precharge, (optional column_mux and column decoder),
@@ -23,10 +23,10 @@ class gain_cell_bank(design):
     This can create up to two ports in any combination: rw, w, r.
     """
 
-    def __init__(self, gain_cell_config, name=""):
+    def __init__(self, sram_config, name=""):
 
-        self.gain_cell_config = gain_cell_config
-        gain_cell_config.set_local_config(self)
+        self.sram_config = sram_config
+        sram_config.set_local_config(self)
         if self.write_size != self.word_size:
             self.num_wmasks = int(ceil(self.word_size / self.write_size))
         else:
@@ -38,7 +38,7 @@ class gain_cell_bank(design):
         if name == "":
             name = "bank_{0}_{1}".format(self.word_size, self.num_words)
         super().__init__(name)
-        debug.info(2, "create gain_cell of size {0} with {1} words".format(self.word_size,
+        debug.info(2, "create sram of size {0} with {1} words".format(self.word_size,
                                                                       self.num_words))
 
         # The local control signals are gated when we have bank select logic,
@@ -102,15 +102,8 @@ class gain_cell_bank(design):
         # the signals gated_*.
         for port in self.read_ports:
             self.add_pin("s_en{0}".format(port), "INPUT")
-            self.add_pin("ref{0}".format(port), "INPUT")
         for port in self.all_ports:
-            if port in self.write_ports:
-                self.add_pin("p_en_bar{0}".format(port), "INPUT")
-            if port in self.read_ports:
-                if OPTS.gc_type == "OS":
-                    self.add_pin("p_en_bar{0}".format(port), "INPUT")
-                else:
-                    self.add_pin("p_en{0}".format(port), "INPUT")
+            self.add_pin("p_en_bar{0}".format(port), "INPUT")
         for port in self.write_ports:
             self.add_pin("w_en{0}".format(port), "INPUT")
             for bit in range(self.num_wmasks):
@@ -120,12 +113,9 @@ class gain_cell_bank(design):
         # for port in self.all_ports:
         for port in self.read_ports:
             self.add_pin("rwl_en{0}".format(port), "INPUT")
-        for port in self.write_ports:
+        for port in self.read_ports:
             self.add_pin("wwl_en{0}".format(port), "INPUT")
-        
         self.add_pin("vdd", "POWER")
-        if OPTS.level_shifter:
-            self.add_pin("vddio", "POWER")
         self.add_pin("gnd", "GROUND")
 
     def route_layout(self):
@@ -147,18 +137,17 @@ class gain_cell_bank(design):
 
         # Connect the rbl to the port data pin
         # bl_pin = self.port_data_inst[port].get_pin("rbl_bl")
-        if port in self.read_ports:
-            bl_pin = self.port_data_inst[port].get_pin("rbl_rbl")
+        if port % 2:
+            bl_pin = self.port_data_inst[port].get_pin("rbl_wbl")
             # wbl_pin = self.port_data_inst[port].get_pin("rbl_wbl")
             pin_pos = bl_pin.uc()
             # wbl_pin_pos = wbl_pin.uc()
             pin_offset = pin_pos + vector(0, self.m3_pitch)
             # wbl_pin_offset = wbl_pin_pos + vector(0, self.m3_pitch)
             left_right_offset = vector(self.max_x_offset, pin_offset.y)
-            array_left_right_offset = vector(self.gain_cell_array_inst.rx(), pin_offset.y)
             # wbl_left_right_offset = vector(self.max_x_offset, wbl_pin_offset.y)
         else:
-            bl_pin = self.port_data_inst[port].get_pin("rbl_wbl")
+            bl_pin = self.port_data_inst[port].get_pin("rbl_rbl")
             pin_pos = bl_pin.bc()
             pin_offset = pin_pos - vector(0, self.m3_pitch)
             left_right_offset = vector(self.min_x_offset, pin_offset.y)
@@ -166,14 +155,13 @@ class gain_cell_bank(design):
                                   to_layer="m3",
                                   offset=pin_offset)
         self.add_path(bl_pin.layer, [pin_offset, pin_pos])
-        if port in self.read_ports:
-            self.add_layout_pin_segment_center(text="rbl_rbl_{0}_{0}".format(port),
+        if port % 2:
+            self.add_layout_pin_segment_center(text="rbl_wbl_{0}_{0}".format(port),
                                            layer="m3",
-                                        #    start=left_right_offset,
-                                           start=array_left_right_offset,
+                                           start=left_right_offset,
                                            end=pin_offset)
         else:
-            self.add_layout_pin_segment_center(text="rbl_wbl_{0}_{0}".format(port),
+            self.add_layout_pin_segment_center(text="rbl_rbl_{0}_{0}".format(port),
                                            layer="m3",
                                            start=left_right_offset,
                                            end=pin_offset)
@@ -211,7 +199,7 @@ class gain_cell_bank(design):
         # The port address decoder/driver logic is placed on the right and mirrored on Y-axis.
         # The port data write/sense/precharge/mux is placed on the top and mirrored on the X-axis.
         self.gain_cell_array_top = self.gain_cell_array.height
-        self.gain_cell_array_right = max(self.gain_cell_array.width, self.port_data[0].width, self.port_data[1].width)
+        self.gain_cell_array_right = self.gain_cell_array.width
 
         # These are the offsets of the main array (excluding dummy and replica rows/cols)
         self.main_gain_cell_array_top = self.gain_cell_array.get_main_array_top()
@@ -257,14 +245,14 @@ class gain_cell_bank(design):
 
         # LOWER LEFT QUADRANT
         # Place the col decoder left aligned with wordline driver
-        # This is also placed so that it's supply rails do not align with the gain_cell-level
+        # This is also placed so that it's supply rails do not align with the SRAM-level
         # control logic to allow control signals to easily pass over in M3
         # by placing 1 1/4 a cell pitch down because both power connections and inputs/outputs
         # may be routed in M3 or M4
         x_offset = self.central_bus_width[port] + self.port_address[port].wordline_driver_array.width
         if self.col_addr_size > 0:
             x_offset += self.column_decoder.width + self.col_addr_bus_width
-            y_offset = 1.25 * self.gain_cell_dff.height + self.column_decoder.height
+            y_offset = 1.25 * self.dff.height + self.column_decoder.height
         else:
             y_offset = 0
         self.column_decoder_offsets[port] = vector(-x_offset, -y_offset)
@@ -299,14 +287,14 @@ class gain_cell_bank(design):
         # UPPER RIGHT QUADRANT
         # Place the col decoder right aligned with wordline driver
         # Above the gain_cell array with a well spacing
-        # This is also placed so that it's supply rails do not align with the gain_cell-level
+        # This is also placed so that it's supply rails do not align with the SRAM-level
         # control logic to allow control signals to easily pass over in M3
         # by placing 1 1/4 a cell pitch down because both power connections and inputs/outputs
         # may be routed in M3 or M4
         x_offset = self.gain_cell_array_right  + self.central_bus_width[port] + self.port_address[port].wordline_driver_array.width
         if self.col_addr_size > 0:
             x_offset += self.column_decoder.width + self.col_addr_bus_width
-            y_offset = self.gain_cell_array_top + 1.25 * self.gain_cell_dff.height + self.column_decoder.height
+            y_offset = self.gain_cell_array_top + 1.25 * self.dff.height + self.column_decoder.height
         else:
             y_offset = self.gain_cell_array_top
         self.column_decoder_offsets[port] = vector(x_offset, y_offset)
@@ -362,10 +350,7 @@ class gain_cell_bank(design):
             self.input_control_signals.append(["p_en_bar{}".format(port_num), "w_en{}".format(port_num)])
             port_num += 1
         for port in range(OPTS.num_r_ports):
-            if OPTS.gc_type == "OS":
-                self.input_control_signals.append(["p_en_bar{}".format(port_num), "s_en{}".format(port_num), "ref{}".format(port_num)])
-            else:
-                self.input_control_signals.append(["p_en{}".format(port_num), "s_en{}".format(port_num), "ref{}".format(port_num)])
+            self.input_control_signals.append(["p_en_bar{}".format(port_num), "s_en{}".format(port_num)])
             port_num += 1
 
         # Number of control lines in the bus for each port
@@ -398,13 +383,13 @@ class gain_cell_bank(design):
         if OPTS.control_logic != "control_logic_delay":
             self.has_rbl = True
             rbl = [1, 1 if len(self.all_ports)>1 else 0]
-            left_wbl = [0]
-            right_rbl = [1] if len(self.all_ports)>1 else []
+            left_rbl = [0]
+            right_wbl = [1] if len(self.all_ports)>1 else []
         else:
             self.has_rbl = False
             rbl = [0, 0]
-            left_wbl = []
-            right_rbl = []
+            left_rbl = []
+            right_wbl = []
 
         local_array_size = OPTS.local_array_size
 
@@ -420,16 +405,16 @@ class gain_cell_bank(design):
                                                 cols=cols,
                                                 rows=self.num_rows,
                                                 rbl=rbl,
-                                                left_rbl=left_wbl,
-                                                right_rbl=right_rbl)
+                                                left_rbl=left_rbl,
+                                                right_rbl=right_wbl)
         else:
             self.gain_cell_array = factory.create(module_type="capped_replica_gain_cell_array",
                                                 cols=self.num_cols + self.num_spare_cols,
                                                 rows=self.num_rows,
                                                 rbl=rbl,
-                                                left_rbl=left_wbl,
-                                                right_rbl=right_rbl)
-        print("gain_cell_bank add_modules self.gain_cell_array.wordline_names = ", self.gain_cell_array.wordline_names)    
+                                                left_rbl=left_rbl,
+                                                right_rbl=right_wbl)
+
         self.port_address = []
         for port in self.all_ports:
             self.port_address.append(factory.create(module_type="gain_cell_port_address",
@@ -442,7 +427,7 @@ class gain_cell_bank(design):
         self.bit_offsets = self.get_column_offsets()
         for port in self.all_ports:
             self.port_data.append(factory.create(module_type="gain_cell_port_data",
-                                                 gain_cell_config=self.gain_cell_config,
+                                                 sram_config=self.sram_config,
                                                  port=port,
                                                  has_rbl=self.has_rbl,
                                                  bit_offsets=self.bit_offsets))
@@ -459,19 +444,13 @@ class gain_cell_bank(design):
         temp = self.gain_cell_array.get_inouts()
 
         if self.has_rbl:
-            temp.append("rbl_wwl_0_0")
+            temp.append("rbl_rwl")
         temp.extend(self.gain_cell_array.get_wordline_names())
         if len(self.all_ports) > 1 and self.has_rbl:
-            temp.append("rbl_rwl_1_1")
-        if OPTS.gc_type == "Si":
-            temp.append("vdd")
-            temp.append("gnd")
-        else:
-            if OPTS.gc_type == "Hybrid":
-                temp.append("vdd")
-                temp.append("gnd")
-            if OPTS.gc_type == "OS":
-                temp.append("vdd")
+            temp.append("rbl_wwl")
+
+        temp.append("vdd")
+        temp.append("gnd")
         if 'vpb' in self.gain_cell_array_inst.mod.pins and 'vnb' in self.gain_cell_array_inst.mod.pins:
             temp.append('vpb')
             temp.append('vnb')
@@ -491,10 +470,7 @@ class gain_cell_bank(design):
 
             temp = []
             if self.has_rbl:
-                if port in self.read_ports:
-                    temp.extend(["rbl_rbl_{0}_{0}".format(port)])
-                if port in self.write_ports:
-                    temp.extend(["rbl_wbl_{0}_{0}".format(port)])
+                temp.extend(["rbl_rbl_{0}_{0}".format(port)])
             temp.extend(self.gain_cell_array.get_bitline_names(port))
             if port in self.read_ports:
                 for bit in range(self.word_size + self.num_spare_cols):
@@ -507,32 +483,14 @@ class gain_cell_bank(design):
             temp.extend(sel_names)
             if port in self.read_ports:
                 temp.append("s_en{0}".format(port))
-                temp.append("ref{0}".format(port))
-            if port in self.write_ports:
-                temp.append("p_en_bar{0}".format(port))
-            if port in self.read_ports:
-                if OPTS.gc_type == "OS":
-                    temp.append("p_en_bar{0}".format(port))
-                else:
-                    temp.append("p_en{0}".format(port))
+            temp.append("p_en_bar{0}".format(port))
             if port in self.write_ports:
                 temp.append("w_en{0}".format(port))
                 for bit in range(self.num_wmasks):
                     temp.append("bank_wmask{0}_{1}".format(port, bit))
                 for bit in range(self.num_spare_cols):
                     temp.append("bank_spare_wen{0}_{1}".format(port, bit))
-            if OPTS.gc_type == "OS" or OPTS.gc_type == "Hybrid":
-                if port in self.write_ports and OPTS.level_shifter:
-                    if OPTS.gc_type == "Hybrid":
-                        temp.extend(["vdd", "vddio", "gnd"])   
-                    else:
-                        temp.extend(["vdd", "gnd"])  
-                else:
-                    temp.extend(["vdd", "gnd"]) 
-            else:
-                temp.extend(["vdd", "gnd"])
-
-            # temp.extend(["vdd", "gnd"])
+            temp.extend(["vdd", "gnd"])
             self.connect_inst(temp)
 
     def place_port_data(self, offsets):
@@ -540,7 +498,7 @@ class gain_cell_bank(design):
 
         for port in self.all_ports:
             # Top one is unflipped, bottom is flipped along X direction
-            if port in self.read_ports:
+            if port % 2 == 1:
                 mirror = "R0"
             else:
                 mirror = "MX"
@@ -559,27 +517,12 @@ class gain_cell_bank(design):
                 temp.append("addr{0}_{1}".format(port, bit + self.col_addr_size))
             if port in self.read_ports: temp.append("rwl_en{}".format(port))
             elif port in self.write_ports: temp.append("wwl_en{}".format(port))
-            print("self.gain_cell_array, row_size = ", self.gain_cell_array, self.gain_cell_array.row_size)
-            print("self.gain_cell_array.row_size, wordline_names = ", self.gain_cell_array.row_size, self.gain_cell_array.wordline_names)
-            print("gain_cell_bank port = ", port)
             wordline_names = self.gain_cell_array.get_wordline_names(port)
-            print("create_port_address wordline_names = ", wordline_names)
             temp.extend(wordline_names)
-            print("create_port_address temp = ", temp)
             if self.has_rbl:
-                if port in self.write_ports: temp.append("rbl_wwl_{0}_{1}".format(port, port))
-                elif port in self.read_ports: temp.append("rbl_rwl_{0}_{1}".format(port, port))
-            # temp.extend(["vdd", "gnd"])
-            if OPTS.gc_type == "Si" or OPTS.gc_type == "Hybrid":
-                if port in self.write_ports and OPTS.level_shifter:
-                    temp.extend(["vdd", "vddio", "gnd"])   
-                else:
-                     temp.extend(["vdd", "gnd"]) 
-            elif OPTS.gc_type == "OS":
-                if port in self.write_ports:
-                    temp.extend(["vdd", "vddio", "gnd"])
-                else:
-                    temp.extend(["vdd", "gnd"])
+                if port % 2: temp.append("rbl_wwl{}".format(port))
+                else: temp.append("rbl_rwl{}".format(port))
+            temp.extend(["vdd", "gnd"])
             self.connect_inst(temp)
 
     def place_port_address(self, offsets):
@@ -594,7 +537,7 @@ class gain_cell_bank(design):
         # The address flop and decoder are aligned in the x coord.
 
         for port in self.all_ports:
-            if port in self.read_ports:
+            if port % 2:
                 mirror = "MY"
             else:
                 mirror = "R0"
@@ -605,7 +548,7 @@ class gain_cell_bank(design):
         Create a 2:4 or 3:8 column address decoder.
         """
 
-        self.gain_cell_dff =factory.create(module_type="gain_cell_dff")
+        self.dff =factory.create(module_type="dff")
 
         if self.col_addr_size == 0:
             return
@@ -623,11 +566,7 @@ class gain_cell_bank(design):
                 temp.append("addr{0}_{1}".format(port, bit))
             for bit in range(self.num_col_addr_lines):
                 temp.append("sel{0}_{1}".format(port, bit))
-            # temp.extend(["vdd", "gnd"])
-            if OPTS.gc_type == "Si":
-                temp.extend(["vdd", "gnd"]) 
-            elif OPTS.gc_type == "OS" or OPTS.gc_type == "Hybrid":
-                temp.extend(["vdd", "vddio", "gnd"])
+            temp.extend(["vdd", "gnd"])
             self.connect_inst(temp)
 
     def place_column_decoder(self, offsets):
@@ -641,7 +580,7 @@ class gain_cell_bank(design):
                     "Insufficient offsets to place column decoder.")
 
         for port in self.all_ports:
-            if port in self.read_ports:
+            if port % 2 == 1:
                 mirror = "XY"
             else:
                 mirror = "R0"
@@ -690,8 +629,6 @@ class gain_cell_bank(design):
 
         for inst in all_insts:
             self.copy_layout_pin(inst, "vdd")
-            if OPTS.level_shifter and inst == self.port_address_inst[0]:
-                self.copy_layout_pin(inst, "vddio")
             self.copy_layout_pin(inst, "gnd")
 
         if 'vpb' in self.gain_cell_array_inst.mod.pins and 'vnb' in self.gain_cell_array_inst.mod.pins:
@@ -718,12 +655,8 @@ class gain_cell_bank(design):
             bank_sel_signals = ["clk_buf", "w_en", "p_en_bar", "bank_sel"]
             gated_bank_sel_signals = ["gated_clk_buf", "gated_w_en", "gated_p_en_bar"]
         else:
-            if OPTS.gc_type == "OS":
-                bank_sel_signals = ["clk_buf", "s_en", "p_en_bar", "bank_sel", "ref"]
-                gated_bank_sel_signals = ["gated_clk_buf", "gated_s_en", "gated_p_en_bar", "gated_ref"]
-            else:
-                bank_sel_signals = ["clk_buf", "s_en", "p_en", "bank_sel", "ref"]
-                gated_bank_sel_signals = ["gated_clk_buf", "gated_s_en", "gated_p_en", "gated_ref"]
+            bank_sel_signals = ["clk_buf", "s_en", "p_en_bar", "bank_sel"]
+            gated_bank_sel_signals = ["gated_clk_buf", "gated_s_en", "gated_p_en_bar"]
 
         copy_control_signals = self.input_control_signals[port] + ["bank_sel{}".format(port)]
         for signal in range(len(copy_control_signals)):
@@ -783,7 +716,7 @@ class gain_cell_bank(design):
                                            make_pins=(True),
                                            pitch=self.m3_pitch)
 
-        self.copy_layout_pin(self.port_address_inst[0], "wwl_en", self.prefix + "wwl_en0")
+        self.copy_layout_pin(self.port_address_inst[0], "rwl_en", self.prefix + "rwl_en0")
 
         # Port 1
         if len(self.all_ports)==2:
@@ -800,36 +733,25 @@ class gain_cell_bank(design):
                                                make_pins=(True),
                                                pitch=self.m3_pitch)
 
-            self.copy_layout_pin(self.port_address_inst[1], "rwl_en", self.prefix + "rwl_en1")
+            self.copy_layout_pin(self.port_address_inst[1], "wwl_en", self.prefix + "wwl_en1")
 
     def route_port_data_to_gain_cell_array(self, port):
         """ Routing of BL and BR between port data and gain_cell array """
 
         # Connect the regular bitlines
-        print("route_port_data_to_gain_cell_array port = ", port)
         inst2 = self.port_data_inst[port]
-        print("inst2 = ", inst2)
         inst1 = self.gain_cell_array_inst
-        if port in self.read_ports:
-            inst1_bl_name = [x for x in self.gain_cell_array.get_bitline_names(port) if "rbl" in x]
-        elif port in self.write_ports:
-            inst1_bl_name = [x for x in self.gain_cell_array.get_bitline_names(port) if "wbl" in x]
+        inst1_bl_name = [x for x in self.gain_cell_array.get_bitline_names(port) if "rbl" in x]
         # inst1_br_name = [x for x in self.gain_cell_array.get_bitline_names(port) if "br" in x]
         # inst1_br_name = ["ref"]
         inst2_bl_name = []
         inst2_br_name = []
         for col in range(self.num_cols):
-            if port in self.read_ports:
-                inst2_bl_name.append(inst2.mod.get_rbl_names() + "_{}".format(col))
-            elif port in self.write_ports:
-                inst2_bl_name.append(inst2.mod.get_wbl_names() + "_{}".format(col))
-            # inst2_br_name.append(inst2.mod.get_br_names() + "_{}".format(col))
+            inst2_bl_name.append(inst2.mod.get_bl_names() + "_{}".format(col))
+            inst2_br_name.append(inst2.mod.get_br_names() + "_{}".format(col))
         for col in range(self.num_spare_cols):
-            if port in self.read_ports:
-                inst2_bl_name.append("spare" + inst2.mod.get_rbl_names() + "_{}".format(col))
-            elif port in self.write_ports:
-                inst2_bl_name.append("spare" + inst2.mod.get_wbl_names() + "_{}".format(col))
-            # inst2_br_name.append("spare" + inst2.mod.get_br_names() + "_{}".format(col))
+            inst2_bl_name.append("spare" + inst2.mod.get_bl_names() + "_{}".format(col))
+            inst2_br_name.append("spare" + inst2.mod.get_br_names() + "_{}".format(col))
 
         # self.connect_bitlines(inst1=inst1,
         #                       inst2=inst2,
@@ -841,11 +763,8 @@ class gain_cell_bank(design):
             self.connect_bitline(inst1, inst2,array_name, data_name)
         # Connect the replica bitlines
         if self.has_rbl:
-            if port in self.read_ports:
-                for (array_name, data_name) in zip(["rbl_rbl_{0}_{0}".format(port)], ["rbl_rbl"]):
-                    self.connect_bitline(inst1, inst2, array_name, data_name)
-            elif port in self.write_ports:
-                for (array_name, data_name) in zip(["rbl_wbl_{0}_{0}".format(port)], ["rbl_wbl"]):
+            for (array_name, data_name) in zip(["rbl_rbl_{0}_{0}".format(port)], ["rbl_rbl"]):
+                if port in self.read_ports:
                     self.connect_bitline(inst1, inst2, array_name, data_name)
 
     def route_port_data_out(self, port):
@@ -928,7 +847,7 @@ class gain_cell_bank(design):
         else:
             (bottom_inst, bottom_name) = (inst2, inst2_name)
             (top_inst, top_name) = (inst1, inst1_name)
-        print("gain_cell_bank connect_bitline bottom_inst, bottom_name = ", bottom_inst, bottom_name)
+
         bottom_pin = bottom_inst.get_pin(bottom_name)
         top_pin = top_inst.get_pin(top_name)
         debug.check(bottom_pin.layer == top_pin.layer, "Pin layers do not match.")
@@ -959,15 +878,14 @@ class gain_cell_bank(design):
 
         self.route_port_address_in(port)
 
-        if port in self.read_ports:
+        if port % 2:
             self.route_port_address_out(port, "right")
         else:
             self.route_port_address_out(port, "left")
 
     def route_port_address_out(self, port, side="left"):
         """ Connecting Wordline driver output to gain_cell WL connection  """
-        # if side == "left": 
-        if port in self.read_ports:
+        if side == "left": 
             driver_names = ["rwl_{}".format(x) for x in range(self.num_rows)]
             # gain_cell_port = port * 2 + 1
         else: 
@@ -975,9 +893,7 @@ class gain_cell_bank(design):
             # gain_cell_port = port * 2
         # driver_names = ["wl_{}".format(x) for x in range(self.num_rows)]
         if self.has_rbl:
-            # if side == "left": 
-            if port in self.read_ports:
-                driver_names = driver_names + ["rbl_rwl"]
+            if side == "left": driver_names = driver_names + ["rbl_rwl"]
             else: driver_names = driver_names + ["rbl_wwl"]
             rbl_wl_name = self.gain_cell_array.get_rbl_wordline_names(port)[port]
         else:
@@ -1016,31 +932,27 @@ class gain_cell_bank(design):
             else:
                 self.add_path(gain_cell_wl_pin.layer, [driver_wl_pos, mid1, mid2, gain_cell_wl_pos])
 
-    # def route_port_address_right(self, port):
-    #     """ Connecting Wordline driver output to gain_cell WL connection  """
-    #     if port in self.read_ports:
-    #         driver_names = ["rwl_{}".format(x) for x in range(self.num_rows)]
-    #         if self.has_rbl:
-    #             driver_names = driver_names + ["rbl_rwl"]
-    #     elif port in self.write_ports:
-    #         driver_names = ["wwl_{}".format(x) for x in range(self.num_rows)]
-    #         if self.has_rbl:
-    #             driver_names = driver_names + ["rbl_wwl"]
-    #     # rbl_wl in next two lines will be ignored by zip once driver_names is exhausted in the no rbl case
-    #     rbl_wl_name = self.gain_cell_array.get_rbl_wordline_names(port)[port]
-    #     for (driver_name, array_name) in zip(driver_names, self.gain_cell_array.get_wordline_names(port) + [rbl_wl_name]):
-    #         # The mid guarantees we exit the input cell to the right.
-    #         driver_wl_pin = self.port_address_inst[port].get_pin(driver_name)
-    #         driver_wl_pos = driver_wl_pin.lc()
-    #         gain_cell_wl_pin = self.gain_cell_array_inst.get_pin(array_name)
-    #         gain_cell_wl_pos = gain_cell_wl_pin.rc()
-    #         mid1 = driver_wl_pos.scale(0, 1) + vector(0.5 * self.port_address_inst[port].lx() + 0.5 * self.gain_cell_array_inst.rx(), 0)
-    #         mid2 = mid1.scale(1, 0) + gain_cell_wl_pos.scale(0, 1)
-    #         self.add_path(driver_wl_pin.layer, [driver_wl_pos, mid1, mid2])
-    #         self.add_via_stack_center(from_layer=driver_wl_pin.layer,
-    #                                   to_layer=gain_cell_wl_pin.layer,
-    #                                   offset=mid2)
-    #         self.add_path(gain_cell_wl_pin.layer, [mid2, gain_cell_wl_pos])
+    def route_port_address_right(self, port):
+        """ Connecting Wordline driver output to gain_cell WL connection  """
+
+        driver_names = ["wwl_{}".format(x) for x in range(self.num_rows)]
+        if self.has_rbl:
+            driver_names = driver_names + ["rbl_wwl"]
+        # rbl_wl in next two lines will be ignored by zip once driver_names is exhausted in the no rbl case
+        rbl_wl_name = self.gain_cell_array.get_rbl_wordline_names(port)[port]
+        for (driver_name, array_name) in zip(driver_names, self.gain_cell_array.get_wordline_names(port) + [rbl_wl_name]):
+            # The mid guarantees we exit the input cell to the right.
+            driver_wl_pin = self.port_address_inst[port].get_pin(driver_name)
+            driver_wl_pos = driver_wl_pin.lc()
+            gain_cell_wl_pin = self.gain_cell_array_inst.get_pin(array_name)
+            gain_cell_wl_pos = gain_cell_wl_pin.rc()
+            mid1 = driver_wl_pos.scale(0, 1) + vector(0.5 * self.port_address_inst[port].lx() + 0.5 * self.gain_cell_array_inst.rx(), 0)
+            mid2 = mid1.scale(1, 0) + gain_cell_wl_pos.scale(0, 1)
+            self.add_path(driver_wl_pin.layer, [driver_wl_pos, mid1, mid2])
+            self.add_via_stack_center(from_layer=driver_wl_pin.layer,
+                                      to_layer=gain_cell_wl_pin.layer,
+                                      offset=mid2)
+            self.add_path(gain_cell_wl_pin.layer, [mid2, gain_cell_wl_pos])
 
     def route_column_address_lines(self, port):
         """ Connecting the select lines of column mux to the address bus """
@@ -1059,7 +971,7 @@ class gain_cell_bank(design):
             addr_name = "addr{0}_{1}".format(port, i)
             self.copy_layout_pin(self.column_decoder_inst[port], decoder_name, addr_name)
 
-        if port in self.read_ports:
+        if port % 2:
             offset = self.column_decoder_inst[port].ll() - vector((self.num_col_addr_lines + 1) * pitch, 0)
         else:
             offset = self.column_decoder_inst[port].lr() + vector(pitch, 0)
@@ -1130,16 +1042,8 @@ class gain_cell_bank(design):
         # Connection from the central bus to the main control block crosses
         # pre-decoder and this connection is in metal3
         connection = []
-        if port in self.write_ports:
-            connection.append((self.prefix + "p_en_bar{}".format(port),
-                            self.port_data_inst[port].get_pin("p_en_bar")))
-        if port in self.read_ports:
-            if OPTS.gc_type == "OS":
-                connection.append((self.prefix + "p_en_bar{}".format(port),
-                            self.port_data_inst[port].get_pin("p_en_bar")))
-            else:
-                connection.append((self.prefix + "p_en{}".format(port),
-                            self.port_data_inst[port].get_pin("p_en")))
+        connection.append((self.prefix + "p_en_bar{}".format(port),
+                           self.port_data_inst[port].get_pin("p_en_bar")))
 
         if port in self.write_ports:
             connection.append((self.prefix + "w_en{}".format(port),
@@ -1148,10 +1052,6 @@ class gain_cell_bank(design):
         if port in self.read_ports:
             connection.append((self.prefix + "s_en{}".format(port),
                                self.port_data_inst[port].get_pin("s_en")))
-        
-        if port in self.read_ports:
-            connection.append((self.prefix + "ref{}".format(port),
-                               self.port_data_inst[port].get_pin("ref")))
 
         for (control_signal, pin) in connection:
             control_pin = self.bus_pins[port][control_signal]
@@ -1172,17 +1072,7 @@ class gain_cell_bank(design):
         """
         for port in self.read_ports:
             if self.port_data[port]:
-                # if OPTS.gc_type == "Si":
-                #     self.port_data[port].graph_exclude_predischarge()
-                # else:
                 self.port_data[port].graph_exclude_precharge()
-    def graph_exclude_predischarge(self):
-        """
-        Precharge adds a loop between bitlines, can be excluded to reduce complexity
-        """
-        for port in self.read_ports:
-            if self.port_data[port]:
-                self.port_data[port].graph_exclude_predischarge()
 
     def get_cell_name(self, inst_name, row, col):
         """

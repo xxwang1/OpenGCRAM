@@ -21,7 +21,7 @@ def parse_spice_list(filename, key):
     """Parses a hspice output.lis file for a key value"""
 
     lower_key = key.lower()
-    print("parse_spice_list lower_key = ", lower_key)
+
     if OPTS.spice_name == "xa" :
         # customsim has a different output file name
         full_filename="{0}xa.meas".format(OPTS.openram_temp)
@@ -42,9 +42,7 @@ def parse_spice_list(filename, key):
     contents = f.read().lower()
     f.close()
     # val = re.search(r"{0}\s*=\s*(-?\d+.?\d*\S*)\s+.*".format(key), contents)
-    print("content to search = ", r"{0}\s*=\s*(-?\d+.?\d*[e]?[-+]?[0-9]*\S*)\s+.*".format(lower_key))
     val = re.search(r"{0}\s*=\s*(-?\d+.?\d*[e]?[-+]?[0-9]*\S*)\s+.*".format(lower_key), contents)
-    print("val = ", val)
     if val != None:
         debug.info(4, "Key = " + lower_key + " Val = " + val.group(1))
         return convert_to_float(val.group(1))
@@ -132,16 +130,6 @@ class bit_polarity(Enum):
 
 
 class sram_op(Enum):
-    READ_ZERO = 0
-    READ_ONE = 1
-    WRITE_ZERO = 2
-    WRITE_ONE = 3
-    DISABLED_READ_ZERO = 4
-    DISABLED_READ_ONE = 5
-    DISABLED_WRITE_ZERO = 6
-    DISABLED_WRITE_ONE = 7
-
-class gain_cell_op(Enum):
     READ_ZERO = 0
     READ_ONE = 1
     WRITE_ZERO = 2

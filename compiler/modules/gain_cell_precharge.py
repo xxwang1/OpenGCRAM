@@ -15,7 +15,7 @@ from openram import OPTS
 from .pgate import *
 
 
-class gain_cell_precharge(design):
+class precharge(design):
     """
     Creates a single precharge cell
     This module implements the precharge bitline cell used in the design.
@@ -54,10 +54,10 @@ class gain_cell_precharge(design):
             self.DRC_LVS()
 
     def get_rbl_names(self):
-        return self.gain_cell_rbl
+        return "rbl"
 
-    def get_wbl_names(self):
-        return self.gain_cell_rbl
+    # def get_br_names(self):
+    #     return "br"
 
     def create_netlist(self):
         self.add_pins()
@@ -76,7 +76,7 @@ class gain_cell_precharge(design):
         self.add_boundary()
 
     def add_pins(self):
-        self.add_pin_list([self.gain_cell_rbl, "en_bar", "vdd"],
+        self.add_pin_list(["rbl", "en_bar", "vdd"],
                           ["OUTPUT", "INPUT", "POWER"])
 
     def add_ptx(self):
@@ -95,11 +95,10 @@ class gain_cell_precharge(design):
         Adds a vdd rail at the top of the cell
         """
 
-        pmos_pin = self.upper_pmos1_inst.get_pin("D")
+        pmos_pin = self.upper_pmos2_inst.get_pin("S")
         pmos_pos = pmos_pin.center()
         self.add_path(pmos_pin.layer, [pmos_pos, self.well_contact_pos])
-        pmos_pos_lower = self.lower_pmos_inst.get_pin("D").center()
-        self.add_path(pmos_pin.layer, [pmos_pos, pmos_pos_lower])
+
         self.add_layout_pin_rect_center(text="vdd",
                                         layer=pmos_pin.layer,
                                         offset=self.well_contact_pos)
@@ -111,11 +110,11 @@ class gain_cell_precharge(design):
 
         self.lower_pmos_inst = self.add_inst(name="lower_pmos",
                                              mod=self.pmos)
-        self.connect_inst([self.gain_cell_rbl, "en_bar", "vdd", "vdd"])
+        self.connect_inst(["rbl", "en_bar", "vdd", "vdd"])
 
         self.upper_pmos1_inst = self.add_inst(name="upper_pmos1",
                                               mod=self.pmos)
-        self.connect_inst([self.gain_cell_rbl, "en_bar", "vdd", "vdd"])
+        self.connect_inst(["rbl", "en_bar", "vdd", "vdd"])
 
         # self.upper_pmos2_inst = self.add_inst(name="upper_pmos2",
         #                                       mod=self.pmos)
@@ -167,7 +166,7 @@ class gain_cell_precharge(design):
 
         # connects the two poly for the two upper pmos(s)
         offset = offset + vector(0, ylength - self.poly_width)
-        xlength = self.upper_pmos1_inst.get_pin("G").lx() \
+        xlength = self.upper_pmos2_inst.get_pin("G").lx() \
                   - self.upper_pmos1_inst.get_pin("G").lx() \
                   + self.poly_width
         self.add_rect(layer="poly",
@@ -234,7 +233,7 @@ class gain_cell_precharge(design):
                                   offset=self.well_contact_pos,
                                   min_area = True)
 
-        self.height = self.well_contact_pos.y + self.active_contact.height + self.m1_space + self.well_enclose_active
+        self.height = self.well_contact_pos.y + self.active_contact.height + self.m1_space
 
         # nwell should span the whole design since it is pmos only
         self.add_rect(layer="nwell",
@@ -253,17 +252,17 @@ class gain_cell_precharge(design):
         top_pos = vector(self.rbl_xoffset, self.height)
         pin_pos = vector(self.rbl_xoffset, 0)
         self.add_path(self.bitline_layer, [top_pos, pin_pos])
-        self.rbl_pin = self.add_layout_pin_segment_center(text=self.gain_cell_rbl,
+        self.rbl_pin = self.add_layout_pin_segment_center(text="rbl",
                                                          layer=self.bitline_layer,
                                                          start=pin_pos,
                                                          end=top_pos)
 
         # adds the BR
-        self.vdd_xoffset = self.width - layer_pitch
-        top_pos = vector(self.vdd_xoffset, self.height)
-        pin_pos = vector(self.vdd_xoffset, 0)
+        self.br_xoffset = self.width - layer_pitch
+        top_pos = vector(self.br_xoffset, self.height)
+        pin_pos = vector(self.br_xoffset, 0)
         self.add_path(self.bitline_layer, [top_pos, pin_pos])
-        self.vdd_pin = self.add_layout_pin_segment_center(text="vdd",
+        self.br_pin = self.add_layout_pin_segment_center(text="br",
                                                          layer=self.bitline_layer,
                                                          start=pin_pos,
                                                          end=top_pos)
@@ -275,13 +274,13 @@ class gain_cell_precharge(design):
         self.add_bitline_contacts()
         self.connect_pmos(self.lower_pmos_inst.get_pin("S"),
                           self.rbl_xoffset)
-        self.connect_pmos(self.lower_pmos_inst.get_pin("D"),
-                          self.vdd_xoffset)
+        # self.connect_pmos(self.lower_pmos_inst.get_pin("D"),
+        #                   self.br_xoffset)
 
         self.connect_pmos(self.upper_pmos1_inst.get_pin("S"),
                           self.rbl_xoffset)
-        self.connect_pmos(self.upper_pmos1_inst.get_pin("D"),
-                          self.vdd_xoffset)
+        # self.connect_pmos(self.upper_pmos2_inst.get_pin("D"),
+        #                   self.br_xoffset)
 
     def add_bitline_contacts(self):
         """
@@ -296,19 +295,13 @@ class gain_cell_precharge(design):
                                       directions=("V", "V"),
                                       min_area=True)
 
-        # BR
+        # # BR
         # for upper_pin in [self.upper_pmos1_inst.get_pin("S"), self.upper_pmos2_inst.get_pin("D")]:
         #     self.add_via_stack_center(from_layer=upper_pin.layer,
         #                               to_layer=self.bitline_layer,
         #                               offset=upper_pin.center(),
         #                               directions=("V", "V"),
         #                               min_area=True)
-        for upper_pin in [self.upper_pmos1_inst.get_pin("S")]:
-            self.add_via_stack_center(from_layer=upper_pin.layer,
-                                      to_layer=self.bitline_layer,
-                                      offset=upper_pin.center(),
-                                      directions=("V", "V"),
-                                      min_area=True)
 
     def connect_pmos(self, pmos_pin, bit_xoffset):
         """

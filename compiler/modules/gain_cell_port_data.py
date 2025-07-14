@@ -15,15 +15,15 @@ from openram.tech import layer_properties as layer_props
 from openram import OPTS
 
 
-class gain_cell_port_data(design):
+class port_data(design):
     """
     Create the data port (column mux, sense amps, write driver, etc.) for the given port number.
     When RBLs present: port 0 always has the RBL on the left while port 1 is on the right.
     """
 
-    def __init__(self, gain_cell_config, port, has_rbl, num_spare_cols=None, bit_offsets=None, name="",):
+    def __init__(self, sram_config, port, has_rbl, num_spare_cols=None, bit_offsets=None, name="",):
 
-        gain_cell_config.set_local_config(self)
+        sram_config.set_local_config(self)
         self.port = port
         self.has_rbl = has_rbl
         if self.write_size != self.word_size:
@@ -35,14 +35,13 @@ class gain_cell_port_data(design):
                 self.num_spare_cols = num_spare_cols + self.num_spare_cols
         if self.num_spare_cols is None:
             self.num_spare_cols = 0
-        print("gain_cell_port_data bit_offsets = ", bit_offsets)
         if not bit_offsets:
-            gain_cell = factory.create(module_type=OPTS.gain_cell)
+            bitcell = factory.create(module_type=OPTS.bitcell)
             if(cell_properties.use_strap == True and OPTS.num_ports == 1):
                 strap = factory.create(module_type=cell_properties.strap_module, version=cell_properties.strap_version)
-                precharge_width = gain_cell.width + strap.width
+                precharge_width = bitcell.width + strap.width
             else:
-                precharge_width = gain_cell.width
+                precharge_width = bitcell.width
             self.bit_offsets = []
             for i in range(self.num_cols + self.num_spare_cols):
                 self.bit_offsets.append(i * precharge_width)
@@ -64,19 +63,16 @@ class gain_cell_port_data(design):
 
     def get_rbl_names(self):
         # bl lines are connect from the precharger
-        if OPTS.gc_type == "Si":
-            return self.predischarge.get_rbl_names()
-        else:
-            return self.precharge.get_rbl_names()
+        return self.precharge.get_rbl_names()
 
     def get_wbl_names(self):
         # br lines are connect from the precharger
         return self.precharge.get_wbl_names()
 
-    def get_rbl_name(self, port=1):
+    def get_rbl_name(self, port=0):
         return "rbl_{}".format(port)
 
-    def get_wbl_name(self, port=0):
+    def get_wbl_name(self, port=1):
         return "wbl_{}".format(port)
 
     def create_netlist(self):
@@ -86,24 +82,11 @@ class gain_cell_port_data(design):
         self.create_instances()
 
     def create_instances(self):
-        if self.port in self.write_ports:
-            if self.precharge_array:
-                if self.port in self.write_ports:
-                    self.create_precharge_array()
-                else:
-                    self.precharge_array_inst = None
-        if self.port in self.read_ports:
-            if self.predischarge_array:
-                self.precharge_array_inst = None
-                if self.port in self.read_ports:
-                    self.create_predischarge_array()
-                else: self.predischarge_array_inst = None
-            elif self.precharge_array:
-                self.predischarge_array_inst = None
-                if self.port in self.read_ports:
-                    self.create_precharge_array()
-                else: self.precharge_array_inst = None
-        
+        if self.precharge_array:
+            self.create_precharge_array()
+        else:
+            self.precharge_array_inst = None
+
         if self.sense_amp_array:
             self.create_sense_amp_array()
         else:
@@ -132,26 +115,16 @@ class gain_cell_port_data(design):
 
     def add_pins(self):
         """ Adding pins for port data module"""
-        if self.port in self.read_ports:
-            if self.has_rbl:
-                self.add_pin("rbl_rbl", "INOUT")
-                # self.add_pin("rbl_br", "INOUT")
-            for bit in range(self.num_cols):
-                self.add_pin("rbl_{0}".format(bit), "INOUT")
-                # self.add_pin("br_{0}".format(bit), "INOUT")
-            for bit in range(self.num_spare_cols):
-                self.add_pin("sparerbl_{0}".format(bit), "INOUT")
-                # self.add_pin("sparebr_{0}".format(bit), "INOUT")
-        elif self.port in self.write_ports:
-            if self.has_rbl:
-                self.add_pin("rbl_wbl", "INOUT")
-                # self.add_pin("rbl_br", "INOUT")
-            for bit in range(self.num_cols):
-                self.add_pin("wbl_{0}".format(bit), "INOUT")
-                # self.add_pin("br_{0}".format(bit), "INOUT")
-            for bit in range(self.num_spare_cols):
-                self.add_pin("sparewbl_{0}".format(bit), "INOUT")
-                # self.add_pin("sparebr_{0}".format(bit), "INOUT")
+
+        if self.has_rbl:
+            self.add_pin("rbl_rbl", "INOUT")
+            # self.add_pin("rbl_br", "INOUT")
+        for bit in range(self.num_cols):
+            self.add_pin("rbl_{0}".format(bit), "INOUT")
+            # self.add_pin("br_{0}".format(bit), "INOUT")
+        for bit in range(self.num_spare_cols):
+            self.add_pin("sparerbl_{0}".format(bit), "INOUT")
+            # self.add_pin("sparebr_{0}".format(bit), "INOUT")
         if self.port in self.read_ports:
             for bit in range(self.word_size + self.num_spare_cols):
                 self.add_pin("dout_{}".format(bit), "OUTPUT")
@@ -164,21 +137,13 @@ class gain_cell_port_data(design):
             self.add_pin(pin_name, "INPUT")
         if self.port in self.read_ports:
             self.add_pin("s_en", "INPUT")
-            self.add_pin("ref", "INPUT")
-        if self.port in self.read_ports:
-            if OPTS.gc_type == "OS":
-                self.add_pin("p_en_bar", "INPUT")
-            else:
-                self.add_pin("p_en", "INPUT")
-        elif self.port in self.write_ports:
-            self.add_pin("p_en_bar", "INPUT")
+        self.add_pin("p_en_bar", "INPUT")
         if self.port in self.write_ports:
             self.add_pin("w_en", "INPUT")
             for bit in range(self.num_wmasks):
                 self.add_pin("bank_wmask_{}".format(bit), "INPUT")
             for bit in range(self.num_spare_cols):
                 self.add_pin("bank_spare_wen{}".format(bit), "INPUT")
-        
         self.add_pin("vdd", "POWER")
         self.add_pin("gnd", "GROUND")
 
@@ -197,7 +162,7 @@ class gain_cell_port_data(design):
         """ Route the bitlines depending on the port type rw, w, or r. """
 
         if self.port in self.readwrite_ports:
-            # (write_mask_and ->) write_driver -> sense_amp -> (column_mux ->) precharge -> gain_cell_array
+            # (write_mask_and ->) write_driver -> sense_amp -> (column_mux ->) precharge -> bitcell_array
             self.route_write_mask_and_array_in(self.port)
             self.route_write_mask_and_array_to_write_driver(self.port)
             self.route_write_driver_in(self.port)
@@ -206,16 +171,12 @@ class gain_cell_port_data(design):
             self.route_sense_amp_to_column_mux_or_precharge_array(self.port)
             self.route_column_mux_to_precharge_array(self.port)
         elif self.port in self.read_ports:
-            # sense_amp -> (column_mux) -> precharge -> gain_cell_array
+            # sense_amp -> (column_mux) -> precharge -> bitcell_array
             self.route_sense_amp_out(self.port)
-            if OPTS.gc_type == "Si":
-                self.route_sense_amp_to_column_mux_or_predischarge_array(self.port)
-                self.route_column_mux_to_predischarge_array(self.port)
-            else:
-                self.route_sense_amp_to_column_mux_or_precharge_array(self.port)
-                self.route_column_mux_to_precharge_array(self.port)
+            self.route_sense_amp_to_column_mux_or_precharge_array(self.port)
+            self.route_column_mux_to_precharge_array(self.port)
         else:
-            # (write_mask_and ->) write_driver -> (column_mux ->) precharge -> gain_cell_array
+            # (write_mask_and ->) write_driver -> (column_mux ->) precharge -> bitcell_array
             self.route_write_mask_and_array_in(self.port)
             self.route_write_mask_and_array_to_write_driver(self.port)
             self.route_write_driver_in(self.port)
@@ -226,7 +187,7 @@ class gain_cell_port_data(design):
         """ Propagate all vdd/gnd pins up to this level for all modules """
 
         for inst in self.insts:
-            self.copy_power_pins(inst, "vdd", minarea=True, snap_to_grid=False)
+            self.copy_power_pins(inst, "vdd", minarea=True)
             self.copy_power_pins(inst, "gnd", minarea=True)
 
     def add_modules(self):
@@ -237,7 +198,7 @@ class gain_cell_port_data(design):
         # and mirroring happens correctly
 
         # Used for names/dimensions only
-        cell = factory.create(module_type=OPTS.gain_cell)
+        cell = factory.create(module_type=OPTS.bitcell)
         if(cell_properties.use_strap == True and OPTS.num_ports == 1):
             strap = factory.create(module_type=cell_properties.strap_module, version=cell_properties.strap_version)
             precharge_width = cell.width + strap.width
@@ -254,39 +215,16 @@ class gain_cell_port_data(design):
             precharge_bit_offsets = self.bit_offsets
 
         # has_rbl is a boolean treated as 1 if true 0 if false typical python
-        if self.port in self.read_ports:
-            gain_cell_bl = self.rbl_names[self.port - 1]
-        elif self.port in self.write_ports:
-            gain_cell_bl = self.wbl_names[self.port]
-        if self.port in self.write_ports:
-            self.precharge_array = factory.create(module_type="gain_cell_precharge_array",
+        self.precharge_array = factory.create(module_type="precharge_array",
                                               columns=self.num_cols + self.num_spare_cols + self.has_rbl,
                                               offsets=precharge_bit_offsets,
-                                              gain_cell_bl=gain_cell_bl,
-                                            #   gain_cell_br=self.br_names[self.port],
+                                              bitcell_bl=self.bl_names[self.port],
+                                            #   bitcell_br=self.br_names[self.port],
                                               column_offset=self.port - 1)
-        if self.port in self.read_ports:
-            if OPTS.gc_type == "Si":
-                self.predischarge_array = factory.create(module_type="gain_cell_predischarge_array",
-                                              columns=self.num_cols + self.num_spare_cols + self.has_rbl,
-                                              offsets=precharge_bit_offsets,
-                                              gain_cell_bl=gain_cell_bl,
-                                            #   gain_cell_br=self.br_names[self.port],
-                                              column_offset=self.port - 1)
-                self.precharge_array = None
-            else:
-                self.precharge_array = factory.create(module_type="gain_cell_precharge_array",
-                                              columns=self.num_cols + self.num_spare_cols + self.has_rbl,
-                                              offsets=precharge_bit_offsets,
-                                              gain_cell_bl=gain_cell_bl,
-                                            #   gain_cell_br=self.br_names[self.port],
-                                              column_offset=self.port - 1)
-                self.predischarge_array = None
 
         if self.port in self.read_ports:
             # RBLs don't get a sense amp
-            print("creating gain_cell_sense_amp_array self.bit_offsets = ", self.bit_offsets)
-            self.sense_amp_array = factory.create(module_type="gain_cell_sense_amp_array",
+            self.sense_amp_array = factory.create(module_type="sense_amp_array",
                                                   word_size=self.word_size,
                                                   offsets=self.bit_offsets,
                                                   words_per_row=self.words_per_row,
@@ -296,26 +234,18 @@ class gain_cell_port_data(design):
 
         if self.col_addr_size > 0:
             # RBLs dont get a col mux
-            if self.port in self.read_ports:
-                self.column_mux_array = factory.create(module_type="gain_cell_column_mux_array",
-                                                    columns=self.num_cols,
-                                                    word_size=self.word_size,
-                                                    offsets=self.bit_offsets,
-                                                    gain_cell_bl=self.rbl_names[0])
-                                                    #    gain_cell_br=self.br_names[self.port])
-            if self.port in self.write_ports:
-                self.column_mux_array = factory.create(module_type="gain_cell_column_mux_array",
-                                                    columns=self.num_cols,
-                                                    word_size=self.word_size,
-                                                    offsets=self.bit_offsets,
-                                                    gain_cell_bl=self.wbl_names[0])
-                                                    #    gain_cell_br=self.br_names[self.port])
+            self.column_mux_array = factory.create(module_type="column_mux_array",
+                                                   columns=self.num_cols,
+                                                   word_size=self.word_size,
+                                                   offsets=self.bit_offsets,
+                                                   bitcell_bl=self.bl_names[self.port],
+                                                #    bitcell_br=self.br_names[self.port])
         else:
             self.column_mux_array = None
 
         if self.port in self.write_ports:
             # RBLs dont get a write driver
-            self.write_driver_array = factory.create(module_type="gain_cell_write_driver_array",
+            self.write_driver_array = factory.create(module_type="write_driver_array",
                                                      columns=self.num_cols,
                                                      word_size=self.word_size,
                                                      offsets=self.bit_offsets,
@@ -351,23 +281,14 @@ class gain_cell_port_data(design):
 
         # create arrays of bitline and bitline_bar names for read,
         # write, or all ports
-        self.gain_cell = factory.create(module_type=OPTS.gain_cell)
-        self.rbl_names = self.gain_cell.get_all_rbl_names()
-        self.wbl_names = self.gain_cell.get_all_wbl_names()
-        self.wwl_names = self.gain_cell.get_all_wwl_names()
-        self.rwl_names = self.gain_cell.get_all_rwl_names()
+        self.bitcell = factory.create(module_type=OPTS.bitcell)
+        self.rbl_names = self.bitcell.get_all_rbl_names()
+        # self.br_names = self.bitcell.get_all_br_names()
+        self.wwl_names = self.bitcell.get_all_wwl_names()
+        self.rwl_names = self.bitcell.get_all_rwl_names()
         # used for bl/br names
-        
-        if self.port in self.read_ports:
-            if OPTS.gc_type == "Si":
-                self.predischarge = factory.create(module_type=OPTS.gain_cell_predischarge,
-                                            gain_cell_rbl=self.rbl_names[0])
-            elif OPTS.gc_type == "OS":
-                self.precharge = factory.create(module_type=OPTS.gain_cell_precharge,
-                                            gain_cell_rbl=self.rbl_names[0])
-        elif self.port in self.write_ports:
-            self.precharge = factory.create(module_type=OPTS.gain_cell_precharge,
-                                            gain_cell_rbl=self.wbl_names[0])
+        self.precharge = factory.create(module_type=OPTS.precharge,
+                                        bitcell_bl=self.rbl_names[0])
 
     def create_precharge_array(self):
         """ Creating Precharge """
@@ -380,79 +301,27 @@ class gain_cell_port_data(design):
         temp = []
         # Use left BLs for RBL
         if self.port==0 and self.has_rbl:
-            temp.append("rbl_wbl")
+            temp.append("rbl_rbl")
             # temp.append("rbl_br")
-        if self.port in self.read_ports:
-            for bit in range(self.num_cols):
-                temp.append("rbl_{0}".format(bit))
-                # temp.append("br_{0}".format(bit))
+        for bit in range(self.num_cols):
+            temp.append("rbl_{0}".format(bit))
+            # temp.append("br_{0}".format(bit))
 
-            for bit in range(self.num_spare_cols):
-                temp.append("sparerbl_{0}".format(bit))
-                # temp.append("sparebr_{0}".format(bit))
-        elif self.port in self.write_ports:
-            for bit in range(self.num_cols):
-                temp.append("wbl_{0}".format(bit))
-                # temp.append("br_{0}".format(bit))
-
-            for bit in range(self.num_spare_cols):
-                temp.append("sparewbl_{0}".format(bit))
-                # temp.append("sparebr_{0}".format(bit))
+        for bit in range(self.num_spare_cols):
+            temp.append("sparerbl_{0}".format(bit))
+            # temp.append("sparebr_{0}".format(bit))
 
         # Use right BLs for RBL
         if self.port==1 and self.has_rbl:
             temp.append("rbl_rbl")
             # temp.append("rbl_br")
-        # if self.port == 1: temp.extend(["p_en", "vdd"])
         temp.extend(["p_en_bar", "vdd"])
-        self.connect_inst(temp)
-
-    def create_predischarge_array(self):
-        """ Creating Predischarge """
-        if not self.predischarge_array:
-            self.predischarge_array_inst = None
-            return
-
-        self.predischarge_array_inst = self.add_inst(name="predischarge_array{}".format(self.port),
-                                                  mod=self.predischarge_array)
-        temp = []
-        # Use left BLs for RBL
-        if self.port==0 and self.has_rbl:
-            temp.append("rbl_wbl")
-            # temp.append("rbl_br")
-        if self.port in self.read_ports:
-            for bit in range(self.num_cols):
-                temp.append("rbl_{0}".format(bit))
-                # temp.append("br_{0}".format(bit))
-
-            for bit in range(self.num_spare_cols):
-                temp.append("sparerbl_{0}".format(bit))
-                # temp.append("sparebr_{0}".format(bit))
-        elif self.port in self.write_ports:
-            for bit in range(self.num_cols):
-                temp.append("wbl_{0}".format(bit))
-                # temp.append("br_{0}".format(bit))
-
-            for bit in range(self.num_spare_cols):
-                temp.append("sparewbl_{0}".format(bit))
-                # temp.append("sparebr_{0}".format(bit))
-
-        # Use right BLs for RBL
-        if self.port==1 and self.has_rbl:
-            temp.append("rbl_rbl")
-            # temp.append("rbl_br")
-        temp.extend(["p_en", "gnd"])
         self.connect_inst(temp)
 
     def place_precharge_array(self, offset):
         """ Placing Precharge """
 
         self.precharge_array_inst.place(offset=offset, mirror="MX")
-
-    def place_predischarge_array(self, offset):
-        """ Placing Predischarge """
-
-        self.predischarge_array_inst.place(offset=offset, mirror="MX")
 
     def create_column_mux_array(self):
         """ Creating Column Mux when words_per_row > 1 . """
@@ -462,18 +331,12 @@ class gain_cell_port_data(design):
 
         temp = []
         for col in range(self.num_cols):
-            if self.port in self.read_ports:
-                temp.append("rbl_{0}".format(col))
-            if self.port in self.write_ports:
-                temp.append("wbl_{0}".format(col))
+            temp.append("rbl_{0}".format(col))
             # temp.append("br_{0}".format(col))
         for word in range(self.words_per_row):
             temp.append("sel_{}".format(word))
         for bit in range(self.word_size):
-            if self.port in self.read_ports:
-                temp.append("rbl_out_{0}".format(bit))
-            if self.port in self.write_ports:
-                temp.append("wbl_out_{0}".format(bit))
+            temp.append("rbl_out_{0}".format(bit))
             # temp.append("br_out_{0}".format(bit))
 
         temp.append("gnd")
@@ -495,19 +358,18 @@ class gain_cell_port_data(design):
         for bit in range(self.word_size):
             temp.append("dout_{}".format(bit))
             if self.words_per_row == 1:
-                temp.append("rbl_{0}".format(bit))
-                # temp.append("ref_{0}".format(bit))
+                temp.append("bl_{0}".format(bit))
+                temp.append("ref_{0}".format(bit))
             else:
-                temp.append("rbl_out_{0}".format(bit))
-                # temp.append("ref_out_{0}".format(bit))
+                temp.append("bl_out_{0}".format(bit))
+                temp.append("ref_out_{0}".format(bit))
 
         for bit in range(self.num_spare_cols):
             temp.append("dout_{}".format(self.word_size + bit))
-            temp.append("sparerbl_{0}".format(bit))
-            # temp.append("spareref_{0}".format(bit))
-        temp.append("ref")
+            temp.append("sparebl_{0}".format(bit))
+            temp.append("spareref_{0}".format(bit))
+
         temp.append("s_en")
-        
         temp.extend(["vdd", "gnd"])
         self.connect_inst(temp)
 
@@ -525,14 +387,14 @@ class gain_cell_port_data(design):
 
         for bit in range(self.word_size):
             if (self.words_per_row == 1):
-                temp.append("wbl_{0}".format(bit))
+                temp.append("rbl_{0}".format(bit))
                 # temp.append("br_{0}".format(bit))
             else:
-                temp.append("wbl_out_{0}".format(bit))
+                temp.append("rbl_out_{0}".format(bit))
                 # temp.append("br_out_{0}".format(bit))
 
         for bit in range(self.num_spare_cols):
-            temp.append("sparewbl_{0}".format(bit))
+            temp.append("sparerbl_{0}".format(bit))
             # temp.append("sparebr_{0}".format(bit))
 
         if self.write_size != self.word_size:
@@ -579,13 +441,7 @@ class gain_cell_port_data(design):
         """
 
         vertical_port_order = []
-        if self.port in self.read_ports:
-            if OPTS.gc_type == "Si":
-                vertical_port_order.append(self.predischarge_array_inst)
-            else:
-                vertical_port_order.append(self.precharge_array_inst)
-        if self.port in self.write_ports:
-            vertical_port_order.append(self.precharge_array_inst)
+        vertical_port_order.append(self.precharge_array_inst)
         vertical_port_order.append(self.column_mux_array_inst)
         vertical_port_order.append(self.sense_amp_array_inst)
         vertical_port_order.append(self.write_driver_array_inst)
@@ -606,16 +462,7 @@ class gain_cell_port_data(design):
         self.write_driver_offset = vertical_port_offsets[3]
         self.sense_amp_offset = vertical_port_offsets[2]
         self.column_mux_offset = vertical_port_offsets[1]
-        if self.port in self.read_ports:
-            if OPTS.gc_type == "Si":
-                self.predischarge_offset = vertical_port_offsets[0]
-                self.precharge_offset = False
-            else:
-                self.precharge_offset = vertical_port_offsets[0]
-                self.predischarge_offset = False
-        if self.port in self.write_ports:
-            self.precharge_offset = vertical_port_offsets[0]
-
+        self.precharge_offset = vertical_port_offsets[0]
 
     def place_instances(self):
         """ Place the instances. """
@@ -627,21 +474,10 @@ class gain_cell_port_data(design):
         if self.write_driver_offset:
             self.place_write_driver_array(self.write_driver_offset)
         if self.sense_amp_offset:
-            print("self.sense_amp_offset = ", self.sense_amp_offset)
             self.place_sense_amp_array(self.sense_amp_offset)
-        if self.port in self.write_ports:
-            if self.precharge_offset:
-                print("self.precharge_offset = ", self.precharge_offset)
-                self.place_precharge_array(self.precharge_offset)
-        if self.port in self.read_ports:
-            if self.predischarge_offset:
-                print("self.predischarge_offset = ", self.predischarge_offset)
-                self.place_predischarge_array(self.predischarge_offset)
-            elif self.precharge_offset:
-                print("self.precharge_offset = ", self.precharge_offset)
-                self.place_precharge_array(self.precharge_offset)
+        if self.precharge_offset:
+            self.place_precharge_array(self.precharge_offset)
         if self.column_mux_offset:
-            print("self.column_mux_offset = ", self.column_mux_offset)
             self.place_column_mux_array(self.column_mux_offset)
 
     def route_sense_amp_out(self, port):
@@ -712,23 +548,7 @@ class gain_cell_port_data(design):
         self.connect_bitlines(inst1=self.column_mux_array_inst,
                               inst2=self.precharge_array_inst,
                               num_bits=self.num_cols,
-                              inst2_start_bit=start_bit,
-                              port=port)
-    
-    def route_column_mux_to_predischarge_array(self, port):
-        """ Routing of BL and BR between col mux and predischarge array """
-
-        # Only do this if we have a column mux!
-        if self.col_addr_size==0:
-            return
-
-        start_bit = 1 if self.port == 0 and self.has_rbl else 0
-
-        self.connect_bitlines(inst1=self.column_mux_array_inst,
-                              inst2=self.predischarge_array_inst,
-                              num_bits=self.num_cols,
-                              inst2_start_bit=start_bit,
-                              port=port)
+                              inst2_start_bit=start_bit)
 
     def route_sense_amp_to_column_mux_or_precharge_array(self, port):
         """ Routing of BL and BR between sense_amp and column mux or precharge array """
@@ -779,79 +599,6 @@ class gain_cell_port_data(design):
                                             port=self.port)
 
                 self.connect_bitlines(inst1=self.precharge_array_inst,
-                                            inst1_bls_template="{inst}_{bit}",
-                                            inst2=inst2,
-                                            num_bits=self.num_spare_cols,
-                                            inst1_start_bit=self.num_cols + off,
-                                            inst2_start_bit=self.word_size,
-                                            port=self.port)
-
-        elif layer_props.port_data.channel_route_bitlines:
-            self.channel_route_bitlines(inst1=inst1,
-                                        inst1_bls_template=inst1_bls_templ,
-                                        inst2=inst2,
-                                        num_bits=self.word_size + self.num_spare_cols,
-                                        inst1_start_bit=start_bit,
-                                        port=self.port)
-        # This could be a channel route, but in some techs the bitlines
-        # are too close together.
-        else:
-            self.connect_bitlines(inst1=inst1,
-                                  inst1_bls_template=inst1_bls_templ,
-                                  inst2=inst2,
-                                  num_bits=self.word_size + self.num_spare_cols,
-                                  inst1_start_bit=start_bit,
-                                  port=self.port)
-
-    def route_sense_amp_to_column_mux_or_predischarge_array(self, port):
-        """ Routing of BL and BR between sense_amp and column mux or predischarge array """
-        inst2 = self.sense_amp_array_inst
-
-        if self.col_addr_size>0:
-            # Sense amp is connected to the col mux
-            inst1 = self.column_mux_array_inst
-            inst1_bls_templ = "{inst}_out_{bit}"
-            start_bit = 0
-        else:
-            # Sense amp is directly connected to the predischarge array
-            inst1 = self.predischarge_array_inst
-            inst1_bls_templ="{inst}_{bit}"
-
-            if self.port==0 and self.has_rbl:
-                start_bit=1
-            else:
-                start_bit=0
-
-        # spare cols connected to predischarge array since they are read independently
-        if self.num_spare_cols and self.col_addr_size>0:
-            if self.port==0:
-                off = 1
-            else:
-                off = 0
-            if OPTS.num_ports > 1:
-                self.channel_route_bitlines(inst1=self.column_mux_array_inst,
-                                            inst1_bls_template="{inst}_out_{bit}",
-                                            inst2=inst2,
-                                            num_bits=self.word_size,
-                                            inst1_start_bit=start_bit,
-                                            port=self.port)
-
-                self.channel_route_bitlines(inst1=self.predischarge_array_inst,
-                                            inst1_bls_template="{inst}_{bit}",
-                                            inst2=inst2,
-                                            num_bits=self.num_spare_cols,
-                                            inst1_start_bit=self.num_cols + off,
-                                            inst2_start_bit=self.word_size,
-                                            port=self.port)
-            else:
-                self.connect_bitlines(inst1=self.column_mux_array_inst,
-                                            inst1_bls_template="{inst}_out_{bit}",
-                                            inst2=inst2,
-                                            num_bits=self.word_size,
-                                            inst1_start_bit=start_bit,
-                                            port=self.port)
-
-                self.connect_bitlines(inst1=self.predischarge_array_inst,
                                             inst1_bls_template="{inst}_{bit}",
                                             inst2=inst2,
                                             num_bits=self.num_spare_cols,
@@ -936,66 +683,6 @@ class gain_cell_port_data(design):
                                   inst1_start_bit=start_bit,
                                   port=self.port)
 
-    def route_write_driver_to_column_mux_or_predischarge_array(self, port):
-        """ Routing of BL and BR between sense_amp and column mux or predischarge array """
-        inst2 = self.write_driver_array_inst
-
-        if self.col_addr_size>0:
-            # Write driver is connected to the col mux
-            inst1 = self.column_mux_array_inst
-            inst1_bls_templ = "{inst}_out_{bit}"
-            start_bit = 0
-        else:
-            # Sense amp is directly connected to the predischarge array
-            inst1 = self.predischarge_array_inst
-            inst1_bls_templ="{inst}_{bit}"
-            if self.port==0:
-                start_bit=1
-            else:
-                start_bit=0
-
-        if self.port==0:
-            off = 1
-        else:
-            off = 0
-
-        # Channel route spare columns' bitlines
-        if self.num_spare_cols and self.col_addr_size>0:
-            if self.port==0:
-                off = 1
-            else:
-                off = 0
-
-            self.channel_route_bitlines(inst1=self.column_mux_array_inst,
-                                        inst1_bls_template="{inst}_out_{bit}",
-                                        inst2=inst2,
-                                        num_bits=self.word_size,
-                                        inst1_start_bit=start_bit,
-                                        port=self.port)
-
-            self.channel_route_bitlines(inst1=self.predischarge_array_inst,
-                                        inst1_bls_template="{inst}_{bit}",
-                                        inst2=inst2,
-                                        num_bits=self.num_spare_cols,
-                                        inst1_start_bit=self.num_cols + off,
-                                        inst2_start_bit=self.word_size,
-                                        port=self.port)
-
-        # This could be a channel route, but in some techs the bitlines
-        # are too close together.
-        elif layer_props.port_data.channel_route_bitlines:
-            self.channel_route_bitlines(inst1=inst1, inst2=inst2,
-                                        num_bits=self.word_size + self.num_spare_cols,
-                                        inst1_bls_template=inst1_bls_templ,
-                                        inst1_start_bit=start_bit,
-                                        port=self.port)
-        else:
-            self.connect_bitlines(inst1=inst1, inst2=inst2,
-                                  num_bits=self.word_size,
-                                  inst1_bls_template=inst1_bls_templ,
-                                  inst1_start_bit=start_bit,
-                                  port=self.port)
-
     def route_write_driver_to_sense_amp(self, port):
         """ Routing of BL and BR between write driver and sense amp """
 
@@ -1014,74 +701,50 @@ class gain_cell_port_data(design):
 
         # Connect one bitline to the RBL and offset the indices for the other BLs
         if self.port==0 and self.has_rbl:
-            self.copy_layout_pin(self.precharge_array_inst, "wbl_0", "rbl_wbl")
+            self.copy_layout_pin(self.precharge_array_inst, "rbl_0", "rbl_rbl")
             # self.copy_layout_pin(self.precharge_array_inst, "br_0", "rbl_br")
             bit_offset=1
         elif self.port==1 and self.has_rbl:
-            if OPTS.gc_type == "Si":
-                self.copy_layout_pin(self.predischarge_array_inst, "rbl_{}".format(self.num_cols + self.num_spare_cols), "rbl_rbl")
-            else:
-                self.copy_layout_pin(self.precharge_array_inst, "rbl_{}".format(self.num_cols + self.num_spare_cols), "rbl_rbl")
+            self.copy_layout_pin(self.precharge_array_inst, "wbl_{}".format(self.num_cols + self.num_spare_cols), "rbl_wbl")
             # self.copy_layout_pin(self.precharge_array_inst, "br_{}".format(self.num_cols + self.num_spare_cols), "rbl_br")
             bit_offset=0
         else:
             bit_offset=0
 
         for bit in range(self.num_cols):
-            if self.port in self.write_ports:
-                if self.precharge_array_inst:
-                    if self.port == 0: self.copy_layout_pin(self.precharge_array_inst,
-                                        "wbl_{}".format(bit + bit_offset),
-                                        "wbl_{}".format(bit))
-            if self.port in self.read_ports:
-                if self.predischarge_array_inst:
-                    if self.port == 1: self.copy_layout_pin(self.predischarge_array_inst,
-                                        "rbl_{}".format(bit + bit_offset),
-                                        "rbl_{}".format(bit))
-                elif self.precharge_array_inst:
-                    if self.port == 1: self.copy_layout_pin(self.precharge_array_inst,
-                                        "rbl_{}".format(bit + bit_offset),
-                                        "rbl_{}".format(bit))
-            # else:
-                # debug.error("Didn't find precharge array.")
+            if self.precharge_array_inst:
+                if self.port == 0: self.copy_layout_pin(self.precharge_array_inst,
+                                     "rbl_{}".format(bit + bit_offset),
+                                     "rbl_{}".format(bit))
+                elif self.port == 1: self.copy_layout_pin(self.precharge_array_inst,
+                                     "wbl_{}".format(bit + bit_offset),
+                                     "wbl_{}".format(bit))
+            else:
+                debug.error("Didn't find precharge array.")
 
         # Copy bitlines of spare columns
         for bit in range(self.num_spare_cols):
-            if self.port in self.write_ports:
-                if self.precharge_array_inst:
-                    if self.port == 0: self.copy_layout_pin(self.precharge_array_inst,
-                                        "wbl_{}".format(self.num_cols + bit + bit_offset),
-                                        "sparerwbl_{}".format(bit))
-            if self.port in self.read_ports:
-                if self.predischarge_array_inst:
-                    if self.port == 1: self.copy_layout_pin(self.predischarge_array_inst,
-                                        "rbl_{}".format(self.num_cols + bit + bit_offset),
-                                        "sparerbl_{}".format(bit))
-                if self.precharge_array_inst:
-                    if self.port == 1: self.copy_layout_pin(self.precharge_array_inst,
-                                        "rbl_{}".format(self.num_cols + bit + bit_offset),
-                                        "sparerbl_{}".format(bit))
-            # else:
-            #     debug.error("Didn't find precharge array.")
+            if self.precharge_array_inst:
+                if self.port == 0: self.copy_layout_pin(self.precharge_array_inst,
+                                     "rbl_{}".format(self.num_cols + bit + bit_offset),
+                                     "sparerrbl_{}".format(bit))
+                elif self.port == 1: self.copy_layout_pin(self.precharge_array_inst,
+                                     "wbl_{}".format(self.num_cols + bit + bit_offset),
+                                     "sparewbl_{}".format(bit))
+            else:
+                debug.error("Didn't find precharge array.")
 
 
     def route_control_pins(self):
         """ Add the control pins: s_en, p_en_bar, w_en """
-        if self.port in self.write_ports:
-            if self.precharge_array_inst:
-                self.copy_layout_pin(self.precharge_array_inst, "en_bar", "p_en_bar")
-        if self.port in self.read_ports:
-            if self.predischarge_array_inst:
-                self.copy_layout_pin(self.predischarge_array_inst, "en", "p_en")
-            elif self.precharge_array_inst:
-                self.copy_layout_pin(self.precharge_array_inst, "en_bar", "p_en_bar")
+        if self.precharge_array_inst:
+            self.copy_layout_pin(self.precharge_array_inst, "en_bar", "p_en_bar")
         if self.column_mux_array_inst:
             sel_names = ["sel_{}".format(x) for x in range(self.num_col_addr_lines)]
             for pin_name in sel_names:
                 self.copy_layout_pin(self.column_mux_array_inst, pin_name)
         if self.sense_amp_array_inst:
            self.copy_layout_pin(self.sense_amp_array_inst, "en", "s_en")
-           self.copy_layout_pin(self.sense_amp_array_inst, "ref", "ref")
         if self.write_driver_array_inst:
             if self.write_mask_and_array_inst:
                 for bit in range(self.num_wmasks):
@@ -1119,22 +782,12 @@ class gain_cell_port_data(design):
                                     inst2.mod.get_rbl_name(),
                                     inst2_start_bit)
         elif port in self.write_ports:
-            # if inst1 == self.write_driver_array_inst:
             inst1_group = inst_group(inst1, inst1_bls_template,
-                                    inst1.mod.get_wbl_name(),
+                                    inst1.mod.get_rbl_name(),
                                     inst1_start_bit)
-            # else:
-            #     inst1_group = inst_group(inst1, inst1_bls_template,
-            #                             inst1.mod.get_rbl_name(),
-            #                             inst1_start_bit)
-            # if inst2 == self.write_driver_array_inst:
             inst2_group = inst_group(inst2, inst2_bls_template,
-                                    inst2.mod.get_wbl_name(),
+                                    inst2.mod.get_rbl_name(),
                                     inst2_start_bit)
-            # else:
-            #     inst2_group = inst_group(inst2, inst2_bls_template,
-            #                             inst2.mod.get_rbl_name(),
-            #                             inst2_start_bit)
         # determine top and bottom automatically.
         # since they don't overlap, we can just check the bottom y coordinate.
         if inst1.by() < inst2.by():
@@ -1150,21 +803,15 @@ class gain_cell_port_data(design):
         """
         Extracts bl/br pins from an InstanceGroup based on the bit modifier.
         """
-        # print("inst_groups = ", inst_group)
-        # print("inst_group.bl_name = ", inst_group.bl_name)
         full_bl_name = inst_group.bls_template.format(
             **{'inst': inst_group.bl_name,
                'bit': inst_group.start_bit + bit}
         )
-        # print("full_bl_name = ", full_bl_name)
         # full_br_name = inst_group.bls_template.format(
         #     **{'inst': inst_group.br_name,
         #        'bit': inst_group.start_bit + bit}
-        # )
-        bitline_pins = []
-        bitline_pins.append(inst_group.inst.get_pin(full_bl_name))
-        # return (inst_group.inst.get_pin(full_bl_name))
-        return bitline_pins
+        )
+        return (inst_group.inst.get_pin(full_bl_name))
 
     def channel_route_bitlines(self, inst1, inst2, num_bits,
                                inst1_bls_template="{inst}_{bit}",
@@ -1175,25 +822,19 @@ class gain_cell_port_data(design):
         """
         Route the bl and br of two modules using the channel router.
         """
-        print("inst1, inst2, num_bits, inst1_bls_template, inst1_start_bit, inst2_bls_template, inst2_start_bit, port = ",
-            inst1, inst2, num_bits,
-            inst1_bls_template, inst1_start_bit,
-            inst2_bls_template, inst2_start_bit,
-            port)
+
         bot_inst_group, top_inst_group = self._group_bitline_instances(inst1, inst2, num_bits,
                                                                        inst1_bls_template, inst1_start_bit,
                                                                        inst2_bls_template, inst2_start_bit,
                                                                        port)
-        
+
         # Channel route each mux separately since we don't minimize the number
         # of tracks in teh channel router yet. If we did, we could route all the bits at once!
         offset = bot_inst_group.inst.ul() + vector(0, self.m1_nonpref_pitch)
         for bit in range(num_bits):
-            print("bot_inst_group, bit = ", bot_inst_group, bit)
-            print("top_inst_group, bit = ", top_inst_group, bit)
             bottom_names = self._get_bitline_pins(bot_inst_group, bit)
             top_names = self._get_bitline_pins(top_inst_group, bit)
-            print("bottom_names, top_names = ", bottom_names, top_names)
+
             route_map = list(zip(bottom_names, top_names))
             self.create_horizontal_channel_route(route_map, offset, self.m1_stack)
 
@@ -1213,17 +854,10 @@ class gain_cell_port_data(design):
                                                                        inst1_bls_template, inst1_start_bit,
                                                                        inst2_bls_template, inst2_start_bit,
                                                                        port)
-        # print("bot_inst_group = ", bot_inst_group)
-        # print("top_inst_group = ", top_inst_group)
+
         for col in range(num_bits):
-            bot_bl_pin_list = self._get_bitline_pins(bot_inst_group, col)
-            top_bl_pin_list = self._get_bitline_pins(top_inst_group, col)
-            # print("bot_bl_pin = ", bot_bl_pin_list)
-            # print("top_bl_pin = ", top_bl_pin_list)
-            if len(bot_bl_pin_list) != 1 or len(top_bl_pin_list) != 1:
-                debug.error("Get multiple bitlines to connect.")
-            bot_bl_pin = bot_bl_pin_list[0]
-            top_bl_pin = top_bl_pin_list[0]
+            bot_bl_pin = self._get_bitline_pins(bot_inst_group, col)
+            top_bl_pin = self._get_bitline_pins(top_inst_group, col)
             bot_bl = bot_bl_pin.uc()
             top_bl = top_bl_pin.bc()
             if top_bl_pin.layer[-1] == "p":
@@ -1236,15 +870,8 @@ class gain_cell_port_data(design):
 
     def graph_exclude_precharge(self):
         """Precharge adds a loop between bitlines, can be excluded to reduce complexity"""
-        # if self.port in self.write_ports:
         if self.precharge_array_inst:
             self.graph_inst_exclude.add(self.precharge_array_inst)
-       
-    def graph_exclude_predischarge(self):
-        """Predischarge adds a loop between bitlines, can be excluded to reduce complexity"""
-        # if self.port in self.read_ports:
-        if self.predischarge_array_inst:
-            self.graph_inst_exclude.add(self.predischarge_array_inst)
 
     def graph_exclude_column_mux(self, column_include_num):
         """

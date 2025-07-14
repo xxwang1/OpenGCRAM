@@ -162,8 +162,6 @@ class pinv(pgate):
             # The mults must be the same for easy connection of poly
             print("nmos_required_mults, pmos_required_mults = ", nmos_required_mults, pmos_required_mults)
             self.tx_mults = max(nmos_required_mults, pmos_required_mults)
-            # if OPTS.gc_type == "OS":
-                # self.tx_mults = min(nmos_required_mults, pmos_required_mults)
             print("self.tx_mults = ", self.tx_mults)
             # Recompute each mult width and check it isn't too small
             # This could happen if the height is narrow and the size is small
@@ -175,9 +173,7 @@ class pinv(pgate):
             # debug.check(self.nmos_width >= drc("minwidth_tx"),
             #            "Cannot finger NMOS transistors to fit cell height.")
             if self.nmos_width < drc("minwidth_tx"):
-                # self.pmos_width = self.pmos_width * int(math.ceil(drc("minwidth_tx") / self.nmos_width))
-                self.nmos_width = drc("minwidth_tx")
-                # raise drc_error("Cannot finger NMOS transistors to fit cell height.")
+                raise drc_error("Cannot finger NMOS transistors to fit cell height.")
 
             self.pmos_width = round_to_grid(self.pmos_width / self.tx_mults)
             #debug.check(self.pmos_width >= drc("minwidth_tx"),
@@ -301,10 +297,10 @@ class pinv(pgate):
         self.add_path(self.route_layer, [nmos_drain_pos, pmos_drain_pos])
 
         # Remember the mid for the output
-        mid_drain_offset = vector(nmos_drain_pos.x, self.output_pos.y + self.m1_pitch)
+        mid_drain_offset = vector(nmos_drain_pos.x, self.output_pos.y)
 
         # This leaves the output as an internal pin (min sized)
-        output_offset = mid_drain_offset.snap_to_grid() + vector(self.route_layer_width, 0.5 * self.route_layer_width)
+        output_offset = mid_drain_offset.snap_to_grid() + vector(self.route_layer_width, 0)
         # output_offset = vector(ceil(output_offset.x), output_offset.y)
         self.add_layout_pin_rect_center(text="Z",
                                         layer=self.route_layer,

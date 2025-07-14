@@ -230,16 +230,17 @@ def write_pex_script(cell_name, extract, output, final_verification=False, outpu
 
     # write probe file
     # TODO: get from cell name
-    if OPTS.tech_name == "tsmcN40":
+    if OPTS.readwrite_ports == 2:
         f = open(output_path + "probe_file", "w")
-        f.write('CELL si_gc\n')
-        f.write('  SN     0.400  0.935  31\n')
+        f.write('CELL cell_1rw\n')
+        f.write('  Q     0.360  1.480  31\n')
+        f.write('  Q_bar  0.730  1.480  31\n')
         f.close()
     else:
         f = open(output_path + "probe_file", "w")
         f.write('CELL cell_1rw\n')
-        f.write('  Q     0.100  0.510  11\n')
-        f.write('  Q_bar  0.520  0.510  11\n')
+        f.write('  Q     0.200  1.250  31\n')
+        f.write('  Q_bar  0.560  1.250  31\n')
         f.close()
 
     # Create an auxiliary script to run calibre with the runset
@@ -412,9 +413,8 @@ def run_pex(cell_name, gds_name, sp_name, output=None, final_verification=False)
 
     out_errors = len(stdouterrors)
 
-    # assert(os.path.isfile(output))
-    print("run_pex cell_name, output, sp_name = ", cell_name, output, sp_name)
-    correct_port(cell_name, output, sp_name)
+    assert(os.path.isfile(output))
+    # correct_port(cell_name, output, sp_name)
 
     return out_errors
 
@@ -440,19 +440,11 @@ def correct_port(name, output_file_name, ref_file_name):
     # obtain the correct definition line from the original spice file
     sp_file = open(ref_file_name, "r")
     contents = sp_file.read()
-    pattern = r".SUBCKT " + str(name) + "\n(.*?)\*"
-    # circuit_title = re.search(".SUBCKT " + str(name) + "\n", contents)
-    # circuit_title = re.search(rf'{pattern}(.*?)(?=\*)', contents)
-    circuit_title = re.search(pattern, contents, re.DOTALL)
-    print("run_pex circuit_title = ", circuit_title)
+    circuit_title = re.search(".SUBCKT " + str(name) + ".*\n", contents)
     circuit_title = circuit_title.group()
-    
     sp_file.close()
 
     # write the new pex file with info in the memory
-    print("run_pex correct_port part1 = ", part1)
-    print("run_pex correct_port part2 = ", part2)
-    print("run_pex correct_port circuit_title = ", circuit_title)
     output_file = open(output_file_name, "w")
     output_file.write(part1)
     output_file.write(circuit_title)

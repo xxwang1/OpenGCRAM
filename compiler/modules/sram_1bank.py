@@ -228,7 +228,7 @@ class sram_1bank(design, verilog, lef):
         highest_coord = self.find_highest_coords()
         self.width = highest_coord[0]
         self.height = highest_coord[1]
-        if OPTS.use_pex: #and OPTS.pex_exe[0] != "calibre":
+        if OPTS.use_pex and OPTS.pex_exe[0] != "calibre":
             debug.info(2, "adding global pex labels")
             self.add_global_pex_labels()
         self.add_boundary(ll=vector(0, 0),
@@ -844,7 +844,7 @@ class sram_1bank(design, verilog, lef):
         # We need to temporarily add some pins for the x offsets
         # but we'll remove them so that they have the right y
         # offsets after the DFF placement.
-        self.add_layout_pins(add_vias=False)
+        self.add_layout_pins(add_vias=False, add_rect=False)
         self.route_dffs(add_routes=False)
         self.remove_layout_pins()
 
@@ -996,15 +996,15 @@ class sram_1bank(design, verilog, lef):
             self.data_pos[port] = vector(x_offset, y_offset)
             self.spare_wen_pos[port] = vector(x_offset, y_offset)
 
-    def add_layout_pins(self, add_vias=True):
+    def add_layout_pins(self, add_vias=True, add_rect=True):
         """
-        Add the top-level pins for a single bank SRAM with control.
+        Add the top-level pins for a single bank sram with control.
         """
         for port in self.all_ports:
             # Hack: If we are escape routing, set the pin layer to
             # None so that we will start from the pin layer
             # Otherwise, set it as the pin layer so that no vias are added.
-            # Otherwise, when we remove pins to move the dff array dynamically,
+            # Otherwise, when we remove pins to move the sram_dff array dynamically,
             # we will leave some remaining vias when the pin locations change.
             if add_vias:
                 pin_layer = None
@@ -1023,14 +1023,15 @@ class sram_1bank(design, verilog, lef):
 
             if port in self.write_ports:
                 for bit in range(self.word_size + self.num_spare_cols):
-                    # self.add_io_pin(self.data_dff_insts[port],
-                    #                 "din_{}".format(bit),
-                    #                 "din{0}[{1}]".format(port, bit),
-                    #                 start_layer=pin_layer,
-                    #             minarea=True)
-                    pass
+                    self.add_io_pin(self.data_dff_insts[port],
+                                    "din_{}".format(bit),
+                                    "din{0}[{1}]".format(port, bit),
+                                    start_layer=pin_layer,
+                                    add_rect=add_rect,
+                                minarea=True)
+                    # pass
 
-            if port in self.readwrite_ports or port in self.read_ports:
+            if port in self.read_ports:
                 for bit in range(self.word_size + self.num_spare_cols):
                     self.add_io_pin(self.bank_inst,
                                     "dout{0}_{1}".format(port, bit),
@@ -1039,17 +1040,19 @@ class sram_1bank(design, verilog, lef):
                                 minarea=True)
 
             for bit in range(self.col_addr_size):
-                # self.add_io_pin(self.col_addr_dff_insts[port],
-                #                 "din_{}".format(bit),
-                #                 "addr{0}[{1}]".format(port, bit),
-                #                 start_layer=pin_layer,
-                #                 minarea=True)
-                pass
+                self.add_io_pin(self.col_addr_dff_insts[port],
+                                "din_{}".format(bit),
+                                "addr{0}[{1}]".format(port, bit),
+                                start_layer=pin_layer,
+                                add_rect=add_rect,
+                                minarea=True)
+                # pass
             for bit in range(self.row_addr_size):
                 self.add_io_pin(self.row_addr_dff_insts[port],
                                 "din_{}".format(bit),
                                 "addr{0}[{1}]".format(port, bit + self.col_addr_size),
                                 start_layer=pin_layer,
+                                add_rect=add_rect,
                                 minarea=True)
 
             if port in self.write_ports:

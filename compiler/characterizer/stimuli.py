@@ -24,12 +24,9 @@ class stimuli():
 
     def __init__(self, stim_file, meas_file, corner):
         self.vdd_name = "vdd"
-        if OPTS.level_shifter:
-            self.vddio_name = "vddio"
         self.gnd_name = "gnd"
         self.pmos_name = tech.spice["pmos"]
         self.nmos_name = tech.spice["nmos"]
-        # self.osfet_name = tech.spice["osfet"]
         self.tx_width = tech.drc["minwidth_tx"]
         self.tx_length = tech.drc["minlength_channel"]
 
@@ -37,27 +34,19 @@ class stimuli():
         self.mf = meas_file
 
         (self.process, self.voltage, self.temperature) = corner
-        print("stimuli corner, process, voltage, temperature = ", corner, self.process, self.voltage, self.temperature)
         found = False
         self.device_libraries = []
         self.device_models = []
-        self.os_device_models = []
         try:
             self.device_libraries += tech.spice["fet_libraries"][self.process]
             found = True
         except KeyError:
             pass
-        if OPTS.gc_type == "OS" or OPTS.gc_type == "Hybrid":
-            try:
-                self.device_models += tech.spice["fet_models"][self.process]
-                found = True
-            except KeyError:
-                pass
-        # try:
-        #     self.os_device_models += tech.spice["osfet_models"][self.process]
-        #     found = True
-        # except KeyError:
-        #     pass
+        try:
+            self.device_models += tech.spice["fet_models"][self.process]
+            found = True
+        except KeyError:
+            pass
         if not found:
             debug.error("Must define either fet_libraries or fet_models.", -1)
 
@@ -79,8 +68,8 @@ class stimuli():
         for bank in range(OPTS.num_banks):
             row = int(OPTS.num_words / OPTS.words_per_row) - 1
             col = int(OPTS.word_size * OPTS.words_per_row) - 1
-            self.sf.write("gain_cell_SN{0}_r{1}_c{2} ".format(bank, row, col))
-            # self.sf.write("bitcell_Q_bar_b{0}_r{1}_c{2} ".format(bank, row, col))
+            self.sf.write("bitcell_Q_b{0}_r{1}_c{2} ".format(bank, row, col))
+            self.sf.write("bitcell_Q_bar_b{0}_r{1}_c{2} ".format(bank, row, col))
         #    can't add all bitcells to top level due to ngspice max port count of 1005
         #    for row in range(int(OPTS.num_words / OPTS.words_per_row)):
         #        for col in range(int(OPTS.word_size * OPTS.words_per_row)):
@@ -89,10 +78,8 @@ class stimuli():
         for bank in range(OPTS.num_banks):
             for col in range(OPTS.word_size * OPTS.words_per_row):
                 for port in range(OPTS.num_r_ports + OPTS.num_w_ports + OPTS.num_rw_ports):
-                    if port in self.write_ports:
-                        self.sf.write("wbl{0}_{1} ".format(port, col))
-                    if port in self.read_ports:
-                        self.sf.write("rbl{0}_{1} ".format(port, col))
+                    self.sf.write("bl{0}_{1} ".format(port, col))
+                    self.sf.write("br{0}_{1} ".format(port, col))
 
             self.sf.write("s_en{0} ".format(bank))
         self.sf.write("{0}\n".format(model_name))
@@ -228,10 +215,7 @@ class stimuli():
         if OPTS.spice_name == "hspice":
             power_exp = "power"
         else:
-            if OPTS.level_shifter:
-                power_exp = "par('(-1*v(" + str(self.vdd_name) + ")*I(v" + str(self.vdd_name) + ")) + (-1*v(" + str(self.vddio_name) + ")*I(v" + str(self.vddio_name) + "))')"
-            else:
-                power_exp = "par('(-1*v(" + str(self.vdd_name) + ")*I(v" + str(self.vdd_name) + "))')"
+            power_exp = "par('(-1*v(" + str(self.vdd_name) + ")*I(v" + str(self.vdd_name) + "))')"
         self.mf.write(".meas tran {0} avg {1} from={2}n to={3}n\n\n".format(meas_name.lower(),
                                                                             power_exp,
                                                                             t_initial,
@@ -333,29 +317,17 @@ class stimuli():
             else:
                 debug.error("Could not find spice library: {0}\nSet SPICE_MODEL_DIR to over-ride path.\n".format(item[0]), -1)
         
-        includes_model = self.device_models + self.os_device_models
-        includes_circuit = [circuit]
+        includes = self.device_models + [circuit]
 
-        for item in list(includes_model):
-            if OPTS.spice_name:
-                item = item.replace("SIMULATOR", OPTS.spice_name.lower())
-            else:
-                item = item.replace("SIMULATOR", "ngspice")
-            if OPTS.gc_type == "OS":
-                self.sf.write(".HDL \"{0}\"\n".format(item))
-            else:
-                self.sf.write(".include \"{0}\"\n".format(item))
-        for item in list(includes_circuit):
+        for item in list(includes):
             if OPTS.spice_name:
                 item = item.replace("SIMULATOR", OPTS.spice_name.lower())
             else:
                 item = item.replace("SIMULATOR", "ngspice")
             self.sf.write(".include \"{0}\"\n".format(item))
-        
             print("*****************************************************************")
             print("Include to write =", ".include \"{0}\"\n".format(item))
             print("*****************************************************************")
-        
 
     def add_comment(self, msg):
         self.sf.write(msg + "\n")
@@ -364,8 +336,6 @@ class stimuli():
         """ Writes supply voltage statements """
         gnd_node_name = "0"
         self.sf.write("V{0} {0} {1} {2}\n".format(self.vdd_name, gnd_node_name, self.voltage))
-        if OPTS.level_shifter:
-            self.sf.write("V{0} {0} {1} {2}\n".format(self.vddio_name, gnd_node_name, self.voltage * OPTS.vddio))
 
         # Adding a commented out supply for simulators where gnd and 0 are not global grounds.
         self.sf.write("\n*Nodes gnd and 0 are the same global ground node in ngspice/hspice/xa. Otherwise, this source may be needed.\n")
@@ -391,6 +361,7 @@ class stimuli():
                                                                  temp_stim,
                                                                  OPTS.openram_temp,
                                                                  OPTS.num_sim_threads)
+            print("run_sim hspice cmd = ", cmd)
             valid_retcode=0
         elif OPTS.spice_name == "spectre":
             if OPTS.use_pex:
@@ -408,8 +379,6 @@ class stimuli():
                                                            OPTS.num_sim_threads,
                                                            temp_stim,
                                                            OPTS.openram_temp)
-
-            print("run_sim hspice cmd = ", cmd)
             valid_retcode=0
         elif OPTS.spice_name in ["Xyce", "xyce"]:
             if OPTS.num_sim_threads > 1 and OPTS.mpi_name:

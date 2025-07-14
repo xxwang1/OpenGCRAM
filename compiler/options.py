@@ -37,7 +37,7 @@ class options(optparse.Values):
     write_size = None
 
     # These will get initialized by the user or the tech file
-    nominal_corner_only = False
+    nominal_corner_only = True
     supply_voltages = ""
     temperatures = ""
     process_corners = ""
@@ -83,7 +83,7 @@ class options(optparse.Values):
     multi_delay_chain_pinouts = [2, 10, 11, 17, 31]
 
     # stages for delay chain in rbl control logic only
-    delay_chain_stages = 13
+    delay_chain_stages = 9
 
     # fanout per stage for any control logic
     delay_chain_fanout_per_stage = 4
@@ -100,7 +100,7 @@ class options(optparse.Values):
         openram_temp = os.path.abspath(os.environ.get("OPENRAM_TMP"))
 
     except:
-        openram_temp = "/home/xxwang1/OpenRAM-GC/tmp"
+        openram_temp = "/home/xxwang1/OpenRAM-SRAM/tmp"
 
     # This is the verbosity level to control debug information. 0 is none, 1
     # is minimal, etc.
@@ -194,11 +194,8 @@ class options(optparse.Values):
     # Bitline, s_en and cell names used in characterizer
     bl_format = "X{name}{hier_sep}xbank0{hier_sep}bl_{row}_{col}"
     br_format = "X{name}{hier_sep}xbank0{hier_sep}br_{row}_{col}"
-    rbl_format = "X{name}{hier_sep}xbank0{hier_sep}rbl_{row}_{col}"
-    wbl_format = "X{name}{hier_sep}xbank0{hier_sep}wbl_{row}_{col}"
     sen_format = "X{name}{hier_sep}xbank0{hier_sep}s_en"
     cell_format = "X{name}{hier_sep}xbank0{hier_sep}xbitcell_array{hier_sep}xreplica_bitcell_array{hier_sep}xbitcell_array{hier_sep}xbit_r{row}_c{col}"
-    cell_format = "X{name}{hier_sep}xbank0{hier_sep}xgain_cell_array{hier_sep}xreplica_gain_cell_array{hier_sep}xgain_cell_array{hier_sep}xbit_r{row}_c{col}"
 
     # Random seed for functional simulation
     functional_seed = None
@@ -223,8 +220,6 @@ class options(optparse.Values):
     delay_chain = "delay_chain"
     dff_array = "dff_array"
     dff = "dff"
-    gain_cell_dff_array = "gain_cell_dff_array"
-    gain_cell_dff = "gain_cell_dff"
     inv_dec = "pinv"
     nand2_dec = "pnand2"
     nand3_dec = "pnand3"
@@ -241,20 +236,3 @@ class options(optparse.Values):
     write_driver_array = "write_driver_array"
     write_driver = "write_driver"
     write_mask_and_array = "write_mask_and_array"
-
-    gain_cell_array = "gain_cell_array"
-    gain_cell = "gain_cell"
-    gain_cell_precharge = "gain_cell_precharge"
-    gain_cell_precharge_array = "gain_cell_precharge_array"
-    gain_cell_predischarge = "gain_cell_predischarge"
-    gain_cell_predischarge_array = "gain_cell_predischarge_array"
-    gain_cell_sense_amp_array = "gain_cell_sense_amp_array"
-    gain_cell_sense_amp = "gain_cell_sense_amp"
-    gain_cell_wordline_driver = "gain_cell_wordline_driver"
-    gain_cell_wwlls = "gain_cell_wwlls"
-    gain_cell_write_driver_array = "gain_cell_write_driver_array"
-    gain_cell_write_driver = "gain_cell_write_driver"
-    gain_cell_control_logic = "gain_cell_control_logic"
-    level_shifter = "level_shifter"
-    gc_type = "Si"
-    vddio = 1.2

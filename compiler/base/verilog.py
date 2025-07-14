@@ -62,7 +62,7 @@ class verilog:
                     self.vf.write("spare_wen{0},".format(port))
                 self.vf.write("addr{0},din{0},dout{0}".format(port))
             elif port in self.write_ports:
-                self.vf.write("    clk{0},web{0},".format(port))
+                self.vf.write("    clk{0},csb{0},".format(port))
                 if self.write_size != self.word_size:
                     self.vf.write("wmask{},".format(port))
                 if self.num_spare_cols > 0:
@@ -124,11 +124,9 @@ class verilog:
         """
         Create the input regs for the given port.
         """
-        # self.vf.write("  reg  csb{0}_reg;\n".format(port))
-        if port in self.write_ports:
+        self.vf.write("  reg  csb{0}_reg;\n".format(port))
+        if port in self.readwrite_ports:
             self.vf.write("  reg  web{0}_reg;\n".format(port))
-        if port in self.read_ports:
-            self.vf.write("  reg  csb{0}_reg;\n".format(port))
         if port in self.write_ports:
             if self.write_size != self.word_size:
                 self.vf.write("  reg [NUM_WMASKS-1:0]   wmask{0}_reg;\n".format(port))
@@ -150,9 +148,8 @@ class verilog:
         self.vf.write("  // All inputs are registers\n")
         self.vf.write("  always @(posedge clk{0})\n".format(port))
         self.vf.write("  begin\n")
-        if port in self.read_ports:
-            self.vf.write("    csb{0}_reg = csb{0};\n".format(port))
-        if port in self.write_ports:
+        self.vf.write("    csb{0}_reg = csb{0};\n".format(port))
+        if port in self.readwrite_ports:
             self.vf.write("    web{0}_reg = web{0};\n".format(port))
         if port in self.write_ports:
             if self.write_size != self.word_size:
@@ -167,8 +164,8 @@ class verilog:
             self.vf.write("    din{0}_reg = din{0};\n".format(port))
         if port in self.read_ports:
             self.vf.write("    #(T_HOLD) dout{0} = {1}'bx;\n".format(port, self.word_size))
-        if port in self.write_ports:
-            self.vf.write("    if ( !web{0}_reg && web{0}_reg && VERBOSE )\n".format(port))
+        if port in self.readwrite_ports:
+            self.vf.write("    if ( !csb{0}_reg && web{0}_reg && VERBOSE )\n".format(port))
             self.vf.write("      $display($time,\" Reading %m addr{0}=%b dout{0}=%b\",addr{0}_reg,mem[addr{0}_reg]);\n".format(port))
         elif port in self.read_ports:
             self.vf.write("    if ( !csb{0}_reg && VERBOSE ) \n".format(port))
@@ -180,7 +177,7 @@ class verilog:
             else:
                 self.vf.write("      $display($time,\" Writing %m addr{0}=%b din{0}=%b\",addr{0}_reg,din{0}_reg);\n".format(port))
         elif port in self.write_ports:
-            self.vf.write("    if ( !web{0}_reg && VERBOSE )\n".format(port))
+            self.vf.write("    if ( !csb{0}_reg && VERBOSE )\n".format(port))
             if self.write_size != self.word_size:
                 self.vf.write("      $display($time,\" Writing %m addr{0}=%b din{0}=%b wmask{0}=%b\",addr{0}_reg,din{0}_reg,wmask{0}_reg);\n".format(port))
             else:
@@ -193,9 +190,8 @@ class verilog:
         Add the module input and output declaration for a port.
         """
         self.vf.write("  input  clk{0}; // clock\n".format(port))
-        if port in self.read_ports:
-            self.vf.write("  input   csb{0}; // active low chip select\n".format(port))
-        if port in self.write_ports:
+        self.vf.write("  input   csb{0}; // active low chip select\n".format(port))
+        if port in self.readwrite_ports:
             self.vf.write("  input  web{0}; // active low write control\n".format(port))
 
         self.vf.write("  input [ADDR_WIDTH-1:0]  addr{0};\n".format(port))
@@ -217,14 +213,11 @@ class verilog:
         """
         self.vf.write("\n")
         self.vf.write("  // Memory Write Block Port {0}\n".format(port))
-        if port in self.write_ports:
-            self.vf.write("  // Write Operation : When web{0} = 0\n".format(port))
-        if port in self.read_ports:
-            self.vf.write("  // Write Operation : When csb{0} = 0\n".format(port))
+        self.vf.write("  // Write Operation : When web{0} = 0, csb{0} = 0\n".format(port))
         self.vf.write("  always @ (negedge clk{0})\n".format(port))
         self.vf.write("  begin : MEM_WRITE{0}\n".format(port))
-        if port in self.write_ports:
-            self.vf.write("    if (!web{0}_reg ) begin\n".format(port))
+        if port in self.readwrite_ports:
+            self.vf.write("    if ( !csb{0}_reg && !web{0}_reg ) begin\n".format(port))
         else:
             self.vf.write("    if (!csb{0}_reg) begin\n".format(port))
 
@@ -255,14 +248,11 @@ class verilog:
         """
         self.vf.write("\n")
         self.vf.write("  // Memory Read Block Port {0}\n".format(port))
-        if port in self.write_ports:
-            self.vf.write("  // Read Operation : When web{0} = 1\n".format(port))
-        if port in self.read_ports:
-            self.vf.write("  // Read Operation : When csb{0} = 0\n".format(port))
+        self.vf.write("  // Read Operation : When web{0} = 1, csb{0} = 0\n".format(port))
         self.vf.write("  always @ (negedge clk{0})\n".format(port))
         self.vf.write("  begin : MEM_READ{0}\n".format(port))
-        if port in self.write_ports:
-            self.vf.write("    if (web{0}_reg)\n".format(port))
+        if port in self.readwrite_ports:
+            self.vf.write("    if (!csb{0}_reg && web{0}_reg)\n".format(port))
         else:
             self.vf.write("    if (!csb{0}_reg)\n".format(port))
         self.vf.write("       dout{0} <= #(DELAY) mem[addr{0}_reg];\n".format(port))
@@ -271,12 +261,12 @@ class verilog:
     def add_address_check(self, wport, rport):
         """ Output a warning if the two addresses match """
         # If the rport is actually reading... and addresses match.
-        if rport in self.write_ports:
-            rport_control = "web{0}".format(rport)
+        if rport in self.readwrite_ports:
+            rport_control = "!csb{0} && web{0}".format(rport)
         else:
             rport_control = "!csb{0}".format(rport)
-        if wport in self.write_ports:
-            wport_control = "!web{0}".format(wport)
+        if wport in self.readwrite_ports:
+            wport_control = "!csb{0} && !web{0}".format(wport)
         else:
             wport_control = "!csb{0}".format(wport)
 

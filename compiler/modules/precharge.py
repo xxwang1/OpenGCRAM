@@ -238,7 +238,7 @@ class precharge(design):
         # nwell should span the whole design since it is pmos only
         self.add_rect(layer="nwell",
                       offset=vector(0, 0),
-                      width=self.width,
+                      width=self.width + self.nwell_enclose_active,
                       height=self.height)
 
     def route_bitlines(self):
@@ -258,7 +258,7 @@ class precharge(design):
                                                          end=top_pos)
 
         # adds the BR
-        self.br_xoffset = self.width - layer_pitch
+        self.br_xoffset = self.width #- layer_pitch
         top_pos = vector(self.br_xoffset, self.height)
         pin_pos = vector(self.br_xoffset, 0)
         self.add_path(self.bitline_layer, [top_pos, pin_pos])

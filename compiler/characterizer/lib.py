@@ -228,12 +228,9 @@ class lib:
         self.write_pg_pin()
 
         #Build string of all control signals.
-        control_str = 'web0' #assume at least 1 port
+        control_str = 'csb0' #assume at least 1 port
         for i in range(1, self.total_port_num):
-            if i in self.write_ports:
-                control_str += ' & web{0}'.format(i)
-            elif i in self.read_ports:
-                control_str += ' & csb{0}'.format(i)
+            control_str += ' & csb{0}'.format(i)
 
         # Leakage is included in dynamic when macro is enabled
         self.lib.write("    leakage_power () {\n")
@@ -513,10 +510,7 @@ class lib:
     def write_control_pins(self, port):
         """ Adds control pins timing results."""
         #The control pins are still to be determined. This is a placeholder for what could be.
-        if port in self.write_ports:
-            ctrl_pin_names = ["web{0}".format(port)]
-        if port in self.read_ports:
-            ctrl_pin_names = ["csb{0}".format(port)]
+        ctrl_pin_names = ["csb{0}".format(port)]
         if port in self.readwrite_ports:
             ctrl_pin_names.append("web{0}".format(port))
 
@@ -569,12 +563,12 @@ class lib:
         web_name = ""
 
         if port in self.write_ports:
-            # if port in self.read_ports:
-            web_name = " & !web{0}".format(0)
+            if port in self.read_ports:
+                web_name = " & !web{0}".format(port)
             write1_power = np.mean(self.char_port_results[port]["write1_power"])
             write0_power = np.mean(self.char_port_results[port]["write0_power"])
             self.lib.write("        internal_power(){\n")
-            self.lib.write("            when : \"!csb{0}{1}\"; \n".format(1, web_name))
+            self.lib.write("            when : \"!csb{0}{1}\"; \n".format(port, web_name))
             self.lib.write("            rise_power(scalar){\n")
             self.lib.write("                values(\"{0:.6e}\");\n".format(write1_power))
             self.lib.write("            }\n")
@@ -587,7 +581,7 @@ class lib:
             disabled_write1_power = np.mean(self.char_port_results[port]["disabled_write1_power"])
             disabled_write0_power = np.mean(self.char_port_results[port]["disabled_write0_power"])
             self.lib.write("        internal_power(){\n")
-            self.lib.write("            when : \"csb{0}{1}\"; \n".format(1, web_name))
+            self.lib.write("            when : \"csb{0}{1}\"; \n".format(port, web_name))
             self.lib.write("            rise_power(scalar){\n")
             self.lib.write("                values(\"{0:.6e}\");\n".format(disabled_write1_power))
             self.lib.write("            }\n")
@@ -597,8 +591,8 @@ class lib:
             self.lib.write("        }\n")
 
         if port in self.read_ports:
-            # if port in self.write_ports:
-            web_name = " & web{0}".format(0)
+            if port in self.write_ports:
+                web_name = " & web{0}".format(port)
             read1_power = np.mean(self.char_port_results[port]["read1_power"])
             read0_power = np.mean(self.char_port_results[port]["read0_power"])
             self.lib.write("        internal_power(){\n")
@@ -734,7 +728,7 @@ class lib:
 
         self.write_signal_from_ports(datasheet,
                                 "csb{}",
-                                self.read_ports,
+                                self.all_ports,
                                 "setup_times_LH",
                                 "setup_times_HL",
                                 "hold_times_LH",
@@ -750,7 +744,7 @@ class lib:
 
         self.write_signal_from_ports(datasheet,
                                 "web{}",
-                                self.write_ports,
+                                self.readwrite_ports,
                                 "setup_times_LH",
                                 "setup_times_HL",
                                 "hold_times_LH",
@@ -840,7 +834,7 @@ class lib:
 
             # write dynamic power usage
             if port in self.read_ports:
-                web_name = " & !web{0}".format(0)
+                web_name = " & !web{0}".format(port)
                 name = "!csb{0} & clk{0}{1}".format(port, web_name)
                 read_write = 'Read'
 
@@ -854,7 +848,7 @@ class lib:
 
             if port in self.write_ports:
                 web_name = " & web{0}".format(port)
-                name = "!csb{0} & !clk{0}{1}".format(1, web_name)
+                name = "!csb{0} & !clk{0}{1}".format(port, web_name)
                 read_write = 'Write'
 
                 datasheet.write("{0},{1},{2},{3},".format(
@@ -866,12 +860,9 @@ class lib:
                         ))
 
         # write leakage power
-        control_str = 'web0'
+        control_str = 'csb0'
         for i in range(1, self.total_port_num):
-            if i in self.write_ports:
-                control_str += ' & web{0}'.format(i)
-            elif i in self.read_ports:
-                control_str += ' & csb{0}'.format(i)
+            control_str += ' & csb{0}'.format(i)
 
         datasheet.write("{0},{1},{2},".format('leak', control_str, self.char_sram_results["leakage_power"]))
 

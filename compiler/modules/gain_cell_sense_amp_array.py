@@ -13,7 +13,7 @@ from openram.tech import cell_properties
 from openram import OPTS
 
 
-class gain_cell_sense_amp_array(design):
+class sense_amp_array(design):
     """
     Array of sense amplifiers to read the bitlines through the column mux.
     Dynamically generated sense amp array for all bitlines.
@@ -30,7 +30,6 @@ class gain_cell_sense_amp_array(design):
         self.words_per_row = words_per_row
         self.num_cols = word_size * words_per_row
         self.offsets = offsets
-        print("gain_cell_sense_amp_array offsets = ", self.offsets)
         if not num_spare_cols:
             self.num_spare_cols = 0
         else:
@@ -43,7 +42,6 @@ class gain_cell_sense_amp_array(design):
             self.en_layer = "m3"
         else:
             self.en_layer = "m1"
-            self.ref_layer = "m3"
         self.create_netlist()
         if not OPTS.netlist_only:
             self.create_layout()
@@ -63,10 +61,6 @@ class gain_cell_sense_amp_array(design):
     @property
     def en_name(self):
         return "en"
-
-    @property
-    def ref_name(self):
-        return "ref"
 
     def create_netlist(self):
         self.add_modules()
@@ -92,13 +86,13 @@ class gain_cell_sense_amp_array(design):
         for i in range(0, self.word_size + self.num_spare_cols):
             self.add_pin(self.data_name + "_{0}".format(i), "OUTPUT")
             self.add_pin(self.get_rbl_name() + "_{0}".format(i), "INPUT")
-        self.add_pin(self.ref_name, "INPUT")
+            self.add_pin(self.get_ref_name() + "_{0}".format(i), "INPUT")
         self.add_pin(self.en_name, "INPUT")
         self.add_pin("vdd", "POWER")
         self.add_pin("gnd", "GROUND")
 
     def add_modules(self):
-        self.amp = factory.create(module_type="gain_cell_sense_amp")
+        self.amp = factory.create(module_type="sense_amp")
 
         # This is just used for measurements,
         # so don't add the module
@@ -111,7 +105,7 @@ class gain_cell_sense_amp_array(design):
             self.local_insts.append(self.add_inst(name=name,
                                                   mod=self.amp))
             self.connect_inst([self.get_rbl_name() + "_{0}".format(i),
-                               self.ref_name,
+                               self.get_ref_name() + "_{0}".format(i),
                                self.data_name + "_{0}".format(i),
                                self.en_name, "vdd", "gnd"])
 
@@ -127,13 +121,12 @@ class gain_cell_sense_amp_array(design):
             self.amp_spacing = precharge_width
         else:
             self.amp_spacing = self.amp.width
-        print("place_sense_amp_array self.offsets = ", self.offsets)
+
         if not self.offsets:
             self.offsets = []
             for i in range(self.num_cols + self.num_spare_cols):
                 self.offsets.append(i * self.amp_spacing)
-        print("place_sense_amp_array self.amp_spacing = ", self.amp_spacing)
-        print("place_sense_amp_array self.offsets = ", self.offsets)
+
         for i, xoffset in enumerate(self.offsets[0:self.num_cols:self.words_per_row]):
             if self.gain_cell.mirror.y and (i * self.words_per_row + self.column_offset) % 2:
                 mirror = "MY"
@@ -160,7 +153,7 @@ class gain_cell_sense_amp_array(design):
             inst = self.local_insts[i]
 
             rbl_pin = inst.get_pin(inst.mod.get_rbl_names())
-            # ref_pin = inst.get_pin(inst.mod.get_ref_names())
+            ref_pin = inst.get_pin(inst.mod.get_ref_names())
             dout_pin = inst.get_pin(inst.mod.dout_name)
 
             self.add_layout_pin(text=self.get_rbl_name() + "_{0}".format(i),
@@ -168,11 +161,11 @@ class gain_cell_sense_amp_array(design):
                                 offset=rbl_pin.ll(),
                                 width=rbl_pin.width(),
                                 height=rbl_pin.height())
-            # self.add_layout_pin(text=self.get_ref_name() + "_{0}".format(i),
-            #                     layer=ref_pin.layer,
-            #                     offset=ref_pin.ll(),
-            #                     width=ref_pin.width(),
-            #                     height=ref_pin.height())
+            self.add_layout_pin(text=self.get_ref_name() + "_{0}".format(i),
+                                layer=ref_pin.layer,
+                                offset=ref_pin.ll(),
+                                width=ref_pin.width(),
+                                height=ref_pin.height())
 
             self.add_layout_pin(text=self.data_name + "_{0}".format(i),
                                 layer=dout_pin.layer,
@@ -199,15 +192,3 @@ class gain_cell_sense_amp_array(design):
             self.add_via_stack_center(from_layer=en_pin.layer,
                                       to_layer=self.en_layer,
                                       offset=inst.get_pin(self.amp.en_name).center())
-
-        ref_pin = self.amp.get_pin(self.amp.ref_name)
-        start_offset = ref_pin.lc().scale(0, 1)
-        end_offset = start_offset + vector(self.width, 0)
-        self.add_layout_pin_segment_center(text=self.ref_name,
-                                           layer=self.ref_layer,
-                                           start=start_offset,
-                                           end=end_offset)
-        for inst in self.local_insts:
-            self.add_via_stack_center(from_layer=ref_pin.layer,
-                                      to_layer=self.ref_layer,
-                                      offset=inst.get_pin(self.amp.ref_name).center())

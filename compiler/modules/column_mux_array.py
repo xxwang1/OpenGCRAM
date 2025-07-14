@@ -184,8 +184,10 @@ class column_mux_array(design):
             offset = vector(gate_offset.x,
                             self.get_pin("sel_{}".format(sel_index)).cy())
             
-            bl_offset = offset.scale(0, 1) + vector((self.mux_inst[col].get_pin("br_out").cx() + self.mux_inst[col].get_pin("bl_out").cx())/2, 0)
-            corrected_bl_offset = vector(offset.x, min_yoffset).scale(0, 1) + vector((self.mux_inst[col].get_pin("br_out").cx() + self.mux_inst[col].get_pin("bl_out").cx())/2, 0)
+            # bl_offset = offset.scale(0, 1) + vector((self.mux_inst[col].get_pin("br_out").cx() + self.mux_inst[col].get_pin("bl_out").cx())/2, 0)
+            # corrected_bl_offset = vector(offset.x, min_yoffset).scale(0, 1) + vector((self.mux_inst[col].get_pin("br_out").cx() + self.mux_inst[col].get_pin("bl_out").cx())/2, 0)
+            bl_offset = offset.scale(0, 1) + vector(gate_offset.x, 0)
+            corrected_bl_offset = vector(offset.x, min_yoffset).scale(0, 1) + vector(gate_offset.x, 0)
             self.add_via_stack_center(from_layer="poly",
                                       to_layer=self.sel_layer,
                                       offset=bl_offset,

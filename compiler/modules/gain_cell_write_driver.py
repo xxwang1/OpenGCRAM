@@ -10,7 +10,7 @@ from openram.base import design
 from openram.tech import cell_properties as props
 
 
-class gain_cell_write_driver(design):
+class write_driver(design):
     """
     Tristate write driver to be active during write operations only.
     This module implements the write driver cell used in the design. It
@@ -22,11 +22,11 @@ class gain_cell_write_driver(design):
         super().__init__(name, prop=props.gain_cell_write_driver)
         debug.info(2, "Create write_driver")
 
-    def get_wbl_names(self):
-        return "wbl"
+    def get_rbl_names(self):
+        return "rbl"
 
-    # def get_ref_names(self):
-    #     return "ref"
+    def get_ref_names(self):
+        return "ref"
 
     @property
     def din_name(self):

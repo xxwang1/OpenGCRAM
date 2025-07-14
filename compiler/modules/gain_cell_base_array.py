@@ -38,26 +38,23 @@ class gain_cell_base_array(design):
     def create_all_bitline_names(self):
         for col in range(self.column_size):
             for port in self.read_ports:
-                self.bitline_names[port].extend(["rbl_{0}_{1}".format(port, col)])
+                self.bitline_names[port].extend(["rbl_{0}".format(col)])
             for port in self.write_ports:
-                self.bitline_names[port].extend(["wbl_{0}_{1}".format(port, col)])
+                self.bitline_names[port].extend(["wbl_{0}".format(col)])
         # Make a flat list too
         self.all_bitline_names = [x for sl in zip(*self.bitline_names) for x in sl]
 
     def create_all_wordline_names(self, row_size=None, start_row=0):
         if row_size == None:
             row_size = self.row_size
-        print("create_all_wordline_names row_size, start_row = ", row_size, start_row)
-        for port in self.write_ports:
-            for row in range(start_row, row_size):
-                # for port in self.all_ports:
-                self.wordline_names[0].append("wwl_{0}_{1}".format(port, row))
-        for port in self.read_ports:
-            for row in range(start_row, row_size):
-                # for port in self.all_ports:
-                self.wordline_names[1].append("rwl_{0}_{1}".format(port, row))
-            
-        print("create_all_wordline_names self.wordline_names = ", self.wordline_names)
+
+        for row in range(start_row, row_size):
+            # for port in self.all_ports:
+            for port in self.read_ports:
+                self.wordline_names[port].append("rwl_{0}".format(row))
+            for port in self.write_ports:
+                self.wordline_names[port].append("wwl_{0}".format(row))
+
         self.all_wordline_names = [x for sl in zip(*self.wordline_names) for x in sl]
 
     def add_pins(self):
@@ -71,9 +68,8 @@ class gain_cell_base_array(design):
                 self.add_pin(wl_name, "INOUT")
             else:
                 self.add_pin(wl_name, "INPUT")
-        if OPTS.gc_type == "Si":
-            self.add_pin("vdd", "POWER")
-            self.add_pin("gnd", "GROUND")
+        self.add_pin("vdd", "POWER")
+        self.add_pin("gnd", "GROUND")
 
     def get_gain_cell_pins(self, row, col):
         """
@@ -81,21 +77,11 @@ class gain_cell_base_array(design):
         indexed by column and row, for instance use in gain_cell_array
         """
         gain_cell_pins = []
-        # for port in self.all_ports:
-        #     gain_cell_pins.extend([x for x in self.get_bitline_names(port) if x.endswith("_{0}".format(col))])
-        # gain_cell_pins.extend([x for x in self.all_wordline_names if x.endswith("_{0}".format(row))])
-
-        for port in self.read_ports:
+        for port in self.all_ports:
             gain_cell_pins.extend([x for x in self.get_bitline_names(port) if x.endswith("_{0}".format(col))])
-        for port in self.write_ports:
-            gain_cell_pins.extend([x for x in self.get_bitline_names(port) if x.endswith("_{0}".format(col))])
-        for port in self.read_ports:
-            gain_cell_pins.extend([x for x in self.get_wordline_names(port) if x.endswith("_{0}".format(row))])
-        for port in self.write_ports:
-            gain_cell_pins.extend([x for x in self.get_wordline_names(port) if x.endswith("_{0}".format(row))])
-        if OPTS.gc_type == "Si":
-            gain_cell_pins.append("vdd")
-            gain_cell_pins.append("gnd")
+        gain_cell_pins.extend([x for x in self.all_wordline_names if x.endswith("_{0}".format(row))])
+        gain_cell_pins.append("vdd")
+        gain_cell_pins.append("gnd")
 
         return gain_cell_pins
 
@@ -136,12 +122,9 @@ class gain_cell_base_array(design):
 
     def get_wordline_names(self, port=None):
         """ Return the regular wordline names """
-        print("port = ", port)
         if port == None:
-            print("port = None")
             return self.all_wordline_names
         else:
-            print("port != None")
             return self.wordline_names[port]
 
     def get_all_wordline_names(self, port=None):
@@ -194,10 +177,9 @@ class gain_cell_base_array(design):
                                     height=wwl_pin.height())
 
     def route_supplies(self):
-        if OPTS.gc_type == "Si":
-            for inst in self.cell_inst.values():
-                for pin_name in ["vdd", "gnd"]:
-                    self.copy_layout_pin(inst, pin_name)
+        for inst in self.cell_inst.values():
+            for pin_name in ["vdd", "gnd"]:
+                self.copy_layout_pin(inst, pin_name)
 
     def add_layout_pins(self):
         """ Add the layout pins """
@@ -211,8 +193,6 @@ class gain_cell_base_array(design):
         if self.cell.mirror.y and (col + col_offset) % 2:
             tempx = xoffset + self.cell.width
             dir_y = True
-        if OPTS.gc_type == "OS":
-            dir_y = False
         return (tempx, dir_y)
 
     def _adjust_y_offset(self, yoffset, row, row_offset):
@@ -221,8 +201,6 @@ class gain_cell_base_array(design):
         # If we mirror the current cell on the x axis adjust the y position
         if self.cell.mirror.x and (row + row_offset) % 2:
             tempy = yoffset + self.cell.height
-            dir_x = True
-        if OPTS.gc_type == "OS":
             dir_x = True
         return (tempy, dir_x)
 

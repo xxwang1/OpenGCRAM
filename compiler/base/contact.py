@@ -8,11 +8,11 @@
 from openram import debug
 from openram.tech import drc, layer, preferred_directions
 from openram.tech import layer as tech_layers
-from .gain_cell_hierarchy_design import gain_cell_hierarchy_design
+from .hierarchy_design import hierarchy_design
 from .vector import vector
 from .utils import ceil
 
-class contact(gain_cell_hierarchy_design):
+class contact(hierarchy_design):
     """
     Object for a contact shape with its conductor enclosures.  Creates
     a contact array minimum active or poly enclosure and metal1

@@ -38,11 +38,9 @@ class spice_measurement(ABC):
     def retrieve_measure(self, port=None):
         self.port_error_check(port)
         if port is not None:
-            print("retrieve_measure key = ", "{0}{1}".format(self.name.lower(), port))
             value = parse_spice_list("timing", "{0}{1}".format(self.name.lower(), port))
         else:
             value = parse_spice_list("timing", "{0}".format(self.name.lower()))
-        print("value, measure_scale = ", value, self.measure_scale)
         if type(value)!=float or self.measure_scale is None:
             return value
         else:
@@ -125,11 +123,11 @@ class slew_measure(delay_measure):
         self.targ_dir_str = slew_dir_str
 
         if slew_dir_str == "RISE":
-            self.trig_val_of_vdd = 0.5 * 0.1
-            self.targ_val_of_vdd = 0.5 * 0.9
+            self.trig_val_of_vdd = 0.1
+            self.targ_val_of_vdd = 0.9
         elif slew_dir_str == "FALL":
-            self.trig_val_of_vdd = 0.5 * 0.9
-            self.targ_val_of_vdd = 0.5 * 0.1
+            self.trig_val_of_vdd = 0.9
+            self.targ_val_of_vdd = 0.1
         else:
             debug.error("Unrecognised slew measurement direction={}".format(slew_dir_str), 1)
         self.trig_name_no_port = signal_name

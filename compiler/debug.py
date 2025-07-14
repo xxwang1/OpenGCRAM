@@ -10,7 +10,7 @@ import os
 import datetime
 import pdb
 import inspect
-from openram import gain_cell_globals
+from openram import globals
 
 # the debug levels:
 # 0 = minimum output (default)
@@ -28,7 +28,7 @@ def check(check, str):
         log("ERROR: file {0}: line {1}: {2}\n".format(
             os.path.basename(filename), line_number, str))
 
-        if gain_cell_globals.OPTS.debug:
+        if globals.OPTS.debug:
             pdb.set_trace()
 
         assert 0
@@ -42,7 +42,7 @@ def error(str, return_value=0):
     log("ERROR: file {0}: line {1}: {2}\n".format(
         os.path.basename(filename), line_number, str))
 
-    if gain_cell_globals.OPTS.debug:
+    if globals.OPTS.debug:
         pdb.set_trace()
 
     assert return_value == 0
@@ -66,7 +66,7 @@ def log(str):
     # Add timestamp at the beginning of the string
     timestr = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
     str = "[{}] {}".format(timestr, str)
-    if gain_cell_globals.OPTS.output_name != '':
+    if globals.OPTS.output_name != '':
         if log.create_file:
             # We may have not yet read the config, so we need to ensure
             # it ends with a /
@@ -74,16 +74,16 @@ def log(str):
             # FIXME: There's actually a bug here. The first few lines
             # could be in one log file and after read_config it could be
             # in another log file if the path or name changes.
-            if not gain_cell_globals.OPTS.output_path.endswith('/'):
-                gain_cell_globals.OPTS.output_path += "/"
-            if not os.path.isdir(gain_cell_globals.OPTS.output_path):
-                os.mkdir(gain_cell_globals.OPTS.output_path)
-            compile_log = open(gain_cell_globals.OPTS.output_path +
-                               gain_cell_globals.OPTS.output_name + '.log', "w+")
+            if not globals.OPTS.output_path.endswith('/'):
+                globals.OPTS.output_path += "/"
+            if not os.path.isdir(globals.OPTS.output_path):
+                os.mkdir(globals.OPTS.output_path)
+            compile_log = open(globals.OPTS.output_path +
+                               globals.OPTS.output_name + '.log', "w+")
             log.create_file = 0
         else:
-            compile_log = open(gain_cell_globals.OPTS.output_path +
-                               gain_cell_globals.OPTS.output_name + '.log', "a")
+            compile_log = open(globals.OPTS.output_path +
+                               globals.OPTS.output_name + '.log', "a")
 
         if len(log.setup_output) != 0:
             for line in log.setup_output:
@@ -100,7 +100,7 @@ log.create_file = True
 
 
 def info(lev, str):
-    from openram.gain_cell_globals import OPTS
+    from openram.globals import OPTS
     # 99 is a special never print level
     if lev == 99:
         return
@@ -108,7 +108,7 @@ def info(lev, str):
     if (OPTS.verbose_level >= lev):
         frm = inspect.stack()[1]
         mod = inspect.getmodule(frm[0])
-        # classname = frm.f_gain_cell_globals['__name__']
+        # classname = frm.f_globals['__name__']
         if mod.__name__ is None:
             class_name = ""
         else:
@@ -118,7 +118,7 @@ def info(lev, str):
 
 
 def archive():
-    from openram.gain_cell_globals import OPTS
+    from openram.globals import OPTS
     try:
         OPENRAM_HOME = os.path.abspath(os.environ.get("OPENRAM_HOME"))
     except:

@@ -171,6 +171,7 @@ class layout():
         debug.info(level, "well_enclose_active".format(layout.well_enclose_active))
         debug.info(level, "implant_enclose_active".format(layout.implant_enclose_active))
         debug.info(level, "nwell_enclose_implant".format(layout.nwell_enclose_implant))
+        debug.info(level, "nwell_enclose_active".format(layout.nwell_enclose_active))
         # debug.info(level, "pimplant_enclose_active".format(layout.pimplant_enclose_active))
         debug.info(level, "implant_space".format(layout.implant_space))
         # debug.info(level, "pimplant_space".format(layout.pimplant_space))
@@ -1159,7 +1160,65 @@ class layout():
                                    width=width,
                                    height=height)
 
-    def add_layout_pin_rect_center(self, text, layer, offset, width=None, height=None, snap_to_grid=True):
+    # def add_layout_pin_rect_center(self, text, layer, offset, width=None, height=None, snap_to_grid=True):
+    #     """ Creates a path like pin with center-line convention """
+    #     if not width:
+    #         width = drc["minwidth_{0}".format(layer)]
+    #     if not height:
+    #         height = drc["minwidth_{0}".format(layer)]
+    #     # if width > 0: width = round(width, 3)
+    #     # else: width = round(abs(width), 3) * (-1)
+    #     # if height > 0: height = round(height, 3)
+    #     # else: height = round(abs(height), 3) * (-1)
+
+    #     # # check minarea requirement
+    #     # min_area = drc("minarea_{}".format(layer))
+    #     # # if min_area == 0:
+    #     # #     return
+    #     # # print("add_min_area_rect_center min_area = ", min_area)
+    #     # # print("add_min_area_rect_center layer = ", layer)
+    #     # if layer == "m1" and width * height < min_area:
+    #     #     min_width = drc("minwidth_{}".format(layer))
+    #     #     if layer != "m1":
+    #     #         if preferred_directions[layer] == "V":
+    #     #             new_height = ceil(max(min_area / width, min_width))
+    #     #             new_width = width
+    #     #         else:
+    #     #             new_width = ceil(max(min_area / height, min_width))
+    #     #             new_height = height
+    #     #         debug.check(min_area <= round_to_grid(new_height*new_width), "Min area violated.")
+
+    #     #         width = new_width
+    #     #         height = new_height
+    #     #     else:
+    #     #         if width > height:
+    #     #             new_height = ceil(max(min_area / width, min_width))
+    #     #             new_width = width
+    #     #             debug.check(min_area <= round_to_grid(new_height*new_width), "Min area violated.")
+    #     #             width = new_width
+    #     #             height = new_height
+    #     #         elif width < height:
+    #     #             new_width = ceil(max(min_area / height, min_width))
+    #     #             new_height = height
+    #     #         # else:
+    #     #         #     new_height = height
+    #     #         #     new_width = width
+    #     #             debug.check(min_area <= round_to_grid(new_height*new_width), "Min area violated.")
+
+    #     #             width = new_width
+    #     #             height = new_height
+    #         # debug.check(min_area <= round_to_grid(new_height*new_width), "Min area violated.")
+
+    #         # width = new_width
+    #         # height = new_height
+
+    #     ll_offset = (offset - vector(0.5 * width, 0.5 * height))
+    #     ini_offset_x = ll_offset.x
+    #     if snap_to_grid: ll_offset = ll_offset.snap_to_grid()
+    #     else: ll_offset = vector(ini_offset_x, round_to_grid(ll_offset.y))
+    #     print("add_layout_pin_rect_center offset, width, height = ", ll_offset, width, height)
+    #     return self.add_layout_pin(text, layer, ll_offset, width, height, snap_to_grid)
+    def add_layout_pin_rect_center(self, text, layer, offset, width=None, height=None, snap_to_grid=True, add_rect=True):
         """ Creates a path like pin with center-line convention """
         if not width:
             width = drc["minwidth_{0}".format(layer)]
@@ -1216,7 +1275,7 @@ class layout():
         if snap_to_grid: ll_offset = ll_offset.snap_to_grid()
         else: ll_offset = vector(ini_offset_x, round_to_grid(ll_offset.y))
         print("add_layout_pin_rect_center offset, width, height = ", ll_offset, width, height)
-        return self.add_layout_pin(text, layer, ll_offset, width, height, snap_to_grid)
+        return self.add_layout_pin(text, layer, ll_offset, width, height, snap_to_grid, add_rect)
 
     def remove_layout_pin(self, text):
         """
@@ -1255,113 +1314,220 @@ class layout():
                             width=pin.width(),
                             height=pin.height())
 
-    def add_layout_pin(self, text, layer, offset, width=None, height=None, snap_to_grid=True):
-        """
-        Create a labeled pin
-        """
-        # print("********************************************************************************")
-        # print("1.1 add_layout_pin layer = ", layer)
-        # print("1.2 self.pin_map = ", self.pin_map)
-        # print("********************************************************************************")
-        if layer[-1] == "p":
-            layer = layer[:-1]
-        min_width = drc["minwidth_{0}".format(layer)]
-        min_height = drc["minwidth_{0}".format(layer)]
-        if not width:
-            width = min_width
-        if not height:
-            height = min_height
-        # if layer == "m1":
-        #     layer = "m1p"
-        # if layer == "m2":
-        #     layer = "m2p"
-        # if layer == "m3":
-        #     layer = "m3p"
-        # if layer == "m4":
-        #     layer = "m4p"
-        # if layer == "m5":
-        #     layer = "m5p"
-        # if layer == "m6":
-        # #     layer = "m6p"
-        # if width > 0: width = round(width, 3)
-        # else: width = round(abs(width), 3) * (-1)
-        # if height > 0: height = round(height, 3)
-        # else: height = round(abs(height), 3) * (-1)
+    # def add_layout_pin(self, text, layer, offset, width=None, height=None, snap_to_grid=True):
+    #     """
+    #     Create a labeled pin
+    #     """
+    #     # print("********************************************************************************")
+    #     # print("1.1 add_layout_pin layer = ", layer)
+    #     # print("1.2 self.pin_map = ", self.pin_map)
+    #     # print("********************************************************************************")
+    #     if layer[-1] == "p":
+    #         layer = layer[:-1]
+    #     min_width = drc["minwidth_{0}".format(layer)]
+    #     min_height = drc["minwidth_{0}".format(layer)]
+    #     if not width:
+    #         width = min_width
+    #     if not height:
+    #         height = min_height
+    #     # if layer == "m1":
+    #     #     layer = "m1p"
+    #     # if layer == "m2":
+    #     #     layer = "m2p"
+    #     # if layer == "m3":
+    #     #     layer = "m3p"
+    #     # if layer == "m4":
+    #     #     layer = "m4p"
+    #     # if layer == "m5":
+    #     #     layer = "m5p"
+    #     # if layer == "m6":
+    #     # #     layer = "m6p"
+    #     # if width > 0: width = round(width, 3)
+    #     # else: width = round(abs(width), 3) * (-1)
+    #     # if height > 0: height = round(height, 3)
+    #     # else: height = round(abs(height), 3) * (-1)
 
-        # # check minarea requirement
-        # if layer == "m1":
-        #     min_area = drc("minarea_{}".format(layer))
-        #     if width * height < min_area:
-        #         # if min_area == 0:
-        #         #     return
-        #         # print("add_min_area_rect_center min_area = ", min_area)
-        #         # print("add_min_area_rect_center layer = ", layer)
-        #         min_width = drc("minwidth_{}".format(layer))
-        #         if layer != "m1":
-        #             if preferred_directions[layer] == "V":
-        #                 new_height = ceil(max(min_area / width, min_width))
-        #                 new_width = width
-        #             else:
-        #                 new_width = ceil(max(min_area / height, min_width))
-        #                 new_height = height
-        #             debug.check(min_area <= round_to_grid(new_height*new_width), "Min area violated.")
-        #             width = new_width
-        #             height = new_height
-        #         else:
-        #             if width > height:
-        #                 new_height = ceil(max(min_area / width, min_width))
-        #                 new_width = width
-        #                 debug.check(min_area <= round_to_grid(new_height*new_width), "Min area violated.")
-        #                 width = new_width
-        #                 height = new_height
-        #             elif width < height:
-        #                 new_width = ceil(max(min_area / height, min_width))
-        #                 new_height = height
-        #                 debug.check(min_area <= round_to_grid(new_height*new_width), "Min area violated.")
-        #                 width = new_width
-        #                 height = new_height
-        #             # new_height = sqrt(min_area)
-        #             # new_width = ceil(max(min_area / new_height, min_width))
+    #     # # check minarea requirement
+    #     # if layer == "m1":
+    #     #     min_area = drc("minarea_{}".format(layer))
+    #     #     if width * height < min_area:
+    #     #         # if min_area == 0:
+    #     #         #     return
+    #     #         # print("add_min_area_rect_center min_area = ", min_area)
+    #     #         # print("add_min_area_rect_center layer = ", layer)
+    #     #         min_width = drc("minwidth_{}".format(layer))
+    #     #         if layer != "m1":
+    #     #             if preferred_directions[layer] == "V":
+    #     #                 new_height = ceil(max(min_area / width, min_width))
+    #     #                 new_width = width
+    #     #             else:
+    #     #                 new_width = ceil(max(min_area / height, min_width))
+    #     #                 new_height = height
+    #     #             debug.check(min_area <= round_to_grid(new_height*new_width), "Min area violated.")
+    #     #             width = new_width
+    #     #             height = new_height
+    #     #         else:
+    #     #             if width > height:
+    #     #                 new_height = ceil(max(min_area / width, min_width))
+    #     #                 new_width = width
+    #     #                 debug.check(min_area <= round_to_grid(new_height*new_width), "Min area violated.")
+    #     #                 width = new_width
+    #     #                 height = new_height
+    #     #             elif width < height:
+    #     #                 new_width = ceil(max(min_area / height, min_width))
+    #     #                 new_height = height
+    #     #                 debug.check(min_area <= round_to_grid(new_height*new_width), "Min area violated.")
+    #     #                 width = new_width
+    #     #                 height = new_height
+    #     #             # new_height = sqrt(min_area)
+    #     #             # new_width = ceil(max(min_area / new_height, min_width))
                 
-        #         # width = new_width
-        #         # height = new_height
-        print("add_layout_pin width, height = ", width, height)
-        print("add_layout_pin min_width, min_height = ", min_width, min_height)
-        new_pin_m = pin_layout(text,
-                             [offset, offset + vector(width, height)],
-                             layer,
-                             snap_to_grid)
-        if len(layer) == 2:
-            layer = layer+"p"
-        # new_pin_p = pin_layout(text,
-        #                      [offset, offset + vector(min_width, min_height)],
-        #                      layer)
-        # print("1.3 add_layout_pin new_pin = ", new_pin_p)
-        try:
-            # Check if there's a duplicate!
-            # and if so, silently ignore it.
-            # Rounding errors may result in some duplicates.
-            if new_pin_m not in self.pin_map[text]:
-                self.pin_map[text].add(new_pin_m)
-                self.add_label_pin(text, layer, offset, width=min_width, height=min_height, snap_to_grid=snap_to_grid)
-        except KeyError:
-            self.pin_map[text] = set()
-            self.pin_map[text].add(new_pin_m)
-            self.add_label_pin(text, layer, offset, width=min_width, height=min_height, snap_to_grid=snap_to_grid)
+    #     #         # width = new_width
+    #     #         # height = new_height
+    #     print("add_layout_pin width, height = ", width, height)
+    #     print("add_layout_pin min_width, min_height = ", min_width, min_height)
+    #     new_pin_m = pin_layout(text,
+    #                          [offset, offset + vector(width, height)],
+    #                          layer,
+    #                          snap_to_grid)
+    #     if len(layer) == 2:
+    #         layer = layer+"p"
+    #     # new_pin_p = pin_layout(text,
+    #     #                      [offset, offset + vector(min_width, min_height)],
+    #     #                      layer)
+    #     # print("1.3 add_layout_pin new_pin = ", new_pin_p)
+    #     try:
+    #         # Check if there's a duplicate!
+    #         # and if so, silently ignore it.
+    #         # Rounding errors may result in some duplicates.
+    #         if new_pin_m not in self.pin_map[text]:
+    #             self.pin_map[text].add(new_pin_m)
+    #             self.add_label_pin(text, layer, offset, width=min_width, height=min_height, snap_to_grid=snap_to_grid)
+    #     except KeyError:
+    #         self.pin_map[text] = set()
+    #         self.pin_map[text].add(new_pin_m)
+    #         self.add_label_pin(text, layer, offset, width=min_width, height=min_height, snap_to_grid=snap_to_grid)
 
         
-        # try:
-        #     # Check if there's a duplicate!
-        #     # and if so, silently ignore it.
-        #     # Rounding errors may result in some duplicates.
-        #     if new_pin_p not in self.pin_map[text]:
-        #         self.pin_map[text].add(new_pin_p)
-        # except KeyError:
-        #     self.pin_map[text] = set()
-        #     self.pin_map[text].add(new_pin_p)
+    #     # try:
+    #     #     # Check if there's a duplicate!
+    #     #     # and if so, silently ignore it.
+    #     #     # Rounding errors may result in some duplicates.
+    #     #     if new_pin_p not in self.pin_map[text]:
+    #     #         self.pin_map[text].add(new_pin_p)
+    #     # except KeyError:
+    #     #     self.pin_map[text] = set()
+    #     #     self.pin_map[text].add(new_pin_p)
 
-        return new_pin_m
+    #     return new_pin_m
+    def add_layout_pin(self, text, layer, offset, width=None, height=None, snap_to_grid=True, add_rect=True):
+            """
+            Create a labeled pin
+            """
+            # print("********************************************************************************")
+            # print("1.1 add_layout_pin layer = ", layer)
+            # print("1.2 self.pin_map = ", self.pin_map)
+            # print("********************************************************************************")
+            if layer[-1] == "p":
+                layer = layer[:-1]
+            min_width = drc["minwidth_{0}".format(layer)]
+            min_height = drc["minwidth_{0}".format(layer)]
+            if not width:
+                width = min_width
+            if not height:
+                height = min_height
+            # if layer == "m1":
+            #     layer = "m1p"
+            # if layer == "m2":
+            #     layer = "m2p"
+            # if layer == "m3":
+            #     layer = "m3p"
+            # if layer == "m4":
+            #     layer = "m4p"
+            # if layer == "m5":
+            #     layer = "m5p"
+            # if layer == "m6":
+            # #     layer = "m6p"
+            # if width > 0: width = round(width, 3)
+            # else: width = round(abs(width), 3) * (-1)
+            # if height > 0: height = round(height, 3)
+            # else: height = round(abs(height), 3) * (-1)
 
+            # # check minarea requirement
+            # if layer == "m1":
+            #     min_area = drc("minarea_{}".format(layer))
+            #     if width * height < min_area:
+            #         # if min_area == 0:
+            #         #     return
+            #         # print("add_min_area_rect_center min_area = ", min_area)
+            #         # print("add_min_area_rect_center layer = ", layer)
+            #         min_width = drc("minwidth_{}".format(layer))
+            #         if layer != "m1":
+            #             if preferred_directions[layer] == "V":
+            #                 new_height = ceil(max(min_area / width, min_width))
+            #                 new_width = width
+            #             else:
+            #                 new_width = ceil(max(min_area / height, min_width))
+            #                 new_height = height
+            #             debug.check(min_area <= round_to_grid(new_height*new_width), "Min area violated.")
+            #             width = new_width
+            #             height = new_height
+            #         else:
+            #             if width > height:
+            #                 new_height = ceil(max(min_area / width, min_width))
+            #                 new_width = width
+            #                 debug.check(min_area <= round_to_grid(new_height*new_width), "Min area violated.")
+            #                 width = new_width
+            #                 height = new_height
+            #             elif width < height:
+            #                 new_width = ceil(max(min_area / height, min_width))
+            #                 new_height = height
+            #                 debug.check(min_area <= round_to_grid(new_height*new_width), "Min area violated.")
+            #                 width = new_width
+            #                 height = new_height
+            #             # new_height = sqrt(min_area)
+            #             # new_width = ceil(max(min_area / new_height, min_width))
+                    
+            #         # width = new_width
+            #         # height = new_height
+            print("add_layout_pin width, height = ", width, height)
+            print("add_layout_pin min_width, min_height = ", min_width, min_height)
+            new_pin_m = pin_layout(text,
+                                [offset, offset + vector(width, height)],
+                                layer,
+                                snap_to_grid)
+            if len(layer) == 2:
+                layer = layer+"p"
+            # new_pin_p = pin_layout(text,
+            #                      [offset, offset + vector(min_width, min_height)],
+            #                      layer)
+            # print("1.3 add_layout_pin new_pin = ", new_pin_p)
+            try:
+                # Check if there's a duplicate!
+                # and if so, silently ignore it.
+                # Rounding errors may result in some duplicates.
+                if new_pin_m not in self.pin_map[text]:
+                    self.pin_map[text].add(new_pin_m)
+                    if add_rect:
+                        self.add_label_pin(text, layer, offset, width=min_width, height=min_height, snap_to_grid=snap_to_grid)
+            except KeyError:
+                self.pin_map[text] = set()
+                self.pin_map[text].add(new_pin_m)
+                if add_rect:
+                    self.add_label_pin(text, layer, offset, width=min_width, height=min_height, snap_to_grid=snap_to_grid)
+
+            
+            # try:
+            #     # Check if there's a duplicate!
+            #     # and if so, silently ignore it.
+            #     # Rounding errors may result in some duplicates.
+            #     if new_pin_p not in self.pin_map[text]:
+            #         self.pin_map[text].add(new_pin_p)
+            # except KeyError:
+            #     self.pin_map[text] = set()
+            #     self.pin_map[text].add(new_pin_p)
+
+            return new_pin_m
     def add_label_pin(self, text, layer, offset, width=None, height=None, snap_to_grid=True):
         """
         Create a labeled pin WITHOUT the pin data structure. This is not an
@@ -1573,16 +1739,24 @@ class layout():
                              well_type=well_type)
         height = via.height
         width = via.width
-
+        
         corrected_offset = offset + vector(-0.5 * width,
                                            -0.5 * height)
-
-        inst = self.add_inst(name=via.name,
-                             mod=via,
-                             offset=corrected_offset)
-        # We don't model the logical connectivity of wires/paths
-        self.connect_inst([])
-        return inst
+        flag=1
+        for inst in self.insts:
+            if "contact" in inst.mod.name:
+                if layers[1] in inst.mod.layer_stack and layers[1] == "via5":
+                    if abs(inst.offset.x - corrected_offset.x) < self.via5_width and abs(inst.offset.y - corrected_offset.y) < self.via5_width:
+                        self.connect_inst([])
+                        flag=0
+                        return inst
+        if flag == 1:
+            inst = self.add_inst(name=via.name,
+                                mod=via,
+                                offset=corrected_offset)
+            # We don't model the logical connectivity of wires/paths
+            self.connect_inst([])
+            return inst
 
     def add_via_center(self, layers, offset, directions=None, size=[1, 1], implant_type=None, well_type=None, multiple_via4=True, multiple_via5=None):
         """
@@ -2741,7 +2915,71 @@ class layout():
             elif add_vias:
                 self.copy_power_pin(pin, new_name=new_name, minarea=minarea)
 
-    def add_io_pin(self, instance, pin_name, new_name, start_layer=None, directions=None, minarea=False,multiple_via4=True):
+    # def add_io_pin(self, instance, pin_name, new_name, start_layer=None, directions=None, minarea=False,multiple_via4=True):
+    #     """
+    #     Add a signle input or output pin up to metal 3.
+    #     """
+    #     pin = instance.get_pin(pin_name)
+
+    #     if not start_layer:
+    #         start_layer = pin.layer
+
+    #     # Just use the power pin function for now to save code
+    #     self.add_power_pin(new_name, pin.center(), start_layer=start_layer, directions=directions, minarea=minarea, multiple_via4=multiple_via4)
+
+    # def add_power_pin(self, name, loc, directions=None, start_layer="m1", minarea=False, multiple_via4=True):
+    #     # Hack for min area
+    #     if OPTS.tech_name == "sky130":
+    #         min_area = drc["minarea_{}".format(self.pwr_grid_layers[1])]
+    #         width = round_to_grid(ceil(sqrt(min_area)))
+    #         height = round_to_grid(ceil(min_area / width))
+    #     elif OPTS.tech_name == "tsmcN40":
+    #         min_area = drc["minarea_{}".format(self.pwr_grid_layers[0])]
+    #         width = round_to_grid(ceil(sqrt(min_area)))
+    #         height = round_to_grid(ceil(min_area / width))
+    #     else:
+    #         width = None
+    #         height = None
+        
+    #     pin = None
+    #     print("add_power_pin width, height = ", width, height)
+    #     if start_layer in self.pwr_grid_layers:
+    #         # if width:
+    #         #     if width > 0: width = round(width, 3)
+    #         #     else: width = round(abs(width), 3) * (-1)
+    #         # if height:
+    #         #     if height > 0: height = round(height, 3)
+    #         #     else: height = round(abs(height), 3) * (-1)
+    #         pin = self.add_layout_pin_rect_center(text=name,
+    #                                                layer=start_layer,
+    #                                                offset=loc,
+    #                                                width=width,
+    #                                                height=height)
+    #     else:
+    #         via = self.add_via_stack_center(from_layer=start_layer,
+    #                                         to_layer=self.pwr_grid_layers[0],
+    #                                         offset=loc,
+    #                                         directions=directions,
+    #                                         min_area=minarea,
+    #                                         multiple_via4=multiple_via4)
+
+    #         if not width:
+    #             width = via.width
+    #         if not height:
+    #             height = via.height
+    #         # if width > 0: width = round(width, 3)
+    #         # else: width = round(abs(width), 3) * (-1)
+    #         # if height > 0: height = round(height, 3)
+    #         # else: height = round(abs(height), 3) * (-1)
+    #         pin = self.add_layout_pin_rect_center(text=name,
+    #                                               layer=self.pwr_grid_layers[0],
+    #                                               offset=loc,
+    #                                               width=width,
+    #                                               height=height)
+
+    #     return pin
+
+    def add_io_pin(self, instance, pin_name, new_name, start_layer=None, directions=None, add_rect=True, minarea=False,multiple_via4=True):
         """
         Add a signle input or output pin up to metal 3.
         """
@@ -2751,9 +2989,9 @@ class layout():
             start_layer = pin.layer
 
         # Just use the power pin function for now to save code
-        self.add_power_pin(new_name, pin.center(), start_layer=start_layer, directions=directions, minarea=minarea, multiple_via4=multiple_via4)
+        self.add_power_pin(new_name, pin.center(), start_layer=start_layer, directions=directions, add_rect=add_rect, minarea=minarea, multiple_via4=multiple_via4)
 
-    def add_power_pin(self, name, loc, directions=None, start_layer="m1", minarea=False, multiple_via4=True):
+    def add_power_pin(self, name, loc, directions=None, start_layer="m1", add_rect=True, minarea=False, multiple_via4=True):
         # Hack for min area
         if OPTS.tech_name == "sky130":
             min_area = drc["minarea_{}".format(self.pwr_grid_layers[1])]
@@ -2780,7 +3018,8 @@ class layout():
                                                    layer=start_layer,
                                                    offset=loc,
                                                    width=width,
-                                                   height=height)
+                                                   height=height,
+                                                   add_rect=add_rect)
         else:
             via = self.add_via_stack_center(from_layer=start_layer,
                                             to_layer=self.pwr_grid_layers[0],
@@ -2801,7 +3040,8 @@ class layout():
                                                   layer=self.pwr_grid_layers[0],
                                                   offset=loc,
                                                   width=width,
-                                                  height=height)
+                                                  height=height,
+                                                  add_rect=add_rect)
 
         return pin
 

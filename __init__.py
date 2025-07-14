@@ -43,16 +43,11 @@ except:
 
 # Import everything in globals.py
 from .globals import *
-from .gain_cell_globals import *
 # Import classes in the "openram" namespace
 from .sram_config import *
 from .sram import *
 from .rom_config import *
 from .rom import *
-from .gain_cell_config import *
-from .gain_cell import *
-# from .rom_config import *
-# from .rom import *
 
 
 # Add a meta path finder for custom modules

@@ -9,9 +9,7 @@ import os
 from openram import debug
 from openram import OPTS, find_exe, get_tool
 from .lib import *
-from .gain_cell_lib import *
 from .delay import *
-from .gain_cell_delay import *
 from .elmore import *
 from .linear_regression import *
 from .neural_network import *
@@ -22,7 +20,6 @@ from .measurements import *
 from .model_check import *
 from .analytical_util import *
 from .fake_sram import *
-from .fake_gain_cell import *
 
 debug.info(1, "Initializing characterizer...")
 OPTS.spice_exe = ""

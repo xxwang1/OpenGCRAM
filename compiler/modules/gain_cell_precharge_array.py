@@ -12,7 +12,7 @@ from openram.sram_factory import factory
 from openram import OPTS
 
 
-class gain_cell_precharge_array(design):
+class precharge_array(design):
     """
     Dynamically generated precharge array of all bitlines.  Cols is number
     of bit line columns, height is the height of the bit-cell array.
@@ -26,7 +26,7 @@ class gain_cell_precharge_array(design):
         self.columns = columns
         self.offsets = offsets
         self.size = size
-        self.gain_cell_rbl = gain_cell_bl
+        self.gain_cell_rbl = gain_cell_rbl
         # self.gain_cell_br = gain_cell_br
         self.column_offset = column_offset
 
@@ -43,17 +43,16 @@ class gain_cell_precharge_array(design):
         rbl_name = self.pc_cell.get_rbl_names()
         return rbl_name
 
-    def get_wbl_name(self):
-        wbl_name = self.pc_cell.get_wbl_names()
-        return wbl_name
+    # def get_br_name(self):
+        # br_name = self.pc_cell.get_br_names()
+        # return br_name
 
     def add_pins(self):
         """Adds pins for spice file"""
         for i in range(self.columns):
             # These are outputs from the precharge only
-            # self.add_pin("bl_{0}".format(i), "OUTPUT")
+            self.add_pin("rbl_{0}".format(i), "OUTPUT")
             # self.add_pin("br_{0}".format(i), "OUTPUT")
-            self.add_pin(self.gain_cell_rbl+"_{0}".format(i), "OUTPUT")
         self.add_pin("en_bar", "INPUT")
         self.add_pin("vdd", "POWER")
 
@@ -74,7 +73,7 @@ class gain_cell_precharge_array(design):
         self.DRC_LVS()
 
     def add_modules(self):
-        self.pc_cell = factory.create(module_type=OPTS.gain_cell_precharge,
+        self.pc_cell = factory.create(module_type=OPTS.precharge,
                                       size=self.size,
                                       gain_cell_rbl=self.gain_cell_rbl)
 
@@ -91,12 +90,11 @@ class gain_cell_precharge_array(design):
 
         for i in range(len(self.local_insts)):
             inst = self.local_insts[i]
-            self.copy_layout_pin(inst, self.gain_cell_rbl, self.gain_cell_rbl+"_{0}".format(i))
-            # self.copy_layout_pin(inst, "bl", "bl_{0}".format(i))
+            self.copy_layout_pin(inst, "rbl", "rbl_{0}".format(i))
             # self.copy_layout_pin(inst, "br", "br_{0}".format(i))
 
     def route_supplies(self):
-        self.route_horizontal_pins("vdd", snap_to_grid=True)
+        self.route_horizontal_pins("vdd")
 
     def create_insts(self):
         """Creates a precharge array by horizontally tiling the precharge cell"""
@@ -108,7 +106,7 @@ class gain_cell_precharge_array(design):
                                  mod=self.pc_cell,
                                  offset=offset)
             self.local_insts.append(inst)
-            self.connect_inst([self.gain_cell_rbl+"_{0}".format(i), "en_bar", "vdd"])
+            self.connect_inst(["rbl_{0}".format(i), "en_bar", "vdd"])
 
     def place_insts(self):
         """ Places precharge array by horizontally tiling the precharge cell"""

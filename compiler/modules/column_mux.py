@@ -96,7 +96,7 @@ class column_mux(pgate):
     def add_bitline_pins(self):
         """ Add the top and bottom pins to this cell """
 
-        bl_pos = vector(self.pin_pitch, 0)
+        bl_pos = vector(2 * self.pin_pitch, 0)
         br_pos = vector(self.width - self.pin_pitch, 0)
 
         # bl and br
@@ -243,8 +243,11 @@ class column_mux(pgate):
         else:
             rbc_width = self.bitcell.width
         # Add it to the right, aligned in between the two tx
-        active_pos = vector(rbc_width,
-                            self.nmos_upper.by() - 0.5 * self.poly_space - self.m2_space)
+        # active_pos = vector(rbc_width,
+        #                     self.nmos_upper.uy() - 0.5 * self.poly_space - self.m2_space)
+        active_height = round_to_grid(drc("minarea_{}".format("active")) / (self.contact_width + 2 * self.m1_enclose_contact))
+        active_pos = vector(rbc_width + self.m1_width,
+                            self.nmos_upper.uy() + self.implant_enclose_active + self.nwell_enclose_implant + round_to_grid(0.5 * active_height))
 
         # self.add_via_center(layers=self.active_stack,
         #                     offset=active_pos,

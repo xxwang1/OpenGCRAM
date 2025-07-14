@@ -82,11 +82,11 @@ class multi_delay_chain(design):
 
     def add_modules(self):
 
-        self.gain_cell_dff = factory.create(module_type="gain_cell_dff_buf")
-        gain_cell_dff_height = self.gain_cell_dff.height
+        self.dff = factory.create(module_type="dff_buf")
+        dff_height = self.dff.height
 
         self.inv = factory.create(module_type="pinv",
-                                  height=gain_cell_dff_height)
+                                  height=dff_height)
 
     def create_inverters(self):
         """ Create the inverters and connect them based on the stage list """
