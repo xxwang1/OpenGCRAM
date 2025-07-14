@@ -124,7 +124,7 @@ class gain_cell():
         # Save stimulus and measurement file
         start_time = datetime.datetime.now()
         debug.print_raw("DELAY: Writing stimulus...")
-        d = gain_cell_delay(self.s, spname, ("TT", 5, 25), output_path=OPTS.output_path)
+        d = gain_cell_delay(self.s, spname, ("TT", 1, 25), output_path=OPTS.output_path)
         if (self.s.num_spare_rows == 0):
             probe_address = "1" * self.s.addr_size
         else:
@@ -133,7 +133,7 @@ class gain_cell():
         d.analysis_init(probe_address, probe_data)
         d.targ_read_ports.extend(self.s.read_ports)
         d.targ_write_ports = [self.s.write_ports[0]]
-        d.write_delay_stimulus()
+        d.write_delay_stimulus(trim=OPTS.trim_netlist)
         print_time("DELAY", datetime.datetime.now(), start_time)
 
         # Save trimmed spice file

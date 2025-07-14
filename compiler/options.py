@@ -83,7 +83,7 @@ class options(optparse.Values):
     multi_delay_chain_pinouts = [2, 10, 11, 17, 31]
 
     # stages for delay chain in rbl control logic only
-    delay_chain_stages = 9
+    delay_chain_stages = 13
 
     # fanout per stage for any control logic
     delay_chain_fanout_per_stage = 4
@@ -100,7 +100,7 @@ class options(optparse.Values):
         openram_temp = os.path.abspath(os.environ.get("OPENRAM_TMP"))
 
     except:
-        openram_temp = "/home/xxwang1/OpenRAM/tmp"
+        openram_temp = "/home/xxwang1/OpenRAM-GC/tmp"
 
     # This is the verbosity level to control debug information. 0 is none, 1
     # is minimal, etc.
@@ -155,9 +155,9 @@ class options(optparse.Values):
     # (existing tools will be used if disabled)
     use_conda = True
     # Variable to select the variant of spice
-    spice_name = None
+    spice_name = "hspice"
     # The spice executable being used which is derived from the user PATH.
-    spice_exe = None
+    spice_exe = "hspice/latest"
     # Variable to select the variant of drc, lvs, pex
     drc_name = None
     lvs_name = None
@@ -187,7 +187,7 @@ class options(optparse.Values):
     output_name = ""
     # Use analytical delay models by default
     # rather than (slow) characterization
-    analytical_delay = True
+    analytical_delay = False
     # Purge the temp directory after a successful
     # run (doesn't purge on errors, anyhow)
 
@@ -251,6 +251,10 @@ class options(optparse.Values):
     gain_cell_sense_amp_array = "gain_cell_sense_amp_array"
     gain_cell_sense_amp = "gain_cell_sense_amp"
     gain_cell_wordline_driver = "gain_cell_wordline_driver"
+    gain_cell_wwlls = "gain_cell_wwlls"
     gain_cell_write_driver_array = "gain_cell_write_driver_array"
     gain_cell_write_driver = "gain_cell_write_driver"
     gain_cell_control_logic = "gain_cell_control_logic"
+    level_shifter = "level_shifter"
+    gc_type = "Si"
+    vddio = 1.2

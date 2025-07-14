@@ -100,7 +100,7 @@ class options(optparse.Values):
         openram_temp = os.path.abspath(os.environ.get("OPENRAM_TMP"))
 
     except:
-        openram_temp = "/home/xxwang1/OpenRAM/tmp"
+        openram_temp = "/home/xxwang1/OpenRAM-GC/tmp"
 
     # This is the verbosity level to control debug information. 0 is none, 1
     # is minimal, etc.
@@ -135,7 +135,7 @@ class options(optparse.Values):
     # Remove noncritical memory cells for characterization speed-up
     trim_netlist = True
     # Run with extracted parasitics
-    use_pex = False
+    use_pex = True
     # Output config with all options
     output_extended_config = False
     # Output temporary file used to format HTML page
@@ -155,9 +155,9 @@ class options(optparse.Values):
     # (existing tools will be used if disabled)
     use_conda = True
     # Variable to select the variant of spice
-    spice_name = None
+    spice_name = "hspice"
     # The spice executable being used which is derived from the user PATH.
-    spice_exe = None
+    spice_exe = "hspice/latest"
     # Variable to select the variant of drc, lvs, pex
     drc_name = None
     lvs_name = None
@@ -187,7 +187,7 @@ class options(optparse.Values):
     output_name = ""
     # Use analytical delay models by default
     # rather than (slow) characterization
-    analytical_delay = True
+    analytical_delay = False
     # Purge the temp directory after a successful
     # run (doesn't purge on errors, anyhow)
 
@@ -238,3 +238,5 @@ class options(optparse.Values):
     gain_cell_write_driver_array = "gain_cell_write_driver_array"
     gain_cell_write_driver = "gain_cell_write_driver"
     write_mask_and_array = "write_mask_and_array"
+    level_shifter = "level_shifter"
+    gc_type = "Si"

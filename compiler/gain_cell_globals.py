@@ -454,11 +454,12 @@ def find_exe(check_exe):
         # search_path = "{0}/bin{1}{2}".format(CONDA_HOME,
         #                                      os.pathsep,
         #                                      os.environ["PATH"])
-        search_path = "{0}/bin{3}{1}/bin{3}{2}/bin{3}{4}".format("/cad/mentor/2021.4/aoi_cal_2021.2_18.11/",
+        search_path = "{0}/bin{3}{1}/bin{3}{2}/bin{3}{4}{3}{5}".format("/cad/mentor/2021.4/aoi_cal_2021.2_18.11/",
                                              "/cad/magic/8.3",
                                              "cad/netgen/1.5",
                                              os.pathsep,
-                                             os.environ["PATH"])
+                                             os.environ["PATH"],
+                                             "/cad/modules/modulefiles/tools/")
     else:
         search_path = os.environ["PATH"]
 
@@ -656,6 +657,9 @@ def report_status():
     debug.print_raw("RW ports: {0}\nR-only ports: {1}\nW-only ports: {2}".format(OPTS.num_rw_ports,
                                                                                  OPTS.num_r_ports,
                                                                                  OPTS.num_w_ports))
+
+    debug.print_raw("Delay Chain Stages: {0}\n".format(OPTS.delay_chain_stages))
+    debug.print_raw("Trim Netlist: {OPTS.trim_netlist}\n")
 
     if OPTS.netlist_only:
         debug.print_raw("Netlist only mode (no physical design is being done, netlist_only=False to disable).")
