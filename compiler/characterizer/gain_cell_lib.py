@@ -228,7 +228,7 @@ class gain_cell_lib:
         self.write_pg_pin()
 
         #Build string of all control signals.
-        control_str = 'csb0' #assume at least 1 port
+        control_str = 'web0' #assume at least 1 port
         for i in range(1, self.total_port_num):
             control_str += ' & csb{0}'.format(i)
 
@@ -510,9 +510,12 @@ class gain_cell_lib:
     def write_control_pins(self, port):
         """ Adds control pins timing results."""
         #The control pins are still to be determined. This is a placeholder for what could be.
-        ctrl_pin_names = ["csb{0}".format(port)]
-        if port in self.readwrite_ports:
-            ctrl_pin_names.append("web{0}".format(port))
+        if port in self.write_ports:
+            ctrl_pin_names = ["web{0}".format(port)]
+        if port in self.read_ports:
+            ctrl_pin_names = ["csb{0}".format(port)]
+        # if port in self.readwrite_ports:
+        #     ctrl_pin_names.append("web{0}".format(port))
 
         for i in ctrl_pin_names:
             self.lib.write("    pin({0})".format(i))
@@ -568,7 +571,7 @@ class gain_cell_lib:
             write1_power = np.mean(self.char_port_results[port]["write1_power"])
             write0_power = np.mean(self.char_port_results[port]["write0_power"])
             self.lib.write("        internal_power(){\n")
-            self.lib.write("            when : \"!csb{0}{1}\"; \n".format(port, web_name))
+            self.lib.write("            when : \"!web{0}{1}\"; \n".format(port, web_name))
             self.lib.write("            rise_power(scalar){\n")
             self.lib.write("                values(\"{0:.6e}\");\n".format(write1_power))
             self.lib.write("            }\n")
@@ -581,7 +584,7 @@ class gain_cell_lib:
             disabled_write1_power = np.mean(self.char_port_results[port]["disabled_write1_power"])
             disabled_write0_power = np.mean(self.char_port_results[port]["disabled_write0_power"])
             self.lib.write("        internal_power(){\n")
-            self.lib.write("            when : \"csb{0}{1}\"; \n".format(port, web_name))
+            self.lib.write("            when : \"web{0}{1}\"; \n".format(port, web_name))
             self.lib.write("            rise_power(scalar){\n")
             self.lib.write("                values(\"{0:.6e}\");\n".format(disabled_write1_power))
             self.lib.write("            }\n")
@@ -647,7 +650,7 @@ class gain_cell_lib:
             char_results = m.get_lib_values(self.load_slews)
 
         else:
-            self.d = delay(self.gain_cell, self.sp_file, self.corner)
+            self.d = gain_cell_delay(self.gain_cell, self.sp_file, self.corner)
             if (self.gain_cell.num_spare_rows == 0):
                 probe_address = "1" * self.gain_cell.addr_size
             else:
@@ -728,7 +731,7 @@ class gain_cell_lib:
 
         self.write_signal_from_ports(datasheet,
                                 "csb{}",
-                                self.all_ports,
+                                self.read_ports,
                                 "setup_times_LH",
                                 "setup_times_HL",
                                 "hold_times_LH",
@@ -744,7 +747,7 @@ class gain_cell_lib:
 
         self.write_signal_from_ports(datasheet,
                                 "web{}",
-                                self.readwrite_ports,
+                                self.write_ports,
                                 "setup_times_LH",
                                 "setup_times_HL",
                                 "hold_times_LH",
@@ -834,7 +837,8 @@ class gain_cell_lib:
 
             # write dynamic power usage
             if port in self.read_ports:
-                web_name = " & !web{0}".format(port)
+                # web_name = " & !web{0}".format(port)
+                web_name = ""
                 name = "!csb{0} & clk{0}{1}".format(port, web_name)
                 read_write = 'Read'
 
@@ -848,7 +852,7 @@ class gain_cell_lib:
 
             if port in self.write_ports:
                 web_name = " & web{0}".format(port)
-                name = "!csb{0} & !clk{0}{1}".format(port, web_name)
+                name = "!clk{0}{1}".format(port, web_name)
                 read_write = 'Write'
 
                 datasheet.write("{0},{1},{2},{3},".format(
@@ -861,8 +865,8 @@ class gain_cell_lib:
 
         # write leakage power
         control_str = 'csb0'
-        for i in range(1, self.total_port_num):
-            control_str += ' & csb{0}'.format(i)
+        # for i in range(1, self.total_port_num):
+        #     control_str += ' & csb{0}'.format(i)
 
         datasheet.write("{0},{1},{2},".format('leak', control_str, self.char_gain_cell_results["leakage_power"]))
 

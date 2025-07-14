@@ -493,9 +493,13 @@ class delay(simulation):
         # generate control signals
         self.sf.write("\n* Generation of control signals\n")
         for port in self.all_ports:
-            self.stim.gen_constant(sig_name="CSB{0}".format(port), v_val=self.vdd_voltage)
-            if port in self.readwrite_ports:
+            # self.stim.gen_constant(sig_name="CSB{0}".format(port), v_val=self.vdd_voltage)
+            if port in self.write_ports:
                 self.stim.gen_constant(sig_name="WEB{0}".format(port), v_val=self.vdd_voltage)
+            elif port in self.read_ports:
+                self.stim.gen_constant(sig_name="CSB{0}".format(port), v_val=self.vdd_voltage)
+            # if port in self.readwrite_ports:
+            #     self.stim.gen_constant(sig_name="WEB{0}".format(port), v_val=self.vdd_voltage)
 
         self.sf.write("\n* Generation of global clock signal\n")
         for port in self.all_ports:
@@ -1553,9 +1557,13 @@ class delay(simulation):
         """ Generates the control signals """
 
         for port in self.all_ports:
-            self.stim.gen_pwl("CSB{0}".format(port), self.cycle_times, self.csb_values[port], self.period, self.slew, 0.05)
-            if port in self.readwrite_ports:
+            # self.stim.gen_pwl("CSB{0}".format(port), self.cycle_times, self.csb_values[port], self.period, self.slew, 0.05)
+            if port in self.write_ports:
                 self.stim.gen_pwl("WEB{0}".format(port), self.cycle_times, self.web_values[port], self.period, self.slew, 0.05)
+            elif port in self.read_ports:
+                self.stim.gen_pwl("CSB{0}".format(port), self.cycle_times, self.csb_values[port], self.period, self.slew, 0.05)
+            if port in self.readwrite_ports:
+                # self.stim.gen_pwl("WEB{0}".format(port), self.cycle_times, self.web_values[port], self.period, self.slew, 0.05)
                 if self.sram.num_wmasks:
                     for bit in range(self.sram.num_wmasks):
                         self.stim.gen_pwl("WMASK{0}_{1}".format(port, bit), self.cycle_times, self.wmask_values[port][bit], self.period, self.slew, 0.05)

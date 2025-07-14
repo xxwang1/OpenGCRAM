@@ -86,24 +86,27 @@ class gain_cell_delay(gain_cell_simulation):
         self.clk_frmt = "clk{0}" # Unformatted clock name
         targ_name = "{0}{{}}_{1}".format(self.dout_name, self.probe_data) # Empty values are the port and probe data bit
         self.delay_meas = []
-        self.delay_meas.append(delay_measure("delay_lh", self.clk_frmt, targ_name, "FALL", "RISE", measure_scale=1e9))
+        
+        self.delay_meas.append(delay_measure("delay_hl", self.clk_frmt, targ_name, "FALL", "FALL", measure_scale=1e9))
         self.delay_meas[-1].meta_str = gain_cell_op.READ_ONE # Used to index time delay values when measurements written to spice file.
         self.delay_meas[-1].meta_add_delay = False
-        self.delay_meas.append(delay_measure("delay_hl", self.clk_frmt, targ_name, "FALL", "FALL", measure_scale=1e9))
+        
+        self.delay_meas.append(delay_measure("delay_lh", self.clk_frmt, targ_name, "FALL", "RISE", measure_scale=1e9))
         self.delay_meas[-1].meta_str = gain_cell_op.READ_ZERO
         self.delay_meas[-1].meta_add_delay = False
         self.read_lib_meas+=self.delay_meas
 
         self.slew_meas = []
-        self.slew_meas.append(slew_measure("slew_lh", targ_name, "RISE", measure_scale=1e9))
-        self.slew_meas[-1].meta_str = gain_cell_op.READ_ONE
         self.slew_meas.append(slew_measure("slew_hl", targ_name, "FALL", measure_scale=1e9))
+        self.slew_meas[-1].meta_str = gain_cell_op.READ_ONE
+        self.slew_meas.append(slew_measure("slew_lh", targ_name, "RISE", measure_scale=1e9))
         self.slew_meas[-1].meta_str = gain_cell_op.READ_ZERO
         self.read_lib_meas+=self.slew_meas
 
-        self.read_lib_meas.append(power_measure("read1_power", "RISE", measure_scale=1e3))
+        
+        self.read_lib_meas.append(power_measure("read1_power", "FALL", measure_scale=1e3))
         self.read_lib_meas[-1].meta_str = gain_cell_op.READ_ONE
-        self.read_lib_meas.append(power_measure("read0_power", "FALL", measure_scale=1e3))
+        self.read_lib_meas.append(power_measure("read0_power", "RISE", measure_scale=1e3))
         self.read_lib_meas[-1].meta_str = gain_cell_op.READ_ZERO
 
         self.read_lib_meas.append(power_measure("disabled_read1_power", "RISE", measure_scale=1e3))
@@ -157,6 +160,24 @@ class gain_cell_delay(gain_cell_simulation):
 
         self.write_lib_meas = []
 
+        # self.clk_frmt = "clk{0}" # Unformatted clock name
+        # targ_name = self.sn_name # Empty values are the port and probe data bit
+        # self.write_delay_meas = []
+        # self.write_delay_meas.append(delay_measure("delay_lh", self.clk_frmt, targ_name, "FALL", "RISE", measure_scale=1e9))
+        # self.write_delay_meas[-1].meta_str = gain_cell_op.WRITE_ONE # Used to index time delay values when measurements written to spice file.
+        # self.write_delay_meas[-1].meta_add_delay = False
+        # self.write_delay_meas.append(delay_measure("delay_hl", self.clk_frmt, targ_name, "FALL", "FALL", measure_scale=1e9))
+        # self.write_delay_meas[-1].meta_str = gain_cell_op.WRITE_ZERO
+        # self.write_delay_meas[-1].meta_add_delay = False
+        # self.write_lib_meas+=self.write_delay_meas
+
+        # self.write_slew_meas = []
+        # self.write_slew_meas.append(slew_measure("slew_lh", targ_name, "RISE", measure_scale=1e9))
+        # self.write_slew_meas[-1].meta_str = gain_cell_op.WRITE_ONE
+        # self.write_slew_meas.append(slew_measure("slew_hl", targ_name, "FALL", measure_scale=1e9))
+        # self.write_slew_meas[-1].meta_str = gain_cell_op.WRITE_ZERO
+        # self.write_lib_meas+=self.write_slew_meas
+
         self.write_lib_meas.append(power_measure("write1_power", "RISE", measure_scale=1e3))
         self.write_lib_meas[-1].meta_str = gain_cell_op.WRITE_ONE
         self.write_lib_meas.append(power_measure("write0_power", "FALL", measure_scale=1e3))
@@ -169,7 +190,12 @@ class gain_cell_delay(gain_cell_simulation):
 
         write_measures = []
         write_measures.append(self.write_lib_meas)
+        # write_measures.append(self.create_sn_measurement_objects())
+        # write_measures.append(self.create_debug_measurement_objects())
         write_measures.append(self.create_write_bit_measures())
+
+        # if OPTS.top_process != "memchar":
+        #     write_measures.append(self.create_wen_and_sn_path_measures())
 
         return write_measures
 
@@ -239,16 +265,16 @@ class gain_cell_delay(gain_cell_simulation):
                                               "supported for characterization. Storage nets={0}").format(storage_names))
         if OPTS.use_pex and OPTS.pex_exe[0] != "calibre":
             bank_num = self.gain_cell.get_bank_num(self.gain_cell.name, bit_row, bit_col)
-            sn_name = "gain_cell_SN_b{0}_r{1}_c{2}".format(bank_num, bit_row, bit_col)
+            self.sn_name = "gain_cell_SN_b{0}_r{1}_c{2}".format(bank_num, bit_row, bit_col)
             # qbar_name = "gain_cell_Q_bar_b{0}_r{1}_c{2}".format(bank_num, bit_row, bit_col)
         else:
-            sn_name = cell_name + OPTS.hier_seperator + str(storage_names[0])
+            self.sn_name = cell_name + OPTS.hier_seperator + str(storage_names[0])
             # qbar_name = cell_name + OPTS.hier_seperator + str(storage_names[1])
 
         # Bit measures, measurements times to be defined later. The measurement names must be unique
         # but they is enforced externally. {} added to names to differentiate between ports allow the
         # measurements are independent of the ports
-        sn_meas = voltage_at_measure("v_sn_{0}".format(meas_tag), sn_name)
+        sn_meas = voltage_at_measure("v_sn_{0}".format(meas_tag), self.sn_name)
         # qbar_meas = voltage_at_measure("v_snbar_{0}".format(meas_tag), qbar_name)
 
         return {bit_polarity.NONINVERTING: sn_meas}
@@ -278,8 +304,40 @@ class gain_cell_delay(gain_cell_simulation):
         print("bl_paths = ", bl_paths)
         # debug.check(len(sen_paths)==1, 'Found {0} paths which contain the s_en net.'.format(len(sen_paths)))
         # debug.check(len(bl_paths)==1, 'Found {0} paths which contain the bitline net.'.format(len(bl_paths)))
-        sen_path = sen_paths[1]
-        bitline_path = bl_paths[1]
+        sen_index = 0
+        # if OPTS.gc_type == "OS":
+        #     sen_path = sen_paths[sen_index]
+        # elif OPTS.gc_type == "Si":
+        for i in range(len(sen_paths)):
+            valid = 1
+            for node in sen_paths[i]:
+                if OPTS.gc_type == "OS":
+                    if "p_en_bar1" in node:
+                        valid = 0
+                else:
+                    if "p_en1" in node:
+                        valid = 0
+            if valid:
+                sen_index = i
+        sen_path = sen_paths[sen_index]
+
+        bl_index = 0
+        # if OPTS.gc_type == "OS":
+        #     bitline_path = bl_paths[bl_index]
+        # elif OPTS.gc_type == "Si":
+        for i in range(len(bl_paths)):
+            valid = 1
+            for node in bl_paths[i]:
+                if OPTS.gc_type == "OS":
+                    if "p_en_bar1" in node:
+                        valid = 0
+                else:
+                    if "p_en1" in node:
+                        valid = 0
+            if valid:
+                bl_index = i
+        bitline_path = bl_paths[bl_index]
+
 
         # Get the measures
         self.sen_path_meas = self.create_delay_path_measures(sen_path, "sen")
@@ -400,7 +458,7 @@ class gain_cell_delay(gain_cell_simulation):
             for i in range(self.word_size + self.num_spare_cols):
                 self.sf.write("CD{0}{1} {2}{0}_{1} 0 {3}f\n".format(port, i, self.dout_name, self.load))
 
-    def write_delay_stimulus(self):
+    def write_delay_stimulus(self, trim):
         """
         Creates a stimulus file for simulations to probe a gain_cell at a given clock period.
         Address and bit were previously set with set_probe().
@@ -427,9 +485,19 @@ class gain_cell_delay(gain_cell_simulation):
         self.sf.write("* Delay stimulus for period of {0}n load={1}fF slew={2}ns\n\n".format(self.period,
                                                                                              self.load,
                                                                                              self.slew))
+
+        # self.sf.write("myOpts options duplicate_subckt=warning")
         self.stim = stimuli(self.sf, self.mf, self.corner)
         # include files in stimulus file
+
+        # change to no trim
         self.stim.write_include(self.trim_sp_file)
+        # if trim:
+        #     self.stim.write_include(self.trim_sp_file)
+        # else:
+        #     self.stim.write_include(self.sim_sp_file)
+
+
 
         self.write_generic_stimulus()
 
@@ -503,9 +571,13 @@ class gain_cell_delay(gain_cell_simulation):
         # generate control signals
         self.sf.write("\n* Generation of control signals\n")
         for port in self.all_ports:
-            self.stim.gen_constant(sig_name="CSB{0}".format(port), v_val=self.vdd_voltage)
-            if port in self.readwrite_ports:
+            # self.stim.gen_constant(sig_name="CSB{0}".format(port), v_val=self.vdd_voltage)
+            if port in self.write_ports:
                 self.stim.gen_constant(sig_name="WEB{0}".format(port), v_val=self.vdd_voltage)
+            elif port in self.read_ports:
+                self.stim.gen_constant(sig_name="CSB{0}".format(port), v_val=self.vdd_voltage)
+            # if port in self.readwrite_ports:
+            #     self.stim.gen_constant(sig_name="WEB{0}".format(port), v_val=self.vdd_voltage)
 
         self.sf.write("\n* Generation of global clock signal\n")
         for port in self.all_ports:
@@ -707,16 +779,37 @@ class gain_cell_delay(gain_cell_simulation):
                                                                                                         col,
                                                                                                         OPTS.hier_seperator))
             if port in self.targ_read_ports:
+                if OPTS.gc_type == "Si":
+                    probe_nets.add(
+                        "{0}{3}p_en{1}_Xbank0_Xport_data{1}_Xpredischarge_array{1}_Xpre_column_{2}".format(gain_cell_name,
+                                                                                                            port,
+                                                                                                            col,
+                                                                                                            OPTS.hier_seperator))
+                else:
+                    probe_nets.add(
+                        "{0}{3}p_en_bar{1}_Xbank0_Xport_data{1}_Xprecharge_array{1}_Xpre_column_{2}".format(gain_cell_name,
+                                                                                                            port,
+                                                                                                            col,
+                                                                                                            OPTS.hier_seperator))
+            if port in self.targ_write_ports:
                 probe_nets.add(
-                    "{0}{3}p_en{1}_Xbank0_Xport_data{1}_Xprecharge_array{1}_Xpre_column_{2}".format(gain_cell_name,
-                                                                                                        port,
-                                                                                                        col,
-                                                                                                        OPTS.hier_seperator))
-            probe_nets.add(
-                "{0}{3}vdd_Xbank0_Xport_data{1}_Xprecharge_array{1}_xpre_column_{2}".format(gain_cell_name,
-                                                                                            port,
-                                                                                            col,
-                                                                                            OPTS.hier_seperator))
+                    "{0}{3}vdd_Xbank0_Xport_data{1}_Xprecharge_array{1}_xpre_column_{2}".format(gain_cell_name,
+                                                                                                port,
+                                                                                                col,
+                                                                                                OPTS.hier_seperator))
+            if port in self.targ_read_ports:
+                if OPTS.gc_type == "Si":
+                    probe_nets.add(
+                    "{0}{3}vdd_Xbank0_Xport_data{1}_Xpredischarge_array{1}_xpre_column_{2}".format(gain_cell_name,
+                                                                                                port,
+                                                                                                col,
+                                                                                                OPTS.hier_seperator))
+                else:
+                    probe_nets.add(
+                    "{0}{3}vdd_Xbank0_Xport_data{1}_Xprecharge_array{1}_xpre_column_{2}".format(gain_cell_name,
+                                                                                                port,
+                                                                                                col,
+                                                                                                OPTS.hier_seperator))
             probe_nets.add("{0}{3}vdd_Xbank0_Xport_data{1}_Xwrite_driver_array{1}_xwrite_driver{2}".format(gain_cell_name,
                                                                                                            port,
                                                                                                            col,
@@ -829,7 +922,8 @@ class gain_cell_delay(gain_cell_simulation):
 
         debug.check(self.period > 0, "Target simulation period non-positive")
 
-        self.write_delay_stimulus()
+        # change to no trim
+        self.write_delay_stimulus(trim=OPTS.trim_netlist)
 
         self.stim.run_sim(self.delay_stim_sp)
 
@@ -843,6 +937,7 @@ class gain_cell_delay(gain_cell_simulation):
 
         for port in self.targ_write_ports:
             if not self.check_bit_measures(self.write_bit_meas, port):
+                print("check_bit_measures fails for self.write_bit_meas, port = ", self.write_bit_meas, port)
                 return (False, {})
 
             debug.info(2, "Checking write values for port {0}".format(port))
@@ -857,14 +952,17 @@ class gain_cell_delay(gain_cell_simulation):
         for port in self.targ_read_ports:
             # First, check that the memory has the right values at the right times
             if not self.check_bit_measures(self.read_bit_meas, port):
+                print("check_bit_measures fails for self.read_bit_meas, port = ", self.read_bit_meas, port)
                 return (False, {})
 
             debug.info(2, "Checking read delay values for port {0}".format(port))
             # Check sen timing, then bitlines, then general measurements.
             if not self.check_sen_measure(port):
+                print("check_sen_measure fails for port = ", port)
                 return (False, {})
 
             if not self.check_read_debug_measures(port):
+                print("check_read_debug_measure fails for port = ", port)
                 return (False, {})
 
             # Check timing for read ports. Power is only checked if it was read correctly
@@ -873,6 +971,7 @@ class gain_cell_delay(gain_cell_simulation):
                 read_port_dict[measure.name] = measure.retrieve_measure(port=port)
 
             if not self.check_valid_delays(read_port_dict):
+                print("check_valid_delays fails for read_port_dict = ", read_port_dict)
                 return (False, {})
 
             if not check_dict_values_is_float(read_port_dict):
@@ -918,19 +1017,37 @@ class gain_cell_delay(gain_cell_simulation):
         dout_success = True
         bl_success = False
         for meas in self.dout_volt_meas:
+            print("meas in self.dout_volt_meas = ", meas)
             val = meas.retrieve_measure(port=port)
             debug.info(2, "{0}={1}".format(meas.name, val))
             debug.check(type(val)==float, "Error retrieving numeric measurement: {0} {1}".format(meas.name, val))
-
-            if meas.meta_str == gain_cell_op.READ_ONE and val < self.vdd_voltage * 0.1:
+            print("check_read_debug measures port, val = ", port, val)
+            if meas.meta_str == gain_cell_op.READ_ONE:
+                print("meas.meta_str = gain_cell_op.READ_ONE")
+            if meas.meta_str == gain_cell_op.READ_ZERO:
+                print("meas.meta_str = gain_cell_op.READ_ZERO")
+            print("bl_vals[gain_cell_op.READ_ONE], bl_vals[gain_cell_op.READ_ZERO] = ", bl_vals[gain_cell_op.READ_ONE], bl_vals[gain_cell_op.READ_ZERO])
+            # if OPTS.gc_type == "OS":
+            #     check_0 = gain_cell_op.READ_ONE
+            #     check_1 = gain_cell_op.READ_ZERO
+            # elif OPTS.gc_type == "Si":
+            check_0 = gain_cell_op.READ_ZERO
+            check_1 = gain_cell_op.READ_ONE
+            # if meas.meta_str == gain_cell_op.READ_ZERO and val < self.vdd_voltage * 0.1:
+            if meas.meta_str == check_0 and val < self.vdd_voltage * 0.1:
                 dout_success = False
                 debug.info(1, "Debug measurement failed. Value {0}V was read on read 1 cycle.".format(val))
-                bl_success = self.check_bitline_meas(bl_vals[gain_cell_op.READ_ONE])#, br_vals[gain_cell_op.READ_ONE])
-            elif meas.meta_str == gain_cell_op.READ_ZERO and val > self.vdd_voltage * 0.9:
+                print("Debug measurement failed. Value {0}V was read on read 1 cycle.".format(val))
+                bl_success = self.check_bitline_meas(self.vdd_voltage * 0.5, bl_vals[check_0])
+                print("bl_vals[check_1], bl_success = ", bl_vals[check_1], bl_success)
+            # elif meas.meta_str == gain_cell_op.READ_ONE and val > self.vdd_voltage * 0.9:
+            elif meas.meta_str == check_1 and val > self.vdd_voltage * 0.9:
                 dout_success = False
                 debug.info(1, "Debug measurement failed. Value {0}V was read on read 0 cycle.".format(val))
+                print("Debug measurement failed. Value {0}V was read on read 0 cycle.".format(val))
                 # bl_success = self.check_bitline_meas(br_vals[gain_cell_op.READ_ONE], bl_vals[gain_cell_op.READ_ONE])
-                bl_success = self.check_bitline_meas(bl_vals[gain_cell_op.READ_ONE])
+                bl_success = self.check_bitline_meas(bl_vals[check_1], self.vdd_voltage * 0.5) 
+                print("bl_vals[check_0], bl_success = ", bl_vals[check_0], bl_success)
             # If the bitlines have a correct value while the output does not then that is a
             # sen error. FIXME: there are other checks that can be done to solidfy this conclusion.
             if not dout_success and bl_success:
@@ -979,8 +1096,8 @@ class gain_cell_delay(gain_cell_simulation):
         # The inputs looks at discharge/charged bitline rather than left or right (bl/br)
         # Performs two checks, discharging bitline is at least 10% away from vdd and there is a
         # 10% vdd difference between the bitlines. Both need to fail to be considered a s_en error.
-        min_dicharge = v_discharged_bl < self.vdd_voltage * 0.9
-        min_diff = (v_charged_bl - v_discharged_bl) > self.vdd_voltage * 0.1
+        min_dicharge = v_discharged_bl < self.vdd_voltage * 0.5 * 0.9
+        min_diff = (v_charged_bl - v_discharged_bl) > self.vdd_voltage * 0.5 * 0.1
 
         debug.info(1, "min_dicharge={0}, min_diff={1}".format(min_dicharge, min_diff))
         return (min_dicharge and min_diff)
@@ -1246,7 +1363,7 @@ class gain_cell_delay(gain_cell_simulation):
 #                    self.write_bit_meas[polarity].append(meas)
 #                    self.write_meas_lists[-1].append(meas)
 
-        delay_path_rule = re.compile(r"\.meas tran delay_(.*)_to_(.*)_(sen|bl)_(id\d*) TRIG v\((.*)\) VAL=(\d+(\.\d+)?) (RISE|FALL)=(\d+) TD=(\d+(\.\d+)?)n TARG v\((.*)\) VAL=(\d+(\.\d+)?) (RISE|FALL)=(\d+) TD=(\d+(\.\d+)?)n")
+        delay_path_rule = re.compile(r"\.meas tran delay_(.*)_to_(.*)_(sen|rbl)_(id\d*) TRIG v\((.*)\) VAL=(\d+(\.\d+)?) (RISE|FALL)=(\d+) TD=(\d+(\.\d+)?)n TARG v\((.*)\) VAL=(\d+(\.\d+)?) (RISE|FALL)=(\d+) TD=(\d+(\.\d+)?)n")
         port = self.read_ports[0]
         meas_buff = []
         self.sen_path_meas = []
@@ -1269,7 +1386,7 @@ class gain_cell_delay(gain_cell_simulation):
                 if path_ == "sen":
                     self.sen_path_meas.extend(meas_buff.copy())
                     meas_buff.clear()
-                elif path_ == "bl":
+                elif path_ == "rbl":
                     self.bl_path_meas.extend(meas_buff.copy())
                     meas_buff.clear()
         self.read_meas_lists.append(self.sen_path_meas + self.bl_path_meas)
@@ -1572,9 +1689,13 @@ class gain_cell_delay(gain_cell_simulation):
         """ Generates the control signals """
 
         for port in self.all_ports:
-            self.stim.gen_pwl("CSB{0}".format(port), self.cycle_times, self.csb_values[port], self.period, self.slew, 0.05)
-            if port in self.readwrite_ports:
+            # self.stim.gen_pwl("CSB{0}".format(port), self.cycle_times, self.csb_values[port], self.period, self.slew, 0.05)
+            if port in self.write_ports:
                 self.stim.gen_pwl("WEB{0}".format(port), self.cycle_times, self.web_values[port], self.period, self.slew, 0.05)
+            elif port in self.read_ports:
+                self.stim.gen_pwl("CSB{0}".format(port), self.cycle_times, self.csb_values[port], self.period, self.slew, 0.05)
+            if port in self.readwrite_ports:
+                # self.stim.gen_pwl("WEB{0}".format(port), self.cycle_times, self.web_values[port], self.period, self.slew, 0.05)
                 if self.gain_cell.num_wmasks:
                     for bit in range(self.gain_cell.num_wmasks):
                         self.stim.gen_pwl("WMASK{0}_{1}".format(port, bit), self.cycle_times, self.wmask_values[port][bit], self.period, self.slew, 0.05)

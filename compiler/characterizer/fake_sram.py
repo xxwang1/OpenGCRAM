@@ -82,7 +82,10 @@ class fake_sram(sram_config):
                 self.pins.extend(['wmask{0}[{1}]'.format(port, bit)
                                   for bit in range(self.num_wmasks)])
 
-            self.pins.extend(['csb{}'.format(port), 'web{}'.format(port)])
+            if port in self.write_ports:
+                self.pins.extend(['web{}'.format(port)])
+            if port in self.read_ports:
+                self.pins.extend(['csb{}'.format(port)])
 
         start_port = OPTS.num_rw_ports
         for port in range(start_port, start_port + OPTS.num_r_ports):
@@ -90,8 +93,9 @@ class fake_sram(sram_config):
                               for bit in range(self.word_size + self.num_spare_cols)])
             self.pins.extend(['addr{0}[{1}]'.format(port, bit)
                               for bit in range(self.addr_size)])
+            if port in self.read_ports:
+                self.pins.extend(['csb{}'.format(port)])
 
-            self.pins.extend(['csb{}'.format(port)])
 
         start_port += OPTS.num_r_ports
         for port in range(start_port, start_port + OPTS.num_w_ports):
@@ -104,5 +108,7 @@ class fake_sram(sram_config):
             if self.num_wmasks != 0:
                 self.pins.extend(['wmask{0}[{1}]'.format(port, bit)
                                   for bit in range(self.num_wmasks)])
-
-            self.pins.extend(['csb{}'.format(port), 'web{}'.format(port)])
+            if port in self.write_ports:
+                self.pins.extend(['web{}'.format(port)])
+            if port in self.read_ports:
+                self.pins.extend(['csb{}'.format(port)])

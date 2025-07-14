@@ -16,18 +16,18 @@ from openram import debug
 from openram import OPTS
 from .stimuli import *
 from .charutils import *
-from .simulation import simulation
+from .gain_cell_simulation import gain_cell_simulation
 from .measurements import voltage_at_measure
 
 
-class functional(simulation):
+class functional(gain_cell_simulation):
     """
        Functions to write random data values to a random address then read them back and check
-       for successful SRAM operation.
+       for successful gain_cell operation.
     """
 
-    def __init__(self, sram, spfile=None, corner=None, cycles=15, period=None, output_path=None):
-        super().__init__(sram, spfile, corner)
+    def __init__(self, gain_cell, spfile=None, corner=None, cycles=15, period=None, output_path=None):
+        super().__init__(gain_cell, spfile, corner)
 
         # Seed the characterizer with a constant seed for unit tests
         if OPTS.is_unit_test:
@@ -42,9 +42,9 @@ class functional(simulation):
 
         if not spfile:
             # self.sp_file is assigned in base class
-            sram.sp_write(self.sp_file, trim=OPTS.trim_netlist)
+            gain_cell.sp_write(self.sp_file, trim=OPTS.trim_netlist)
         # Copy sp file to temp dir
-        self.temp_spice = path.join(OPTS.openram_temp, "sram.sp")
+        self.temp_spice = path.join(OPTS.openram_temp, "gain_cell.sp")
         try:
             shutil.copy(self.sp_file, self.temp_spice)
         except shutil.SameFileError: # skip if the same
@@ -98,9 +98,9 @@ class functional(simulation):
         #self.add_graph_exclusions()
         #self.create_graph()
         #self.set_internal_spice_names()
-        self.bl_name = "xsram:xbank0:bl_0_{}"
-        self.br_name = "xsram:xbank0:br_0_{}"
-        self.sen_name = "xsram:s_en"
+        self.bl_name = "xgain_cell:xbank0:bl_0_{}"
+        self.br_name = "xgain_cell:xbank0:br_0_{}"
+        self.sen_name = "xgain_cell:s_en"
         self.q_name, self.qbar_name = self.get_bit_name()
         debug.info(2, "q:\t\t{0}".format(self.q_name))
         debug.info(2, "qbar:\t{0}".format(self.qbar_name))
@@ -363,7 +363,7 @@ class functional(simulation):
         elif all_ones:
             index = random.randint(0, self.num_wmasks - 1)
             wmask = wmask[:index] + "0" + wmask[index + 1:]
-        # wmask must be reversed since a python list goes right to left and sram bits go left to right.
+        # wmask must be reversed since a python list goes right to left and gain_cell bits go left to right.
         return wmask[::-1]
 
     def gen_data(self):
@@ -417,13 +417,13 @@ class functional(simulation):
         self.sf.write("\n* Global Power Supplies\n")
         self.stim.write_supply()
 
-        # Instantiate the SRAM
-        self.sf.write("\n* Instantiation of the SRAM\n")
+        # Instantiate the gain_cell
+        self.sf.write("\n* Instantiation of the gain_cell\n")
         self.stim.inst_model(pins=self.pins,
-                             model_name=self.sram.name)
+                             model_name=self.gain_cell.name)
 
         # Add load capacitance to each of the read ports
-        self.sf.write("\n* SRAM output loads\n")
+        self.sf.write("\n* gain_cell output loads\n")
         for port in self.read_ports:
             for bit in range(self.word_size + self.num_spare_cols):
                 sig_name="{0}{1}_{2} ".format(self.dout_name, port, bit)
@@ -458,10 +458,14 @@ class functional(simulation):
         # Generate control signals
         self.sf.write("\n * Generation of control signals\n")
         for port in self.all_ports:
-            self.stim.gen_pwl("CSB{0}".format(port), self.cycle_times, self.csb_values[port], self.period, self.slew, 0.05)
+            if port in self.write_ports:
+                self.stim.gen_pwl("WEB{0}".format(port), self.cycle_times, self.web_values[port], self.period, self.slew, 0.05)
+            elif port in self.read_ports:
+                self.stim.gen_pwl("CSB{0}".format(port), self.cycle_times, self.csb_values[port], self.period, self.slew, 0.05)
+            # self.stim.gen_pwl("CSB{0}".format(port), self.cycle_times, self.csb_values[port], self.period, self.slew, 0.05)
 
-        for port in self.readwrite_ports:
-            self.stim.gen_pwl("WEB{0}".format(port), self.cycle_times, self.web_values[port], self.period, self.slew, 0.05)
+        # for port in self.readwrite_ports:
+        #     self.stim.gen_pwl("WEB{0}".format(port), self.cycle_times, self.web_values[port], self.period, self.slew, 0.05)
 
         # Generate wmask bits
         for port in self.write_ports:
@@ -528,11 +532,11 @@ class functional(simulation):
     def get_bit_name(self):
         """ Get a bit cell name """
         # TODO: Find a way to get the cell_name and storage_names statically
-        # (cell_name, cell_inst) = self.sram.get_cell_name(self.sram.name, 0, 0)
+        # (cell_name, cell_inst) = self.gain_cell.get_cell_name(self.gain_cell.name, 0, 0)
         # storage_names = cell_inst.mod.get_storage_net_names()
         # debug.check(len(storage_names) == 2, ("Only inverting/non-inverting storage nodes"
         #                                       "supported for characterization. Storage nets={0}").format(storage_names))
-        cell_name = "xsram:xbank0:xbitcell_array:xbitcell_array:xbit_r0_c0"
+        cell_name = "xgain_cell:xbank0:xbitcell_array:xbitcell_array:xbit_r0_c0"
         storage_names = ("Q", "Q_bar")
         q_name = cell_name + OPTS.hier_seperator + str(storage_names[0])
         qbar_name = cell_name + OPTS.hier_seperator + str(storage_names[1])

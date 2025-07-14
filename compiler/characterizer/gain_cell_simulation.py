@@ -93,8 +93,8 @@ class gain_cell_simulation():
         self.t_current = 0
 
         # control signals: only one cs_b for entire multiported gain_cell, one we_b for each write port
-        self.csb_values = {port: [] for port in self.all_ports}
-        self.web_values = {port: [] for port in self.readwrite_ports}
+        self.csb_values = {port: [] for port in self.read_ports}
+        self.web_values = {port: [] for port in self.write_ports}
 
         # Raw values added as a bit vector
         self.addr_value = {port: [] for port in self.all_ports}
@@ -146,15 +146,16 @@ class gain_cell_simulation():
         if op == "read":
             csb_val = 0
         elif op == "write":
-            csb_val = 0
+            # csb_val = 0
             web_val = 0
         elif op != "noop":
             debug.error("Could not add control signals for port {0}. Command {1} not recognized".format(port, op), 1)
 
         # Append the values depending on the type of port
-        self.csb_values[port].append(csb_val)
+        if port in self.read_ports:
+            self.csb_values[port].append(csb_val)
         # If port is in both lists, add rw control signal. Condition indicates its a RW port.
-        if port in self.readwrite_ports:
+        if port in self.write_ports:
             self.web_values[port].append(web_val)
 
     def add_data(self, data, port):
@@ -456,9 +457,11 @@ class gain_cell_simulation():
 
         # Control signals not finalized.
         for port in range(total_ports):
-            pin_names.append("CSB{0}".format(port))
-        for port in range(total_ports):
-            if (port in read_index) and (port in write_index):
+            if port in self.read_ports:
+                pin_names.append("CSB{0}".format(port))
+        # for port in range(total_ports):
+            # if (port in read_index) and (port in write_index):
+            if port in self.write_ports:
                 pin_names.append("WEB{0}".format(port))
 
         for port in range(total_ports):
@@ -479,6 +482,8 @@ class gain_cell_simulation():
                 pin_names.append("{0}{1}_{2}".format(dout_name, read_output, i))
 
         pin_names.append("{0}".format("vdd"))
+        if OPTS.level_shifter:
+            pin_names.append("{0}".format("vddio"))
         pin_names.append("{0}".format("gnd"))
         return pin_names
 
@@ -494,7 +499,10 @@ class gain_cell_simulation():
         # other initializations can only be done during analysis when a bit has been selected
         # for testing.
         if OPTS.top_process != 'memchar':
-            self.gain_cell.bank.graph_exclude_precharge()
+            if OPTS.gc_type == "Si":
+                self.gain_cell.bank.graph_exclude_predischarge()
+            else:
+                self.gain_cell.bank.graph_exclude_precharge()
             self.gain_cell.graph_exclude_addr_gain_cell_dff()
             self.gain_cell.graph_exclude_data_gain_cell_dff()
             self.gain_cell.graph_exclude_ctrl_gain_cell_dffs()
