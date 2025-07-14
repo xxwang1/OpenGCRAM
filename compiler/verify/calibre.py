@@ -440,11 +440,19 @@ def correct_port(name, output_file_name, ref_file_name):
     # obtain the correct definition line from the original spice file
     sp_file = open(ref_file_name, "r")
     contents = sp_file.read()
-    circuit_title = re.search(".SUBCKT " + str(name) + ".*\n", contents)
+    pattern = r".SUBCKT " + str(name) + "\n(.*?)\*"
+    # circuit_title = re.search(".SUBCKT " + str(name) + "\n", contents)
+    # circuit_title = re.search(rf'{pattern}(.*?)(?=\*)', contents)
+    circuit_title = re.search(pattern, contents, re.DOTALL)
+    print("run_pex circuit_title = ", circuit_title)
     circuit_title = circuit_title.group()
+    
     sp_file.close()
 
     # write the new pex file with info in the memory
+    print("run_pex correct_port part1 = ", part1)
+    print("run_pex correct_port part2 = ", part2)
+    print("run_pex correct_port circuit_title = ", circuit_title)
     output_file = open(output_file_name, "w")
     output_file.write(part1)
     output_file.write(circuit_title)
