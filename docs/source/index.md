@@ -8,8 +8,7 @@ navigate through the documentation.
 1. [OpenGCRAM Dependencies](#OpenGCRAM-dependencies)
 1. [Supported Technologies](#supported-technologies)
 1. [Basic Setup](./basic_setup.md#go-back)
-1. [Basic SRAM Usage](./basic_usage.md#go-back)
-1. [Basic ROM Usage](./basic_rom_usage.md#go-back)
+1. [Basic Usage](./basic_usage.md#go-back)
 1. [Bitcells](./bitcells.md#go-back)
 1. [Architecture](./architecture.md#go-back)
 1. [Implementation](#implementation)
@@ -101,6 +100,3 @@ Commercial tools (optional):
     * DRC and LVS can be disabled completely for improved run-time or if
       licenses are not available.
 
-
-
-## Contributors/Collaborators
