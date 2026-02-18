@@ -36,7 +36,7 @@ updating.
 + Develop new features (see [how to contribute](./CONTRIBUTING.md))
 + Submit code/fixes using a [Github pull request]
 + Follow our [project][Github project]
-+ Read and cite our [ICCAD paper][OpenRAMpaper]
++ Read and cite our [arXiv paper][OpenGCRAMpaper]
 
 
 
@@ -56,7 +56,7 @@ OpenRAM is licensed under the [BSD 3-Clause License](./LICENSE).
 
 
 # Publications
-
++ [X. Wang, L. Yan, S. Liu, L. Upton, Z. Cai, Y. Tan, S. Li, K. Jana, P. Li, J. Cirimelli-Low, T. Tambe, M. Guthaus, H.-S. P. Wong, "OpenGCRAM: An Open-Source Gain Cell Compiler Enabling Design-Space Exploration for AI Workloads." arXiv preprint arXiv:2507.10849, 2025.](https://arxiv.org/pdf/2507.10849)
 + [M. R. Guthaus, J. E. Stine, S. Ataei, B. Chen, B. Wu, M. Sarwar, "OpenRAM: An Open-Source Memory Compiler," Proceedings of the 35th International Conference on Computer-Aided Design (ICCAD), 2016.](https://escholarship.org/content/qt8x19c778/qt8x19c778_noSplash_b2b3fbbb57f1269f86d0de77865b0691.pdf)
 + [S. Ataei, J. Stine, M. Guthaus, "A 64 kb differential single-port 12T SRAM design with a bit-interleaving scheme for low-voltage operation in 32 nm SOI CMOS," International Conference on Computer Design (ICCD), 2016, pp. 499-506.](https://escholarship.org/uc/item/99f6q9c9)
 + [E. Ebrahimi, M. Guthaus, J. Renau, "Timing Speculative SRAM," IEEE International Symposium on Circuits and Systems (ISCAS), 2017.](https://escholarship.org/content/qt7nn0j5x3/qt7nn0j5x3_noSplash_172457455e1aceba20694c3d7aa489b4.pdf)
@@ -79,6 +79,7 @@ Xinxin Wang, Lixian Yan, Shuhan Liu, Luke Upton, Zhuoqi Cai, Yiming Tan, Shengma
 [VLSIDA]:                https://vlsida.soe.ucsc.edu
 [VLSIARCH]:              https://vlsiarch.ecen.okstate.edu/
 [OpenRAMpaper]:          https://ieeexplore.ieee.org/document/7827670/
+[OpenGCRAMpaper]:        https://arxiv.org/abs/2507.10849
 
 [Github issues]:         https://github.com/VLSIDA/OpenRAM/issues
 [Github pull request]:   https://github.com/VLSIDA/OpenRAM/pulls
