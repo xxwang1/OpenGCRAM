@@ -55,7 +55,7 @@ class gain_cell_array(gain_cell_base_array):
     def add_modules(self):
         """ Add the modules used in this design """
         self.cell = factory.create(module_type=OPTS.gain_cell)
-
+        print("self.cell = ", self.cell)
     def create_instances(self):
         """ Create the module instances used in this design """
         self.cell_inst = {}
@@ -64,6 +64,8 @@ class gain_cell_array(gain_cell_base_array):
                 name = "bit_r{0}_c{1}".format(row, col)
                 self.cell_inst[row, col]=self.add_inst(name=name,
                                                        mod=self.cell)
+                print("self.cell_inst=", self.cell_inst)
+                print("self.get_gain_cell_pins(row, col)=", self.get_gain_cell_pins(row, col))
                 self.connect_inst(self.get_gain_cell_pins(row, col))
 
                 # If it is a "core" cell, it could be trimmed for sim time

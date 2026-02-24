@@ -187,7 +187,10 @@ class gain_cell(cell):
 
         self.vdd_layer = "m1"
         self.vdd_dir = "H"
-        self.gnd_layer = "m1"
+        if OPTS.gc_type == "hybrid" or OPTS.gc_type == "OS":
+            self.gnd_layer = "m3"
+        else:
+            self.gnd_layer = "m1"
         self.gnd_dir = "H"
 
 class cell_properties():
@@ -200,25 +203,31 @@ class cell_properties():
         self.names = {}
 
         self.names["bitcell_1port"] = "cell_1rw"
-        # if OPTS.gc_type == "Si":
-        # self.names["gain_cell_2port"] = "si_gc"
-        # else:
-        #     if OPTS.gc_type == "OS":
-        self.names["gain_cell_2port"] = "os_gc"
+        if OPTS.gc_type == "Si":
+            self.names["gain_cell_2port"] = "si_gc"
+        if OPTS.gc_type == "hybrid":
+            self.names["gain_cell_2port"] = "hybrid_gc"
+        else:
+            if OPTS.gc_type == "OS":
+                self.names["gain_cell_2port"] = "os_gc"
         self.names["bitcell_2port"] = "cell_2rw"
         self.names["dummy_bitcell_1port"] = "dummy_cell_1rw"
-        # if OPTS.gc_type == "Si":
-        # self.names["dummy_gain_cell_2port"] = "dummy_si_gc"
-        # else:
-        #     if OPTS.gc_type == "OS":
-        self.names["dummy_gain_cell_2port"] = "dummy_os_gc"
+        if OPTS.gc_type == "Si":
+            self.names["dummy_gain_cell_2port"] = "dummy_si_gc"
+        elif OPTS.gc_type == "hybrid":
+            self.names["dummy_gain_cell_2port"] = "dummy_hybrid_gc"
+        else:
+            if OPTS.gc_type == "OS":
+                self.names["dummy_gain_cell_2port"] = "dummy_os_gc"
         self.names["dummy_bitcell_2port"] = "dummy_cell_2rw"
         self.names["replica_bitcell_1port"] = "replica_cell_1rw"
-        # if OPTS.gc_type == "Si":
-        # self.names["replica_gain_cell_2port"] = "replica_si_gc"
-        # else:
-        #     if OPTS.gc_type == "OS":
-        self.names["replica_gain_cell_2port"] = "replica_os_gc"
+        if OPTS.gc_type == "Si":
+            self.names["replica_gain_cell_2port"] = "replica_si_gc"
+        elif OPTS.gc_type == "hybrid":
+            self.names["replica_gain_cell_2port"] = "replica_hybrid_gc"
+        else:
+            if OPTS.gc_type == "OS":
+                self.names["replica_gain_cell_2port"] = "replica_os_gc"
         self.names["replica_bitcell_2port"] = "replica_cell_2rw"
         self.names["col_cap_bitcell_1port"] = "col_cap_cell_1rw"
         self.names["col_cap_bitcell_2port"] = "col_cap_cell_2rw"
@@ -268,16 +277,21 @@ class cell_properties():
 
         self._bitcell_1port = bitcell(["bl", "br", "wl", "vdd", "gnd"],
                                        ["OUTPUT", "OUTPUT", "INPUT", "POWER", "GROUND"])
-        # if OPTS.gc_type == "Si":
-        # self._gain_cell_2port = gain_cell(["rbl", "wbl", "rwl", "wwl", "vdd", "gnd"],
-        #                             ["INOUT", "INPUT", "INOUT", "INPUT", "POWER", "GROUND"])
-        # self._replica_gain_cell_2port = gain_cell(["rbl", "wbl", "rwl", "wwl", "vdd", "gnd"],
-        #                             ["INOUT", "INPUT", "INOUT", "INPUT", "POWER", "GROUND"])
-        # else:
-        #     if OPTS.gc_type == "OS":
-        self._gain_cell_2port = gain_cell(["rbl", "wbl", "rwl", "wwl"],
+        if OPTS.gc_type == "Si":
+            self._gain_cell_2port = gain_cell(["rbl", "wbl", "rwl", "wwl", "vdd", "gnd"],
+                                    ["INOUT", "INPUT", "INOUT", "INPUT", "POWER", "GROUND"])
+            self._replica_gain_cell_2port = gain_cell(["rbl", "wbl", "rwl", "wwl", "vdd", "gnd"],
+                                    ["INOUT", "INPUT", "INOUT", "INPUT", "POWER", "GROUND"])
+        elif OPTS.gc_type == "hybrid":
+            self._gain_cell_2port = gain_cell(["rbl", "wbl", "rwl", "wwl", "vdd", "gnd"],
+                                    ["INOUT", "INPUT", "INOUT", "INPUT", "POWER", "GROUND"])
+            self._replica_gain_cell_2port = gain_cell(["rbl", "wbl", "rwl", "wwl", "vdd", "gnd"],
+                                    ["INOUT", "INPUT", "INOUT", "INPUT", "POWER", "GROUND"])
+        else:
+            if OPTS.gc_type == "OS":
+                self._gain_cell_2port = gain_cell(["rbl", "wbl", "rwl", "wwl"],
                                 ["INOUT", "INPUT", "INOUT", "INPUT"])
-        self._replica_gain_cell_2port = gain_cell(["rbl", "wbl", "rwl", "wwl", "vdd"],
+                self._replica_gain_cell_2port = gain_cell(["rbl", "wbl", "rwl", "wwl", "vdd"],
                                 ["INOUT", "INPUT", "INOUT", "INPUT", "POWER"])
 
         self._bitcell_2port = bitcell(["bl0", "br0", "bl1", "br1", "wl0", "wl1", "vdd", "gnd"],

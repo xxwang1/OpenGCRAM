@@ -102,7 +102,7 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
                 self.p_en_bar_driver = factory.create(module_type="pdriver",
                                               fanout=self.num_cols,
                                               height=gain_cell_dff_height)
-            elif OPTS.gc_type == "Si":
+            elif OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                 self.p_en_driver = factory.create(module_type="pdriver",
                                               fanout=self.num_cols,
                                               height=gain_cell_dff_height)
@@ -147,7 +147,7 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
         if self.port_type == "r":
             if OPTS.gc_type == "OS":
                 pen_stages = self.p_en_bar_driver.num_stages
-            elif OPTS.gc_type == "Si":
+            elif OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                 pen_stages = self.p_en_driver.num_stages
 
         inverter_stage_delay = logical_effort("inv", 1, 1, OPTS.delay_chain_fanout_per_stage, 1, True).get_absolute_delay()
@@ -229,7 +229,7 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
         if self.port_type == "r":
             if OPTS.gc_type == "OS":
                 self.output_list.append("p_en_bar")
-            elif OPTS.gc_type == "Si":
+            elif OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                 self.output_list.append("p_en")
         if self.port_type == "r":
             self.output_list.append("rwl_en")
@@ -415,7 +415,7 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
                 self.p_en_bar_driver_inst=self.add_inst(name="buf_p_en_bar",
                                                     mod=self.p_en_bar_driver)
                 self.connect_inst(["glitch0", "p_en_bar", "vdd", "gnd"])
-            elif OPTS.gc_type == "Si":
+            elif OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                 self.p_en_driver_inst=self.add_inst(name="buf_p_en",
                                                         mod=self.p_en_driver)
                 self.connect_inst(["glitch0", "p_en", "vdd", "gnd"])
@@ -433,7 +433,7 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
                 x_offset = self.place_util(self.p_en_bar_driver_inst, x_offset+self.nwell_enclose_implant, row)
 
                 self.row_end_inst.append(self.p_en_bar_driver_inst)
-            elif OPTS.gc_type == "Si":
+            elif OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                 x_offset = self.place_util(self.p_en_driver_inst, x_offset+self.nwell_enclose_implant, row)
 
                 self.row_end_inst.append(self.p_en_driver_inst)
@@ -449,7 +449,7 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
         if self.port_type == "r":
             if OPTS.gc_type == "OS":
                 in_pin = self.p_en_bar_driver_inst.get_pin("A")
-            elif OPTS.gc_type == "Si":
+            elif OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                 in_pin = self.p_en_driver_inst.get_pin("A")
         in_pos = in_pin.center()
         mid1 = vector(in_pos.x, out_pos.y)
@@ -462,7 +462,7 @@ class gain_cell_control_logic_logic_delay(gain_cell_control_logic_logic_base):
         if self.port_type == "r":
             if OPTS.gc_type == "OS":
                 self.connect_output(self.p_en_bar_driver_inst, "Z", "p_en_bar")
-            elif OPTS.gc_type == "Si":
+            elif OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                 self.connect_output(self.p_en_driver_inst, "Z", "p_en")
 
 

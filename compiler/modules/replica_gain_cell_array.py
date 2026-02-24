@@ -129,7 +129,7 @@ class replica_gain_cell_array(gain_cell_base_array):
         self.add_bitline_pins()
         self.add_wordline_pins()
         self.add_pin("vdd", "POWER")
-        if OPTS.gc_type == "Si":
+        if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
             self.add_pin("gnd", "GROUND")
 
     def add_bitline_pins(self):
@@ -207,7 +207,10 @@ class replica_gain_cell_array(gain_cell_base_array):
 
     def create_instances(self):
         """ Create the module instances used in this design """
-        self.supplies = ["vdd", "gnd"]
+        if OPTS.gc_type == "Si":
+            self.supplies = ["vdd", "gnd"]
+        if OPTS.gc_type == "hybrid":
+            self.supplies = ["vdd", "gnd"]
         print("replica_gain_cell_array self.all_wordline_names = ", self.all_wordline_names)
         # Main array
         self.gain_cell_array_inst=self.add_inst(name="gain_cell_array",
@@ -217,13 +220,15 @@ class replica_gain_cell_array(gain_cell_base_array):
             array_wl.append(self.all_wordline_names[i + 1])
             array_wl.append(self.all_wordline_names[i])
         # self.connect_inst(self.all_bitline_names + self.all_wordline_names + self.supplies)
-        if OPTS.gc_type == "Si":
+        if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
             self.connect_inst(self.all_bitline_names + array_wl + self.supplies)
         else:
             if OPTS.gc_type =="OS":
                 self.connect_inst(self.all_bitline_names + array_wl)
 
         # Replica columns
+        if OPTS.gc_type == "hybrid":
+            self.supplies = ["vdd", "gnd"]
         self.replica_col_insts = []
         for port in self.all_ports:
             if port in self.rbls:
@@ -254,7 +259,7 @@ class replica_gain_cell_array(gain_cell_base_array):
                 wl[-2] = rwl
                 wl[-1] = wwl
                 print("repilca_gain_cell_array replica_column wl = ", wl)
-                if OPTS.gc_type == "Si":
+                if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                     self.connect_inst(bl + wl + self.supplies)
                 else:
                     if OPTS.gc_type == "OS":
@@ -263,6 +268,8 @@ class replica_gain_cell_array(gain_cell_base_array):
                 self.replica_col_insts.append(None)
 
         # Dummy rows above/below the gain_cell array (connected with the replica cell wl)
+        if OPTS.gc_type == "hybrid":
+            self.supplies = ["vdd", "gnd"]
         self.dummy_row_replica_insts = []
         # Note, this is the number of left and right even if we aren't adding the columns to this gain_cell array!
         for port in self.all_ports: # TODO: tie to self.rbl or whatever
@@ -285,7 +292,7 @@ class replica_gain_cell_array(gain_cell_base_array):
                     # wl.append(self.rbl_wordline_names[i+1][0])
                 # self.connect_inst(self.all_bitline_names + self.rbl_wordline_names[port] + self.supplies)
                 print("replica_gain_cell_array self.rbl_wordline_names, wl = ", self.rbl_wordline_names, wl)
-                if OPTS.gc_type == "Si":
+                if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                     self.connect_inst(self.all_bitline_names + wl + self.supplies)
                 else:
                     if OPTS.gc_type == "OS":
@@ -397,8 +404,10 @@ class replica_gain_cell_array(gain_cell_base_array):
             print("self.dummy_row = ", self.dummy_row)
             for (wl_name, pin_name) in zip(names, self.dummy_row.get_wordline_names()):
                 print("wl_name, pin_name = ", wl_name, pin_name)
-                pin = inst.get_pin(pin_name)
-                self.add_layout_pin(text=wl_name,
+                if not ((OPTS.gc_type == "hybrid" or OPTS.gc_type == "OS") and "wwl" in wl_name):
+                    pin = inst.get_pin(pin_name)
+                
+                    self.add_layout_pin(text=wl_name,
                                     layer=pin.layer,
                                     offset=pin.ll().scale(0, 1),
                                     width=self.width,
@@ -408,7 +417,8 @@ class replica_gain_cell_array(gain_cell_base_array):
         for pin_name in self.all_bitline_names:
             pin_list = self.gain_cell_array_inst.get_pins(pin_name)
             for pin in pin_list:
-                self.add_layout_pin(text=pin_name,
+                if not ((OPTS.gc_type == "hybrid" or OPTS.gc_type == "OS") and "wwl" in pin_name):
+                    self.add_layout_pin(text=pin_name,
                                     layer=pin.layer,
                                     offset=pin.ll().scale(1, 0),
                                     width=pin.width(),
@@ -426,8 +436,10 @@ class replica_gain_cell_array(gain_cell_base_array):
                 pin_names = self.replica_columns[self.rbls[0]].all_bitline_names
                 print("replica_gain_cell_array add_layout_pins names, bl_names, pin_names = ", names, bl_names, pin_names)
                 for (rbl_name, pin_name) in zip(bl_names, pin_names):
-                    pin = inst.get_pin(pin_name)
-                    self.add_layout_pin(text=rbl_name,
+                    if not ((OPTS.gc_type == "hybrid" or OPTS.gc_type == "OS") and "wwl" in rbl_name):
+                        pin = inst.get_pin(pin_name)
+                    
+                        self.add_layout_pin(text=rbl_name,
                                         layer=pin.layer,
                                         offset=pin.ll().scale(1, 0),
                                         width=pin.width(),
@@ -436,6 +448,10 @@ class replica_gain_cell_array(gain_cell_base_array):
     def route_supplies(self):
         """ just copy supply pins from all instances """
         if OPTS.gc_type == "Si":
+            for inst in self.insts:
+                for pin_name in ["vdd", "gnd"]:
+                    self.copy_layout_pin(inst, pin_name)
+        if OPTS.gc_type == "hybrid":
             for inst in self.insts:
                 for pin_name in ["vdd", "gnd"]:
                     self.copy_layout_pin(inst, pin_name)

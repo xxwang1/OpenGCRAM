@@ -499,7 +499,7 @@ class gain_cell_simulation():
         # other initializations can only be done during analysis when a bit has been selected
         # for testing.
         if OPTS.top_process != 'memchar':
-            if OPTS.gc_type == "Si":
+            if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                 self.gain_cell.bank.graph_exclude_predischarge()
             else:
                 self.gain_cell.bank.graph_exclude_precharge()

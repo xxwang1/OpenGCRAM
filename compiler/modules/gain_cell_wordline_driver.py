@@ -133,6 +133,8 @@ class gain_cell_wordline_driver(design):
                                             width=self.width)
 
             y_offset = self.height
+            if OPTS.gc_type == "hybrid" or OPTS.gc_type == "OS":
+                y_offset = self.height
             self.add_layout_pin_rect_center(text=power_name,
                                             layer=self.route_layer,
                                             offset=vector(0.5 * self.width, y_offset),

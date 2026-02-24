@@ -352,7 +352,7 @@ class gain_cell_control_logic(gain_cell_control_logic_base):
                 self.p_en_bar_driver_inst=self.add_inst(name="buf_p_en_bar",
                                                         mod=self.p_en_bar_driver)
                 self.connect_inst(["p_en_bar_unbuf", "p_en_bar", "vdd", "gnd"])
-            elif OPTS.gc_type == "Si":
+            elif OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                 self.p_en_and_inst=self.add_inst(name="and_p_en",
                                                     mod=self.and2)
                 # We use the rbl_bl_delay here to ensure that the p_en is only asserted when the
@@ -381,7 +381,7 @@ class gain_cell_control_logic(gain_cell_control_logic_base):
                 if self.port_type == "w": x_offset = self.place_util(self.p_en_bar_driver_inst, self.control_x_offset + 2 * self.nwell_enclose_implant + self.nwell_space + self.w_en_gate_inst.width, row, pp_space = False) 
                 if self.port_type == "r": x_offset = self.place_util(self.p_en_bar_driver_inst, self.control_x_offset + 2 * self.nwell_enclose_implant + self.nwell_space + self.s_en_gate_inst.width, row, pp_space = False)
                 self.row_end_inst.append(self.p_en_bar_driver_inst)
-            elif OPTS.gc_type == "Si":
+            elif OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                 x_offset = self.place_util(self.p_en_and_inst, x_offset, row, pp_space = False)
                 # print("place_pen_row x_offset, control_x_offset, nwell_enclose_implant, nwell_space, w_en_gate_inst.width = ", x_offset, self.control_x_offset, self.nwell_enclose_implant, self.nwell_space, self.w_en_gate_inst.width)
                 if self.port_type == "w": x_offset = self.place_util(self.p_en_driver_inst, self.control_x_offset + 2 * self.nwell_enclose_implant + self.nwell_space + self.w_en_gate_inst.width, row, pp_space = False) 
@@ -424,7 +424,7 @@ class gain_cell_control_logic(gain_cell_control_logic_base):
 
                 self.connect_output(self.p_en_bar_driver_inst, "Z", "p_en_bar")
                 
-            elif OPTS.gc_type == "Si":
+            elif OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                 self.connect_vertical_bus(in_map, self.p_en_and_inst, self.input_bus)
                 
                 out_pin = self.p_en_and_inst.get_pin("Z")

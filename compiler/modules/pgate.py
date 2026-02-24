@@ -105,11 +105,17 @@ class pgate(design):
         right of gate.
         """
 
-        nmos_gate_pin = nmos_inst.get_pin("G")
-        pmos_gate_pin = pmos_inst.get_pin("G")
+        # nmos_gate_pin = nmos_inst.get_pin("G")
+        # pmos_gate_pin = pmos_inst.get_pin("G")
+        nmos_gate_pin = list(nmos_inst.get_pins("G"))[-1]
+        pmos_gate_pin = list(pmos_inst.get_pins("G"))[0]
 
         # Check if the gates are aligned and give an error if they aren't!
         if nmos_gate_pin.ll().x != pmos_gate_pin.ll().x:
+            print("nmos_gate_pin pos = ", nmos_gate_pin.ll().x)
+            print("pmos_gate_pin pos = ", pmos_gate_pin.ll().x)
+            print('list(nmos_inst.get_pins("G")) =', list(nmos_inst.get_pins("G")))
+            print('list(pmos_inst.get_pins("G")) =', list(pmos_inst.get_pins("G")))
             self.gds_write("unaliged_gates.gds")
         debug.check(nmos_gate_pin.ll().x == pmos_gate_pin.ll().x,
                     "Connecting unaligned gates not supported. See unaligned_gates.gds.")
@@ -142,6 +148,8 @@ class pgate(design):
         print("running route_input_gate")
         # if name == "B" and min_area = False
         # else: min_area = True
+        if OPTS.gc_type == "hybrid" or OPTS.gc_type == "OS":
+            minarea = False
         via = self.add_via_stack_center(from_layer="poly",
                                         to_layer=self.route_layer,
                                         offset=contact_offset,
@@ -316,6 +324,7 @@ class pgate(design):
         # Offset by half a contact in x and y
         contact_offset += vector(0.5 * pmos.active_contact.first_layer_width,
                                  0.5 * pmos.active_contact.first_layer_height)
+        contact_offset = vector(contact_offset.x, contact_offset.y + 0.5 * pmos.active_contact.first_layer_height + 0.04)
         # This over-rides the default one with a custom direction
         print("nwell_contact offset = ", contact_offset)
         print("nwell_contact layer stack = ", layer_stack)
@@ -484,13 +493,14 @@ class pgate(design):
 
         contact_yoffset = max(0.5 * self.implant_width + self.implant_enclose_active,
                               self.get_tx_insts("nmos")[0].by(), self.implant_enclose_active + self.implant_space * 0.5 + via.height - via.second_layer_height)
-        contact_offset = vector(contact_xoffset, contact_yoffset)
-
+        # contact_offset = vector(contact_xoffset, contact_yoffset)
+        contact_offset = vector(contact_xoffset, self.get_tx_insts("nmos")[0].by())
         # Offset by half a contact
         print("nmos.active_contact.first_layer_name, height = ", nmos.active_contact.first_layer_name, nmos.active_contact.first_layer_height)
         print("nmos.active_contact.second_layer_name, height = ", nmos.active_contact.second_layer_name, nmos.active_contact.second_layer_height)
         contact_offset += vector(0.5 * nmos.active_contact.first_layer_width,
                                  0.5 * nmos.active_contact.first_layer_height)
+        contact_offset = vector(contact_offset.x, self.get_tx_insts("nmos")[0].by() + 0.025)
         print("contact_offset = ", contact_offset)
         self.pwell_contact= self.add_via_center(layers=layer_stack,
                                                 offset=contact_offset,

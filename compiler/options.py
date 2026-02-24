@@ -83,7 +83,7 @@ class options(optparse.Values):
     multi_delay_chain_pinouts = [2, 10, 11, 17, 31]
 
     # stages for delay chain in rbl control logic only
-    delay_chain_stages = 13
+    delay_chain_stages = 3
 
     # fanout per stage for any control logic
     delay_chain_fanout_per_stage = 4
@@ -100,7 +100,7 @@ class options(optparse.Values):
         openram_temp = os.path.abspath(os.environ.get("OPENRAM_TMP"))
 
     except:
-        openram_temp = "/home/xxwang1/OpenRAM-GC/tmp"
+        openram_temp = "/home/xxwang1/OpenGCRAM/tmp"
 
     # This is the verbosity level to control debug information. 0 is none, 1
     # is minimal, etc.
@@ -173,7 +173,7 @@ class options(optparse.Values):
     # Number of threads to use
     num_threads = 1
     # Number of threads to use in ngspice/hspice
-    num_sim_threads = 3
+    num_sim_threads = 32
 
     # Some tools (e.g. Xyce) use other separators like ":"
     hier_seperator = "."
@@ -256,5 +256,5 @@ class options(optparse.Values):
     gain_cell_write_driver = "gain_cell_write_driver"
     gain_cell_control_logic = "gain_cell_control_logic"
     level_shifter = "level_shifter"
-    gc_type = "Si"
+    gc_type = "OS"
     vddio = 1.2

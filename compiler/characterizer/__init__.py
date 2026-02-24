@@ -24,6 +24,7 @@ from .analytical_util import *
 from .fake_sram import *
 from .fake_gain_cell import *
 
+print("pre init spice name, exe = ", OPTS.spice_name, OPTS.spice_exe)
 debug.info(1, "Initializing characterizer...")
 OPTS.spice_exe = ""
 
@@ -60,3 +61,4 @@ if not OPTS.analytical_delay or OPTS.top_process in ["memfunc", "memchar"]:
 else:
     debug.info(1, "Analytical model enabled.")
 
+print("post init spice name, exe = ", OPTS.spice_name, OPTS.spice_exe)

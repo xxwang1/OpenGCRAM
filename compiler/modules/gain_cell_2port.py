@@ -20,6 +20,7 @@ class gain_cell_2port(gain_cell_base):
 
     def __init__(self, name):
         super().__init__(name, prop=props.gain_cell_2port)
+        print("props.gain_cell_2port=", props.gain_cell_2port)
         debug.info(2, "Create gain cell")
 
     def build_graph(self, graph, inst_name, port_nets):

@@ -104,7 +104,7 @@ class trim_spice():
         #self.remove_insts("wordline_driver",wl_regex)
 
         # 6. Keep precharges based on BL
-        if OPTS.gc_type == "Si":
+        if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
             self.remove_insts("predischarge_array",[bl_regex])
         # else:
         self.remove_insts("precharge_array",[bl_regex])

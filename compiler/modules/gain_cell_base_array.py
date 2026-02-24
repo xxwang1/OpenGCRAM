@@ -74,6 +74,9 @@ class gain_cell_base_array(design):
         if OPTS.gc_type == "Si":
             self.add_pin("vdd", "POWER")
             self.add_pin("gnd", "GROUND")
+        if OPTS.gc_type == "hybrid":
+            self.add_pin("vdd", "POWER")
+            self.add_pin("gnd", "GROUND")
 
     def get_gain_cell_pins(self, row, col):
         """
@@ -94,6 +97,9 @@ class gain_cell_base_array(design):
         for port in self.write_ports:
             gain_cell_pins.extend([x for x in self.get_wordline_names(port) if x.endswith("_{0}".format(row))])
         if OPTS.gc_type == "Si":
+            gain_cell_pins.append("vdd")
+            gain_cell_pins.append("gnd")
+        if OPTS.gc_type == "hybrid":
             gain_cell_pins.append("vdd")
             gain_cell_pins.append("gnd")
 
@@ -186,15 +192,25 @@ class gain_cell_base_array(design):
                                     width=self.width,
                                     height=rwl_pin.height())
             for port in self.write_ports:
-                wwl_pin = self.cell_inst[row, 0].get_pin(wl_names[port])
-                self.add_layout_pin(text="wwl_{0}_{1}".format(port, row),
+                if OPTS.gc_type == "hybrid" or OPTS.gc_type == "OS":
+                    add_rect=False
+                else:
+                    add_rect=True
+                if OPTS.gc_type == "Si":
+                    wwl_pin = self.cell_inst[row, 0].get_pin(wl_names[port])
+                    self.add_layout_pin(text="wwl_{0}_{1}".format(port, row),
                                     layer=wwl_pin.layer,
                                     offset=wwl_pin.ll().scale(0, 1),
                                     width=self.width,
-                                    height=wwl_pin.height())
+                                    height=wwl_pin.height(),
+                                    add_rect=add_rect)
 
     def route_supplies(self):
         if OPTS.gc_type == "Si":
+            for inst in self.cell_inst.values():
+                for pin_name in ["vdd", "gnd"]:
+                    self.copy_layout_pin(inst, pin_name)
+        if OPTS.gc_type == "hybrid":
             for inst in self.cell_inst.values():
                 for pin_name in ["vdd", "gnd"]:
                     self.copy_layout_pin(inst, pin_name)

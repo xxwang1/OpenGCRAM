@@ -426,7 +426,7 @@ class gain_cell_1bank(design, verilog, lef):
                 ref = "ref{}".format(port)
                 if OPTS.gc_type == "OS":
                     pen = "p_en_bar{}".format(port)
-                elif OPTS.gc_type == "Si":
+                elif OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                     pen = "p_en{}".format(port)
             if self.port_id[port] == "r":
                 self.control_bus_names[port].extend([sen, pen])
@@ -571,7 +571,7 @@ class gain_cell_1bank(design, verilog, lef):
             if port in self.read_ports:
                 if OPTS.gc_type == "OS":
                     temp.append("p_en_bar{0}".format(port))
-                elif OPTS.gc_type == "Si":
+                elif OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                     temp.append("p_en{0}".format(port))
         for port in self.write_ports:
             temp.append("w_en{0}".format(port))
@@ -757,7 +757,7 @@ class gain_cell_1bank(design, verilog, lef):
             if port in self.read_ports:
                 if OPTS.gc_type == "OS":
                     temp.append("p_en_bar{}".format(port))
-                elif OPTS.gc_type == "Si":
+                elif OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                     temp.append("p_en{}".format(port))
             if port in self.read_ports: temp.extend(["rwl_en{}".format(port), "clk_buf{}".format(port)] + self.ext_supplies_read)
             elif port in self.write_ports: temp.extend(["wwl_en{}".format(port), "clk_buf{}".format(port)] + self.ext_supplies_read)
@@ -1340,7 +1340,7 @@ class gain_cell_1bank(design, verilog, lef):
                                       to_layer="m2",
                                       offset=clk_steiner_pos,
                                       min_area=True,
-                                      multiple_via4=True)
+                                      multiple_via4=False)
 
             # Note, the via to the control logic is taken care of above
             self.add_wire(self.m2_stack[::-1],
@@ -1403,13 +1403,13 @@ class gain_cell_1bank(design, verilog, lef):
                                           to_layer="m5",
                                           offset=src_pin.center(),
                                           min_area=True,
-                                      multiple_via4=True)
+                                      multiple_via4=False)
                 # test
                 self.add_via_stack_center(from_layer=dest_pin.layer,
                                           to_layer="m4",
                                           offset=dest_pin.center(),
                                           min_area=True,
-                                      multiple_via4=True)
+                                      multiple_via4=False)
 
     def route_row_addr_gain_cell_dff(self):
         """
@@ -1427,12 +1427,12 @@ class gain_cell_1bank(design, verilog, lef):
                 self.add_via_stack_center(from_layer=flop_pin.layer,
                                           to_layer="m3",
                                           offset=flop_pos,
-                                          multiple_via4=True)
+                                          multiple_via4=False)
                 self.add_path("m3", [flop_pos, mid_pos])
                 self.add_via_stack_center(from_layer=bank_pin.layer,
                                           to_layer="m3",
                                           offset=mid_pos,
-                                          multiple_via4=True)
+                                          multiple_via4=False)
                 self.add_path(bank_pin.layer, [mid_pos, bank_pos])
 
     def add_lvs_correspondence_points(self):

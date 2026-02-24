@@ -125,11 +125,11 @@ class slew_measure(delay_measure):
         self.targ_dir_str = slew_dir_str
 
         if slew_dir_str == "RISE":
-            self.trig_val_of_vdd = 0.5 * 0.1
-            self.targ_val_of_vdd = 0.5 * 0.9
+            self.trig_val_of_vdd = 0.1
+            self.targ_val_of_vdd = 0.9
         elif slew_dir_str == "FALL":
-            self.trig_val_of_vdd = 0.5 * 0.9
-            self.targ_val_of_vdd = 0.5 * 0.1
+            self.trig_val_of_vdd = 0.9
+            self.targ_val_of_vdd = 0.1
         else:
             debug.error("Unrecognised slew measurement direction={}".format(slew_dir_str), 1)
         self.trig_name_no_port = signal_name

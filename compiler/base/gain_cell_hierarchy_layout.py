@@ -1014,7 +1014,7 @@ class layout():
 
         return (bot_rect, top_rect)
 
-    def route_horizontal_pins(self, name, insts=None, layer=None, xside="cx", yside="cy", full_width=True, new_name=None, multiple_via4=True, snap_to_grid=True):
+    def route_horizontal_pins(self, name, insts=None, layer=None, xside="cx", yside="cy", full_width=True, new_name=None, multiple_via4=False, snap_to_grid=True):
         """
         Route together all of the pins of a given name that horizontally align.
         Uses local_insts if insts not specified.
@@ -1591,7 +1591,7 @@ class layout():
         self.connect_inst([])
         return inst
 
-    def add_via_center(self, layers, offset, directions=None, size=[1, 1], implant_type=None, well_type=None, multiple_via4=True, multiple_via5=None):
+    def add_via_center(self, layers, offset, directions=None, size=[1, 1], implant_type=None, well_type=None, multiple_via4=False, multiple_via5=None):
         """
         Add a three layer via structure by the center coordinate
         accounting for mirroring and rotation.
@@ -1993,7 +1993,7 @@ class layout():
                              implant_type=None,
                              well_type=None,
                              min_area=False,
-                             multiple_via4=True,
+                             multiple_via4=False,
                              multiple_via5=None):
         """
         Punch a stack of vias from a start layer to a target layer by the center.
@@ -2750,7 +2750,7 @@ class layout():
             elif add_vias:
                 self.copy_power_pin(pin, new_name=new_name, minarea=minarea, snap_to_grid=snap_to_grid)
 
-    def add_io_pin(self, instance, pin_name, new_name, start_layer=None, directions=None, add_rect=True, minarea=False,multiple_via4=True):
+    def add_io_pin(self, instance, pin_name, new_name, start_layer=None, directions=None, add_rect=True, minarea=False,multiple_via4=False):
         """
         Add a signle input or output pin up to metal 3.
         """
@@ -2762,7 +2762,7 @@ class layout():
         # Just use the power pin function for now to save code
         self.add_power_pin(new_name, pin.center(), start_layer=start_layer, directions=directions, add_rect=add_rect, minarea=minarea, multiple_via4=multiple_via4)
 
-    def add_power_pin(self, name, loc, directions=None, start_layer="m1", add_rect=True, minarea=False, multiple_via4=True):
+    def add_power_pin(self, name, loc, directions=None, start_layer="m1", add_rect=True, minarea=False, multiple_via4=False):
         # Hack for min area
         if OPTS.tech_name == "sky130":
             min_area = drc["minarea_{}".format(self.pwr_grid_layers[1])]

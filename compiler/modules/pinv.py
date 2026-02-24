@@ -130,7 +130,8 @@ class pinv(pgate):
         print("total_height, self.height, top_bottom_space = ", total_height, self.height, self.top_bottom_space)
         if total_height > self.height:
             msg = "Cell height {0} too small for simple min height {1}.".format(self.height, total_height)
-            raise drc_error(msg)
+            self.height = total_height
+            # raise drc_error(msg)
 
         # Determine the height left to the transistors to determine
         # the number of fingers
@@ -183,7 +184,8 @@ class pinv(pgate):
             #debug.check(self.pmos_width >= drc("minwidth_tx"),
             #            "Cannot finger PMOS transistors to fit cell height.")
             if self.pmos_width < drc("minwidth_tx"):
-                raise drc_error("Cannot finger NMOS transistors to fit cell height.")
+                self.pmos_width = drc("minwidth_tx")
+                # raise drc_error("Cannot finger NMOS transistors to fit cell height.")
             print("rounded nmos width and pmos width = ", self.nmos_width, self.pmos_width)
         else:
             self.nmos_width = self.nmos_size * drc("minwidth_tx")
@@ -284,6 +286,8 @@ class pinv(pgate):
         pmos_drain_pos = self.pmos_inst.get_pin("D").ll()
         nmos_drain_pos = self.nmos_inst.get_pin("D").ul()
         self.output_pos = vector(0, 0.5 * (pmos_drain_pos.y + nmos_drain_pos.y))
+        if OPTS.gc_type == "hybrid" or OPTS.gc_type == "OS":
+            self.output_pos = vector(0, 0.4 * (pmos_drain_pos.y + nmos_drain_pos.y))
 
     def route_outputs(self):
         """

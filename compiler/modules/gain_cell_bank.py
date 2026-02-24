@@ -467,7 +467,7 @@ class gain_cell_bank(design):
             temp.append("vdd")
             temp.append("gnd")
         else:
-            if OPTS.gc_type == "Hybrid":
+            if OPTS.gc_type == "hybrid":
                 temp.append("vdd")
                 temp.append("gnd")
             if OPTS.gc_type == "OS":
@@ -521,11 +521,11 @@ class gain_cell_bank(design):
                     temp.append("bank_wmask{0}_{1}".format(port, bit))
                 for bit in range(self.num_spare_cols):
                     temp.append("bank_spare_wen{0}_{1}".format(port, bit))
-            if OPTS.gc_type == "OS" or OPTS.gc_type == "Hybrid":
+            if OPTS.gc_type == "OS":
                 if port in self.write_ports and OPTS.level_shifter:
-                    if OPTS.gc_type == "Hybrid":
-                        temp.extend(["vdd", "vddio", "gnd"])   
-                    else:
+                    # if OPTS.gc_type == "hybrid":
+                        # temp.extend(["vdd", "vddio", "gnd"])   
+                    # else:
                         temp.extend(["vdd", "gnd"])  
                 else:
                     temp.extend(["vdd", "gnd"]) 
@@ -570,7 +570,7 @@ class gain_cell_bank(design):
                 if port in self.write_ports: temp.append("rbl_wwl_{0}_{1}".format(port, port))
                 elif port in self.read_ports: temp.append("rbl_rwl_{0}_{1}".format(port, port))
             # temp.extend(["vdd", "gnd"])
-            if OPTS.gc_type == "Si" or OPTS.gc_type == "Hybrid":
+            if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                 if port in self.write_ports and OPTS.level_shifter:
                     temp.extend(["vdd", "vddio", "gnd"])   
                 else:
@@ -624,9 +624,9 @@ class gain_cell_bank(design):
             for bit in range(self.num_col_addr_lines):
                 temp.append("sel{0}_{1}".format(port, bit))
             # temp.extend(["vdd", "gnd"])
-            if OPTS.gc_type == "Si":
+            if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                 temp.extend(["vdd", "gnd"]) 
-            elif OPTS.gc_type == "OS" or OPTS.gc_type == "Hybrid":
+            elif OPTS.gc_type == "OS":
                 temp.extend(["vdd", "vddio", "gnd"])
             self.connect_inst(temp)
 
@@ -994,27 +994,29 @@ class gain_cell_bank(design):
                 driver_wl_pos = driver_wl_pin.rc()
             else:
                 driver_wl_pos = driver_wl_pin.lc()
-            gain_cell_wl_pin = self.gain_cell_array_inst.get_pin(array_name)
+            print("driver_name, array_name = ", driver_name, array_name)
+            if not ((OPTS.gc_type == "hybrid" or OPTS.gc_type == "OS") and "wwl" in array_name):
+                gain_cell_wl_pin = self.gain_cell_array_inst.get_pin(array_name)
 
-            if side == "left":
-                gain_cell_wl_pos = gain_cell_wl_pin.lc()
-                port_address_pos = self.port_address_inst[port].rx()
-                gain_cell_array_pos = self.gain_cell_array_inst.lx()
-            else:
-                gain_cell_wl_pos = gain_cell_wl_pin.rc()
-                port_address_pos = self.port_address_inst[port].lx()
-                gain_cell_array_pos = self.gain_cell_array_inst.rx()
+                if side == "left":
+                    gain_cell_wl_pos = gain_cell_wl_pin.lc()
+                    port_address_pos = self.port_address_inst[port].rx()
+                    gain_cell_array_pos = self.gain_cell_array_inst.lx()
+                else:
+                    gain_cell_wl_pos = gain_cell_wl_pin.rc()
+                    port_address_pos = self.port_address_inst[port].lx()
+                    gain_cell_array_pos = self.gain_cell_array_inst.rx()
 
-            mid1 = driver_wl_pos.scale(0, 1) + vector(0.5 * port_address_pos + 0.5 * gain_cell_array_pos, 0)
-            mid2 = mid1.scale(1, 0) + gain_cell_wl_pos.scale(0, 1)
-            if driver_wl_pin.layer != gain_cell_wl_pin.layer:
-                self.add_path(driver_wl_pin.layer, [driver_wl_pos, mid1])
-                self.add_via_stack_center(from_layer=driver_wl_pin.layer,
-                                          to_layer=gain_cell_wl_pin.layer,
-                                          offset=mid1)
-                self.add_path(gain_cell_wl_pin.layer, [mid1, mid2, gain_cell_wl_pos])
-            else:
-                self.add_path(gain_cell_wl_pin.layer, [driver_wl_pos, mid1, mid2, gain_cell_wl_pos])
+                mid1 = driver_wl_pos.scale(0, 1) + vector(0.5 * port_address_pos + 0.5 * gain_cell_array_pos, 0)
+                mid2 = mid1.scale(1, 0) + gain_cell_wl_pos.scale(0, 1)
+                if driver_wl_pin.layer != gain_cell_wl_pin.layer:
+                    self.add_path(driver_wl_pin.layer, [driver_wl_pos, mid1])
+                    self.add_via_stack_center(from_layer=driver_wl_pin.layer,
+                                            to_layer=gain_cell_wl_pin.layer,
+                                            offset=mid1)
+                    self.add_path(gain_cell_wl_pin.layer, [mid1, mid2, gain_cell_wl_pos])
+                else:
+                    self.add_path(gain_cell_wl_pin.layer, [driver_wl_pos, mid1, mid2, gain_cell_wl_pos])
 
     # def route_port_address_right(self, port):
     #     """ Connecting Wordline driver output to gain_cell WL connection  """

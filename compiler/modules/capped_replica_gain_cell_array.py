@@ -134,7 +134,7 @@ class capped_replica_gain_cell_array(gain_cell_base_array):
         self.add_bitline_pins()
         self.add_wordline_pins()
         self.add_pin("vdd", "POWER")
-        if OPTS.gc_type == "Si":
+        if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
             self.add_pin("gnd", "GROUND")
 
     def add_bitline_pins(self):
@@ -168,7 +168,7 @@ class capped_replica_gain_cell_array(gain_cell_base_array):
 
     def create_instances(self):
         """ Create the module instances used in this design """
-        if OPTS.gc_type == "Si":
+        if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
             self.supplies = ["vdd", "gnd"]
         else:
             if OPTS.gc_type == "OS":
@@ -191,11 +191,13 @@ class capped_replica_gain_cell_array(gain_cell_base_array):
         # self.connect_inst(bl + self.replica_array_wordline_names_with_grounded_wls + self.supplies)
 
         # Top/bottom dummy rows or col caps
+        # if OPTS.gc_type == "hybrid":
+        #     self.supplies = ["vdd"]
         self.dummy_row_insts = []
         self.dummy_row_insts.append(self.add_inst(name="dummy_row_bot",
                                                   mod=self.col_cap_bottom))
         # self.connect_inst(self.bitline_pin_list + ["gnd"] * len(self.col_cap_bottom.get_wordline_names()) + self.supplies)
-        if OPTS.gc_type == "Si":
+        if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
             self.connect_inst(bl + ["gnd"] * len(self.col_cap_bottom.get_wordline_names()) + self.supplies)
         else:
             if OPTS.gc_type == "OS":
@@ -203,7 +205,7 @@ class capped_replica_gain_cell_array(gain_cell_base_array):
         self.dummy_row_insts.append(self.add_inst(name="dummy_row_top",
                                                   mod=self.col_cap_top))
         # self.connect_inst(self.bitline_pin_list + ["gnd"] * len(self.col_cap_top.get_wordline_names()) + self.supplies)
-        if OPTS.gc_type == "Si":
+        if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
             self.connect_inst(bl + ["gnd"] * len(self.col_cap_top.get_wordline_names()) + self.supplies)
         else:
             if OPTS.gc_type == "OS":
@@ -231,7 +233,7 @@ class capped_replica_gain_cell_array(gain_cell_base_array):
                 # wl[-1] = wwl
         wl.extend(self.wordline_pin_list[-4:])
         # self.connect_inst(["dummy_left_" + bl for bl in self.row_cap_left.all_bitline_names] + self.wordline_pin_list + self.supplies)
-        if OPTS.gc_type == "Si":
+        if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
             self.connect_inst(["dummy_left_" + bl for bl in self.row_cap_left.all_bitline_names] + wl + self.supplies)
         else:
             if OPTS.gc_type == "OS":
@@ -239,7 +241,7 @@ class capped_replica_gain_cell_array(gain_cell_base_array):
         self.dummy_col_insts.append(self.add_inst(name="dummy_col_right",
                                                     mod=self.row_cap_right))
         # self.connect_inst(["dummy_right_" + bl for bl in self.row_cap_right.all_bitline_names] + self.wordline_pin_list + self.supplies)
-        if OPTS.gc_type == "Si":
+        if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
             self.connect_inst(["dummy_right_" + bl for bl in self.row_cap_right.all_bitline_names] + wl + self.supplies)
         else:
             if OPTS.gc_type == "OS":
@@ -352,20 +354,21 @@ class capped_replica_gain_cell_array(gain_cell_base_array):
 
     def add_layout_pins(self):
         for pin_name in self.used_wordline_names + self.bitline_pin_list:
-            pin = self.replica_gain_cell_array_inst.get_pin(pin_name)
+            if not ((OPTS.gc_type == "hybrid" or OPTS.gc_type == "OS") and "wwl" in pin_name):
+                pin = self.replica_gain_cell_array_inst.get_pin(pin_name)
 
-            if "wl" in pin_name:
-                # wordlines
-                pin_offset = pin.ll().scale(0, 1)
-                pin_width  = self.width
-                pin_height = pin.height()
-            else:
-                # bitlines
-                pin_offset = pin.ll().scale(1, 0)
-                pin_width  = pin.width()
-                pin_height = self.height
-
-            self.add_layout_pin(text=pin_name,
+                if "wl" in pin_name:
+                    # wordlines
+                    pin_offset = pin.ll().scale(0, 1)
+                    pin_width  = self.width
+                    pin_height = pin.height()
+                else:
+                    # bitlines
+                    pin_offset = pin.ll().scale(1, 0)
+                    pin_width  = pin.width()
+                    pin_height = self.height
+            
+                self.add_layout_pin(text=pin_name,
                                 layer=pin.layer,
                                 offset=pin_offset,
                                 width=pin_width,
@@ -383,7 +386,7 @@ class capped_replica_gain_cell_array(gain_cell_base_array):
         gnd_dir = gain_cell.gnd_dir
 
         # vdd/gnd are only connected in the perimeter cells
-        if OPTS.gc_type == "Si":
+        if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
             supply_insts = self.dummy_col_insts + self.dummy_row_insts
         else:
             if OPTS.gc_type == "OS":
@@ -443,15 +446,17 @@ class capped_replica_gain_cell_array(gain_cell_base_array):
         # This grounds all the dummy row word lines
         for inst in self.dummy_row_insts:
             for wl_name in self.col_cap_top.get_wordline_names():
-                pin = inst.get_pin(wl_name)
-                self.connect_side_pin(pin, "left", self.left_gnd_locs[0].x)
-                self.connect_side_pin(pin, "right", self.right_gnd_locs[0].x)
+                if not ((OPTS.gc_type == "hybrid" or OPTS.gc_type == "OS")and "wwl" in wl_name):
+                    pin = inst.get_pin(wl_name)
+                    self.connect_side_pin(pin, "left", self.left_gnd_locs[0].x)
+                    self.connect_side_pin(pin, "right", self.right_gnd_locs[0].x)
 
         # Ground the unused replica wordlines
         for wl_name in self.unused_wordline_names:
-            pin = self.replica_gain_cell_array_inst.get_pin(wl_name)
-            self.connect_side_pin(pin, "left", self.left_gnd_locs[0].x)
-            self.connect_side_pin(pin, "right", self.right_gnd_locs[0].x)
+            if not ((OPTS.gc_type == "hybrid" or OPTS.gc_type == "OS")and "wwl" in wl_name):
+                pin = self.replica_gain_cell_array_inst.get_pin(wl_name)
+                self.connect_side_pin(pin, "left", self.left_gnd_locs[0].x)
+                self.connect_side_pin(pin, "right", self.right_gnd_locs[0].x)
 
     def route_side_pin(self, name, side, offset_multiple=1):
         """

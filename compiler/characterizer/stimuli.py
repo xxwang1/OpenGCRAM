@@ -29,7 +29,7 @@ class stimuli():
         self.gnd_name = "gnd"
         self.pmos_name = tech.spice["pmos"]
         self.nmos_name = tech.spice["nmos"]
-        # self.osfet_name = tech.spice["osfet"]
+        self.osfet_name = tech.spice["osfet"]
         self.tx_width = tech.drc["minwidth_tx"]
         self.tx_length = tech.drc["minlength_channel"]
 
@@ -47,7 +47,7 @@ class stimuli():
             found = True
         except KeyError:
             pass
-        if OPTS.gc_type == "OS" or OPTS.gc_type == "Hybrid":
+        if OPTS.gc_type == "OS" or OPTS.gc_type == "hybrid":
             try:
                 self.device_models += tech.spice["fet_models"][self.process]
                 found = True
@@ -341,7 +341,7 @@ class stimuli():
                 item = item.replace("SIMULATOR", OPTS.spice_name.lower())
             else:
                 item = item.replace("SIMULATOR", "ngspice")
-            if OPTS.gc_type == "OS":
+            if OPTS.gc_type == "OS" or OPTS.gc_type == "hybrid":
                 self.sf.write(".HDL \"{0}\"\n".format(item))
             else:
                 self.sf.write(".include \"{0}\"\n".format(item))
@@ -404,6 +404,7 @@ class stimuli():
             valid_retcode = 0
         elif OPTS.spice_name == "hspice":
             # TODO: Should make multithreading parameter a configuration option
+            print("OPTS.spice_exe=", OPTS.spice_exe)
             cmd = "{0} -mt {1} -i {2} -o {3}timing".format(OPTS.spice_exe,
                                                            OPTS.num_sim_threads,
                                                            temp_stim,

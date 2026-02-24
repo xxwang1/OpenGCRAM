@@ -55,6 +55,8 @@ class pnand4(pgate):
 
     def create_netlist(self):
         self.add_pins()
+        if OPTS.gc_type == "hybrid" or OPTS.gc_type == "OS":
+            self.determine_tx_mults()
         self.add_ptx()
         self.create_ptx()
 
@@ -74,6 +76,157 @@ class pnand4(pgate):
         if self.implant_enclose_poly > 0:
             self.add_implant_encloses()
         self.add_boundary()
+
+    def determine_tx_mults(self):
+        """
+        Determines the number of fingers needed to achieve the size within
+        the height constraint. This may fail if the user has a tight height.
+        """
+
+        # This may make the result differ when the layout is created...
+        if OPTS.netlist_only:
+            self.tx_mults = 1
+            self.nmos_width = self.nmos_size * drc("minwidth_tx")
+            self.pmos_width = self.pmos_size * drc("minwidth_tx")
+            if cell_props.ptx.bin_spice_models:
+                (self.nmos_width, self.tx_mults) = pgate.best_bin("nmos", self.nmos_width)
+                (self.pmos_width, self.tx_mults) = pgate.best_bin("pmos", self.pmos_width)
+            return
+
+        # Do a quick sanity check and bail if unlikely feasible height
+        # Sanity check. can we make an inverter in the height
+        # with minimum tx sizes?
+        # Assume we need 3 metal 1 pitches (2 power rails, one
+        # between the tx for the drain)
+        # plus the tx height
+        nmos = factory.create(module_type="ptx",
+                              tx_type="nmos")
+        pmos = factory.create(module_type="ptx",
+                              width=drc("minwidth_tx"),
+                              tx_type="pmos")
+        tx_height = nmos.poly_height + pmos.poly_height
+        print("tx_height = ", tx_height)
+        # rotated m1 pitch or poly to active spacing
+        min_channel = max(self.poly_contact.width + self.m1_space,
+                          self.poly_contact.width + 2 * self.poly_to_active)
+        min_channel = 0.67
+        print("min_channel = ", min_channel)
+        total_height = tx_height + min_channel + 2 * self.top_bottom_space
+        # debug.check(self.height > total_height,
+        #             "Cell height {0} too small for simple min height {1}.".format(self.height,
+        # total_height))
+        print("total_height, self.height, top_bottom_space = ", total_height, self.height, self.top_bottom_space)
+        # if total_height > self.height:
+        #     msg = "Cell height {0} too small for simple min height {1}.".format(self.height, total_height)
+        #     self.height = total_height
+        #     self.nmos_size = 1
+        #     self.pmos_size = 1
+            # raise drc_error(msg)
+
+        # Determine the height left to the transistors to determine
+        # the number of fingers
+        tx_height_available = self.height - min_channel - 2 * self.top_bottom_space
+        print("tx_height_available = ", tx_height_available)
+        # Divide the height in half. Could divide proportional to beta,
+        # but this makes connecting wells of multiple cells easier.
+        # Subtract the poly space under the rail of the tx
+        nmos_height_available = 0.5 * tx_height_available - 0.5 * self.poly_space
+        pmos_height_available = 0.5 * tx_height_available - 0.5 * self.poly_space
+        print("nmos_height_available = ", nmos_height_available)
+        print("pmos_height_available = ", pmos_height_available)
+        debug.info(2,
+                   "Height avail {0:.4f} PMOS {1:.4f} NMOS {2:.4f}".format(tx_height_available,
+                                                                           nmos_height_available,
+                                                                           pmos_height_available))
+
+        # Determine the number of mults for each to fit width
+        # into available space
+        if not cell_props.ptx.bin_spice_models:
+            self.nmos_width = self.nmos_size * drc("minwidth_tx")
+            self.pmos_width = self.pmos_size * drc("minwidth_tx")
+            if self.pmos_width > pmos_height_available:
+                self.pmos_width = pmos_height_available
+                self.pmos_size = self.pmos_width / drc("minwidth_tx")
+            if self.nmos_width > nmos_height_available:
+                self.nmos_width = nmos_height_available
+                self.nmos_size = self.nmos_width / drc("minwidth_tx")
+            print("self.nmos_wdth, self.pmos_width, self.nmos_size, self.pmos_size, minwidth_tx = ", self.nmos_width, self.pmos_width, self.nmos_size, self.pmos_size, drc("minwidth_tx"))
+            nmos_required_mults = max(int(math.ceil(self.nmos_width / nmos_height_available)), 1)
+            print("self.pmos_width / pmos_height_available = ", self.pmos_width / pmos_height_available)
+            print("ceil(self.pmos_width / pmos_height_available) = ", math.ceil(self.pmos_width / pmos_height_available))
+            print("int(ceil(self.pmos_width / pmos_height_available)) = ", int(math.ceil(self.pmos_width / pmos_height_available)))
+            pmos_required_mults = max(int(math.ceil(self.pmos_width / pmos_height_available)), 1)
+            # The mults must be the same for easy connection of poly
+            print("nmos_required_mults, pmos_required_mults = ", nmos_required_mults, pmos_required_mults)
+            self.tx_mults = max(nmos_required_mults, pmos_required_mults)
+            # if OPTS.gc_type == "OS":
+                # self.tx_mults = min(nmos_required_mults, pmos_required_mults)
+            print("self.tx_mults = ", self.tx_mults)
+            # Recompute each mult width and check it isn't too small
+            # This could happen if the height is narrow and the size is small
+            # User should pick a bigger size to fix it...
+            # We also need to round the width to the grid or we will end up
+            # with LVS property mismatch errors when fingers are not a grid
+            # length and get rounded in the offset geometry.
+            self.nmos_width = round_to_grid(self.nmos_width / self.tx_mults)
+            # debug.check(self.nmos_width >= drc("minwidth_tx"),
+            #            "Cannot finger NMOS transistors to fit cell height.")
+            if self.nmos_width < drc("minwidth_tx"):
+                # self.pmos_width = self.pmos_width * int(math.ceil(drc("minwidth_tx") / self.nmos_width))
+                self.nmos_width = drc("minwidth_tx")
+                # raise drc_error("Cannot finger NMOS transistors to fit cell height.")
+
+            self.pmos_width = round_to_grid(self.pmos_width / self.tx_mults)
+            #debug.check(self.pmos_width >= drc("minwidth_tx"),
+            #            "Cannot finger PMOS transistors to fit cell height.")
+            if self.pmos_width < drc("minwidth_tx"):
+                self.pmos_width = drc("minwidth_tx")
+                # raise drc_error("Cannot finger NMOS transistors to fit cell height.")
+            print("rounded nmos width and pmos width = ", self.nmos_width, self.pmos_width)
+        else:
+            self.nmos_width = self.nmos_size * drc("minwidth_tx")
+            self.pmos_width = self.pmos_size * drc("minwidth_tx")
+            nmos_bins = self.scaled_bins("nmos", self.nmos_width)
+            pmos_bins = self.scaled_bins("pmos", self.pmos_width)
+            print("self.nmos_wdth, self.pmos_width, self.nmos_size, self.pmos_size, minwidth_tx = ", self.nmos_width, self.pmos_width, self.nmos_size, self.pmos_size, drc("minwidth_tx"))
+            print("nmos_bins, pmos_bins = ", nmos_bins, pmos_bins)
+            
+            valid_pmos = []
+            for bin in pmos_bins:
+                if abs(self.bin_accuracy(self.pmos_width, bin[0])) > OPTS.accuracy_requirement and abs(self.bin_accuracy(self.pmos_width, bin[0])) <= 1:
+                    valid_pmos.append(bin)
+            valid_pmos.sort(key = operator.itemgetter(1))
+
+            valid_nmos = []
+            for bin in nmos_bins:
+                if abs(self.bin_accuracy(self.nmos_width, bin[0])) > OPTS.accuracy_requirement and abs(self.bin_accuracy(self.nmos_width, bin[0])) <= 1:
+                    valid_nmos.append(bin)
+            valid_nmos.sort(key = operator.itemgetter(1))
+            print("valid_nmos, valid_pmos = ", valid_nmos, valid_pmos)
+            for bin in valid_pmos:
+                if bin[0]/bin[1] < pmos_height_available:
+                    self.pmos_width = (bin[0]/bin[1])
+                    pmos_mults = bin[1]
+                    break
+
+            for bin in valid_nmos:
+                if bin[0]/bin[1] < nmos_height_available:
+                    self.nmos_width = (bin[0]/bin[1])
+                    nmos_mults = bin[1]
+                    break
+            print("self.tx_mults = ", self.tx_mults)
+            self.tx_mults = max(pmos_mults, nmos_mults)
+            debug.info(2, "prebinning {0} tx, target: {4}, found {1} x {2} = {3}".format("pmos", self.pmos_width, pmos_mults, self.pmos_width * pmos_mults, self.pmos_size * drc("minwidth_tx")))
+            debug.info(2, "prebinning {0} tx, target: {4}, found {1} x {2} = {3}".format("nmos", self.nmos_width, nmos_mults, self.nmos_width * nmos_mults, self.nmos_size * drc("minwidth_tx")))
+            pinv.bin_count += 1
+            pinv.bin_error += abs(((self.pmos_width * pmos_mults) - (self.pmos_size * drc("minwidth_tx")))/(self.pmos_size * drc("minwidth_tx")))
+            pinv.bin_count += 1
+            pinv.bin_error += abs(((self.nmos_width * nmos_mults) - (self.nmos_size * drc("minwidth_tx")))/(self.nmos_size * drc("minwidth_tx")))
+            debug.info(2, "pinv bin count: {0} pinv bin error: {1} percent error {2}".format(pinv.bin_count, pinv.bin_error, pinv.bin_error/pinv.bin_count))
+            
+            # self.nmos_width = round_to_grid(self.nmos_size * drc("minwidth_tx") / self.tx_mults)
+            # self.pmos_width = round_to_grid(self.pmos_size * drc("minwidth_tx") / self.tx_mults) 
+            print("nmos_width = ", self.nmos_width)
 
     def add_ptx(self):
         """ Create the PMOS and NMOS transistors. """
@@ -123,7 +276,8 @@ class pnand4(pgate):
         """ Pre-compute some handy layout parameters. """
 
         # Compute the overlap of the source and drain pins
-        self.ptx_offset = self.pmos_left.get_pin("D").center() - self.pmos_left.get_pin("S").center()
+        s_pin_list = list(self.pmos_left.get_pins("S"))
+        self.ptx_offset = self.pmos_left.get_pin("D").center() - s_pin_list[0].center()
 
         # This is the extra space needed to ensure DRC rules
         # to the active contacts
@@ -240,6 +394,13 @@ class pnand4(pgate):
         active_top = self.nmos1_inst.by() + self.nmos1_inst.mod.active_height
         active_to_poly_contact = active_top + self.poly_to_active + 0.5 * self.poly_contact.first_layer_height
         active_to_poly_contact2 = active_top + self.poly_contact_to_gate + 0.5 * self.route_layer_width
+        if OPTS.gc_type == "hybrid" or OPTS.gc_type == "OS":
+            active_contact_to_poly_contact = bottom_pin.uy() + self.m1_space + 0.6 * self.poly_contact.second_layer_height
+            # active diffusion to poly contact spacing
+            # doesn't use nmos uy because that is calculated using offset + poly height
+            active_top = self.nmos1_inst.by() + self.nmos1_inst.mod.active_height
+            active_to_poly_contact = active_top + self.poly_to_active + 0.6 * self.poly_contact.first_layer_height
+            active_to_poly_contact2 = active_top + self.poly_contact_to_gate + 0.6 * self.route_layer_width
         self.inputA_yoffset = max(active_contact_to_poly_contact,
                                   active_to_poly_contact,
                                   active_to_poly_contact2)
@@ -251,6 +412,8 @@ class pnand4(pgate):
                                      position="left")
 
         self.inputB_yoffset = self.inputA_yoffset + self.m1_pitch * 1.25
+        if OPTS.gc_type == "hybrid" or OPTS.gc_type == "OS":
+            self.inputB_yoffset = self.inputA_yoffset + self.m1_pitch
         bpin = self.route_input_gate(self.pmos2_inst,
                                      self.nmos2_inst,
                                      self.inputB_yoffset,
@@ -258,6 +421,8 @@ class pnand4(pgate):
                                      position="center")
 
         self.inputC_yoffset = self.inputB_yoffset + self.m1_pitch * 1.25
+        if OPTS.gc_type == "hybrid" or OPTS.gc_type == "OS":
+            self.inputC_yoffset = self.inputB_yoffset + self.m1_pitch
         cpin = self.route_input_gate(self.pmos3_inst,
                                      self.nmos3_inst,
                                      self.inputC_yoffset,
@@ -265,6 +430,8 @@ class pnand4(pgate):
                                      position="right")
 
         self.inputD_yoffset = self.inputC_yoffset + self.m1_pitch * 1.25
+        if OPTS.gc_type == "hybrid" or OPTS.gc_type == "OS":
+            self.inputD_yoffset = self.inputC_yoffset + self.m1_pitch
         dpin = self.route_input_gate(self.pmos4_inst,
                                      self.nmos4_inst,
                                      self.inputD_yoffset,

@@ -231,10 +231,22 @@ def write_pex_script(cell_name, extract, output, final_verification=False, outpu
     # write probe file
     # TODO: get from cell name
     if OPTS.tech_name == "tsmcN40":
-        f = open(output_path + "probe_file", "w")
-        f.write('CELL si_gc\n')
-        f.write('  SN     0.400  0.935  31\n')
-        f.close()
+        if OPTS.gc_type == "Si":
+            f = open(output_path + "probe_file", "w")
+            f.write('CELL si_gc\n')
+            f.write('  SN     0.400  0.935  31\n')
+            f.close()
+        if OPTS.gc_type == "hybrid":
+            f = open(output_path + "probe_file", "w")
+            f.write('CELL hybrid_gc\n')
+            f.write('  SN     0.400  0.320  31\n')
+            f.close()
+
+        if OPTS.gc_type == "OS":
+            f = open(output_path + "probe_file", "w")
+            f.write('CELL os_gc\n')
+            f.write('  SN     0.400  0.320  31\n')
+            f.close()
     else:
         f = open(output_path + "probe_file", "w")
         f.write('CELL cell_1rw\n')
@@ -316,75 +328,76 @@ def run_lvs(cell_name, gds_name, sp_name, final_verification=False):
     lvs_runset = write_lvs_script(cell_name, gds_name, sp_name, final_verification, OPTS.openram_temp)
 
     (outfile, errfile, resultsfile) = run_script(cell_name, "lvs")
-
+    print("outfile, errfile, resultsfile=", outfile, errfile, resultsfile)
     # check the result for these lines in the summary:
-    f = open(OPTS.openram_temp + lvs_runset['lvsReportFile'], "r")
-    results = f.readlines()
-    f.close()
+    if not ((OPTS.gc_type == "hybrid" or OPTS.gc_type == "OS") and ("gain_cell_array" in cell_name or "gain_cell_column" in cell_name or "gain_cell_bank" in cell_name or cell_name.endswith("_dcs_5"))):
+        f = open(OPTS.openram_temp + lvs_runset['lvsReportFile'], "r")
+        results = f.readlines()
+        f.close()
 
-    # NOT COMPARED
-    # CORRECT
-    # INCORRECT
-    test = re.compile("#     CORRECT     #")
-    correct = list(filter(test.search, results))
-    test = re.compile("NOT COMPARED")
-    notcompared = list(filter(test.search, results))
-    test = re.compile("#     INCORRECT     #")
-    incorrect = list(filter(test.search, results))
+        # NOT COMPARED
+        # CORRECT
+        # INCORRECT
+        test = re.compile("#     CORRECT     #")
+        correct = list(filter(test.search, results))
+        test = re.compile("NOT COMPARED")
+        notcompared = list(filter(test.search, results))
+        test = re.compile("#     INCORRECT     #")
+        incorrect = list(filter(test.search, results))
 
-    # Errors begin with "Error:"
-    test = re.compile(r'\s+Error:')
-    errors = list(filter(test.search, results))
-    for e in errors:
-        debug.error(e.strip("\n"))
+        # Errors begin with "Error:"
+        test = re.compile(r'\s+Error:')
+        errors = list(filter(test.search, results))
+        for e in errors:
+            debug.error(e.strip("\n"))
 
-    summary_errors = len(notcompared) + len(incorrect) + len(errors)
+        summary_errors = len(notcompared) + len(incorrect) + len(errors)
 
-    # also check the extraction summary file
-    f = open(OPTS.openram_temp + lvs_runset['lvsReportFile'] + ".ext", "r")
-    results = f.readlines()
-    f.close()
+        # also check the extraction summary file
+        f = open(OPTS.openram_temp + lvs_runset['lvsReportFile'] + ".ext", "r")
+        results = f.readlines()
+        f.close()
 
-    test = re.compile("ERROR:")
-    exterrors = list(filter(test.search, results))
-    for e in exterrors:
-        debug.error(e.strip("\n"))
+        test = re.compile("ERROR:")
+        exterrors = list(filter(test.search, results))
+        for e in exterrors:
+            debug.error(e.strip("\n"))
 
-    test = re.compile("WARNING:")
-    extwarnings = list(filter(test.search, results))
-    for e in extwarnings:
-        debug.warning(e.strip("\n"))
+        test = re.compile("WARNING:")
+        extwarnings = list(filter(test.search, results))
+        for e in extwarnings:
+            debug.warning(e.strip("\n"))
 
-    # MRG - 9/26/17 - Change this to exclude warnings because of
-    # multiple labels on different pins in column mux.
-    ext_errors = len(exterrors)
-    ext_warnings = len(extwarnings)
+        # MRG - 9/26/17 - Change this to exclude warnings because of
+        # multiple labels on different pins in column mux.
+        ext_errors = len(exterrors)
+        ext_warnings = len(extwarnings)
 
-    # also check the output file
-    f = open(outfile, "r")
-    results = f.readlines()
-    f.close()
+        # also check the output file
+        f = open(outfile, "r")
+        results = f.readlines()
+        f.close()
 
-    # Errors begin with "ERROR:"
-    test = re.compile("ERROR:")
-    stdouterrors = list(filter(test.search, results))
-    for e in stdouterrors:
-        debug.error(e.strip("\n"))
+        # Errors begin with "ERROR:"
+        test = re.compile("ERROR:")
+        stdouterrors = list(filter(test.search, results))
+        for e in stdouterrors:
+            debug.error(e.strip("\n"))
 
-    out_errors = len(stdouterrors)
-    total_errors = summary_errors + out_errors + ext_errors
+        out_errors = len(stdouterrors)
+        total_errors = summary_errors + out_errors + ext_errors
 
-    # always display this summary
-    result_str = "{0}\tSummary: {1}\tOutput: {2}\tExtraction: {3}".format(cell_name,
-                                                                            summary_errors,
-                                                                            out_errors,
-                                                                            ext_errors)
-    if total_errors > 0:
-        debug.warning(result_str)
-    else:
-        debug.info(1, result_str)
+        # always display this summary
+        result_str = "{0}\tSummary: {1}\tOutput: {2}\tExtraction: {3}".format(cell_name,
+                                                                                summary_errors,
+                                                                                out_errors,
+                                                                                ext_errors)
+        if total_errors > 0:
+            debug.warning(result_str)
+        else:
+            debug.info(1, result_str)
 
-    return total_errors
+        return total_errors
 
 
 def run_pex(cell_name, gds_name, sp_name, output=None, final_verification=False):

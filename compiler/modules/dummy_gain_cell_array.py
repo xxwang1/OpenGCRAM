@@ -91,6 +91,9 @@ class dummy_gain_cell_array(gain_cell_base_array):
         if OPTS.gc_type == "Si":
             self.add_pin("vdd", "POWER")
             self.add_pin("gnd", "GROUND")
+        if OPTS.gc_type == "hybrid":
+            self.add_pin("vdd", "POWER")
+            self.add_pin("gnd", "GROUND")
 
     def add_layout_pins(self):
         """ Add the layout pins """
@@ -154,12 +157,20 @@ class dummy_gain_cell_array(gain_cell_base_array):
                                     width=self.width,
                                     height=rwl_pin.height())
             for port in self.write_ports:
-                wwl_pin = self.cell_inst[row, 0].get_pin(wl_names[port])
-                self.add_layout_pin(text="wwl_{0}_{1}".format(port, row),
+                if OPTS.gc_type == "hybrid":
+                    add_rect=False
+                    width = 0.07
+                else:
+                    add_rect=True
+                    width = self.width
+                if OPTS.gc_type == "Si":
+                    wwl_pin = self.cell_inst[row, 0].get_pin(wl_names[port])
+                    self.add_layout_pin(text="wwl_{0}_{1}".format(port, row),
                                     layer=wwl_pin.layer,
                                     offset=wwl_pin.ll().scale(0, 1),
-                                    width=self.width,
-                                    height=wwl_pin.height())
+                                    width=width,
+                                    height=wwl_pin.height(),
+                                    add_rect=add_rect)
 
     def route_supplies(self):
 
@@ -167,7 +178,7 @@ class dummy_gain_cell_array(gain_cell_base_array):
         for row in range(self.row_size):
             for col in range(self.column_size):
                 inst = self.cell_inst[row, col]
-                if OPTS.gc_type == "Si":
+                if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                     for pin_name in ["vdd", "gnd"]:
                         self.copy_layout_pin(inst, pin_name)
                         

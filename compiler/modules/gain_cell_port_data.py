@@ -64,7 +64,7 @@ class gain_cell_port_data(design):
 
     def get_rbl_names(self):
         # bl lines are connect from the precharger
-        if OPTS.gc_type == "Si":
+        if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
             return self.predischarge.get_rbl_names()
         else:
             return self.precharge.get_rbl_names()
@@ -208,7 +208,7 @@ class gain_cell_port_data(design):
         elif self.port in self.read_ports:
             # sense_amp -> (column_mux) -> precharge -> gain_cell_array
             self.route_sense_amp_out(self.port)
-            if OPTS.gc_type == "Si":
+            if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                 self.route_sense_amp_to_column_mux_or_predischarge_array(self.port)
                 self.route_column_mux_to_predischarge_array(self.port)
             else:
@@ -266,7 +266,7 @@ class gain_cell_port_data(design):
                                             #   gain_cell_br=self.br_names[self.port],
                                               column_offset=self.port - 1)
         if self.port in self.read_ports:
-            if OPTS.gc_type == "Si":
+            if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                 self.predischarge_array = factory.create(module_type="gain_cell_predischarge_array",
                                               columns=self.num_cols + self.num_spare_cols + self.has_rbl,
                                               offsets=precharge_bit_offsets,
@@ -359,7 +359,7 @@ class gain_cell_port_data(design):
         # used for bl/br names
         
         if self.port in self.read_ports:
-            if OPTS.gc_type == "Si":
+            if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                 self.predischarge = factory.create(module_type=OPTS.gain_cell_predischarge,
                                             gain_cell_rbl=self.rbl_names[0])
             elif OPTS.gc_type == "OS":
@@ -580,7 +580,7 @@ class gain_cell_port_data(design):
 
         vertical_port_order = []
         if self.port in self.read_ports:
-            if OPTS.gc_type == "Si":
+            if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                 vertical_port_order.append(self.predischarge_array_inst)
             else:
                 vertical_port_order.append(self.precharge_array_inst)
@@ -607,7 +607,7 @@ class gain_cell_port_data(design):
         self.sense_amp_offset = vertical_port_offsets[2]
         self.column_mux_offset = vertical_port_offsets[1]
         if self.port in self.read_ports:
-            if OPTS.gc_type == "Si":
+            if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                 self.predischarge_offset = vertical_port_offsets[0]
                 self.precharge_offset = False
             else:
@@ -1018,7 +1018,7 @@ class gain_cell_port_data(design):
             # self.copy_layout_pin(self.precharge_array_inst, "br_0", "rbl_br")
             bit_offset=1
         elif self.port==1 and self.has_rbl:
-            if OPTS.gc_type == "Si":
+            if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                 self.copy_layout_pin(self.predischarge_array_inst, "rbl_{}".format(self.num_cols + self.num_spare_cols), "rbl_rbl")
             else:
                 self.copy_layout_pin(self.precharge_array_inst, "rbl_{}".format(self.num_cols + self.num_spare_cols), "rbl_rbl")

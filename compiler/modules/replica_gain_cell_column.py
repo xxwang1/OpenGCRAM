@@ -94,7 +94,7 @@ class replica_gain_cell_column(gain_cell_base_array):
             else:
                 self.add_pin(wl_name, "INPUT")
         self.add_pin("vdd", "POWER")
-        if OPTS.gc_type == "Si":
+        if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
             self.add_pin("gnd", "GROUND")
 
     def add_modules(self):
@@ -202,15 +202,21 @@ class replica_gain_cell_column(gain_cell_base_array):
                                     width=self.width,
                                     height=rwl_pin.height())
                 elif port in self.write_ports:
-                    wwl_pin = self.cell_inst[row].get_pin(self.cell.get_wwl_name(port))
-                    self.add_layout_pin(text="wwl_{0}_{1}".format(port, row),
+                    if OPTS.gc_type == "hybrid":
+                        add_rect=False
+                    else:
+                        add_rect=True
+                    if OPTS.gc_type == "Si":
+                        wwl_pin = self.cell_inst[row].get_pin(self.cell.get_wwl_name(port))
+                        self.add_layout_pin(text="wwl_{0}_{1}".format(port, row),
                                     layer=wwl_pin.layer,
                                     offset=wwl_pin.ll().scale(0, 1),
                                     width=self.width,
-                                    height=wwl_pin.height())
+                                    height=wwl_pin.height(),
+                                    add_rect=add_rect)
 
     def route_supplies(self):
-        if OPTS.gc_type == "Si":
+        if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
             for inst in self.cell_inst:
                 for pin_name in ["vdd", "gnd"]:
                     self.copy_layout_pin(inst, pin_name)
@@ -249,6 +255,10 @@ class replica_gain_cell_column(gain_cell_base_array):
         if OPTS.gc_type == "OS":
             if cell == "replica":
                 gain_cell_pins.append("vdd")
+        if OPTS.gc_type == "hybrid":
+            gain_cell_pins.append("vdd")
+            # if cell == "replica":
+            gain_cell_pins.append("gnd")
         else:
             if OPTS.gc_type == "Si":
                 gain_cell_pins.append("vdd")

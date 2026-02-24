@@ -94,15 +94,20 @@ class gain_cell_port_address(design):
                     self.copy_layout_pin(self.rbl_driver_inst, "vdd")
             else:
                 rbl_pos = self.rbl_driver_inst.get_pin("vdd").rc()
-                self.add_power_pin("vdd", rbl_pos, minarea=True)
+                if OPTS.level_shifter and self.port in self.write_ports:
+                    self.add_power_pin("vddio", rbl_pos, minarea=True)
+                else:
+                    self.add_power_pin("vdd", rbl_pos, minarea=True)
                 if OPTS.level_shifter == None or self.port in self.read_ports:
                     self.add_path("m4", [rbl_pos, self.wordline_driver_array_inst.get_pins("vdd")[0].rc()])
+                if OPTS.level_shifter and self.port in self.write_ports:
+                    self.add_path("m4", [rbl_pos, self.wordline_driver_array_inst.get_pins("vddio")[0].rc()])
         if OPTS.level_shifter and self.port in self.write_ports:
             self.copy_layout_pin(self.wordline_driver_array_inst, "vddio")
         else:
             self.copy_layout_pin(self.wordline_driver_array_inst, "vdd")
         self.copy_layout_pin(self.wordline_driver_array_inst, "gnd")
-
+        
         self.copy_layout_pin(self.row_decoder_inst, "vdd")
         self.copy_layout_pin(self.row_decoder_inst, "gnd")
 
@@ -110,6 +115,9 @@ class gain_cell_port_address(design):
             self.copy_layout_pin(self.wwlls_inst, "vdd", "vdd")
             self.copy_layout_pin(self.wwlls_inst, "vddio", "vddio")
             self.copy_layout_pin(self.wwlls_inst, "gnd", "gnd")
+            wwlls_vdd_pos = self.wwlls_inst.get_pin("vdd").rc()
+            wwlls_vddio_pos = self.wwlls_inst.get_pin("vddio").rc()
+            wwlls_gnd_pos = self.wwlls_inst.get_pin("gnd").rc()
 
         # Also connect the B input of the RBL and_dec to vdd
         if self.has_rbl:
@@ -119,6 +127,9 @@ class gain_cell_port_address(design):
                 self.add_path(rbl_b_pin.layer, [rbl_b_pin.center(), rbl_loc])
                 if OPTS.level_shifter and self.port in self.write_ports:
                     self.add_power_pin("vddio", rbl_loc, start_layer=rbl_b_pin.layer,minarea=True)
+                    self.add_power_pin("vddio", wwlls_vddio_pos, start_layer=self.wwlls_inst.get_pin("vddio").layer,minarea=True)
+                    self.add_path("m4", [wwlls_vddio_pos, self.rbl_driver_inst.get_pin("vdd").rc()])
+                    self.add_path("m4", [rbl_loc, self.rbl_driver_inst.get_pin("vdd").rc()])
                 else:
                     self.add_power_pin("vdd", rbl_loc, start_layer=rbl_b_pin.layer,minarea=True)
 
@@ -184,15 +195,22 @@ class gain_cell_port_address(design):
             en_in_pos = en_in_pin.center()
             en_in_offset = en_in_pos
             self.add_via_stack_center(from_layer=en_shifted_pin.layer,
-                                      to_layer=en_pin.layer,
+                                      to_layer="m3",
                                       offset=en_shifted_pos)
+            
             if self.has_rbl:
-                self.add_zjog(layer=en_pin.layer,
+                self.add_via_stack_center(from_layer=en_pin.layer,
+                                      to_layer="m3",
+                                      offset=rbl_in_pos)
+                self.add_zjog(layer="m3",
                           start=en_shifted_pos,
                           end=rbl_in_pos,
                           first_direction="H")
             else:
-                self.add_zjog(layer=en_pin.layer,
+                self.add_via_stack_center(from_layer=en_pin.layer,
+                                      to_layer="m3",
+                                      offset=rbl_in_pos)
+                self.add_zjog(layer="m3",
                           start=en_shifted_pos,
                           end=en_pos,
                           first_direction="H")
@@ -280,9 +298,15 @@ class gain_cell_port_address(design):
             else:
                 temp.append("wwl_en")
             if OPTS.local_array_size == 0:
-                temp.append("vdd")
+                if OPTS.level_shifter and self.port in self.write_ports:
+                    temp.append("vddio")
+                else:
+                    temp.append("vdd")
             temp.append("rbl_wwl")
-            temp.append("vdd")
+            if OPTS.level_shifter and self.port in self.write_ports:
+                temp.append("vddio")
+            else:
+                temp.append("vdd")
             temp.append("gnd")
             self.connect_inst(temp)
 

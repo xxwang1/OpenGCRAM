@@ -138,12 +138,16 @@ class gain_cell_wordline_driver_array(design):
 
     def place_drivers(self):
         if self.port in self.read_ports:
+            if OPTS.gc_type == "Si":
+                height = self.rwl_driver.height
+            if OPTS.gc_type == "hybrid" or OPTS.gc_type == "OS":
+                height = self.rwl_driver.height
             for row in range(self.rows):
                 if (row % 2):
-                    y_offset = self.rwl_driver.height * (row + 1)
+                    y_offset = height * (row + 1)
                     inst_mirror = "MX"
                 else:
-                    y_offset = self.rwl_driver.height * row
+                    y_offset = height * row
                     inst_mirror = "R0"
 
                 and2_offset = [self.rwl_driver.width, y_offset]
@@ -152,12 +156,16 @@ class gain_cell_wordline_driver_array(design):
                 self.rwld_inst[row].place(offset=and2_offset,
                                         mirror=inst_mirror)
         elif self.port in self.write_ports:
+            if OPTS.gc_type == "Si":
+                height = self.wwl_driver.height
+            if OPTS.gc_type == "hybrid" or OPTS.gc_type == "OS":
+                height = self.wwl_driver.height
             for row in range(self.rows):
                 if (row % 2):
-                    y_offset = self.wwl_driver.height * (row + 1) 
+                    y_offset = height * (row + 1) 
                     inst_mirror = "MX"
                 else:
-                    y_offset = self.wwl_driver.height * row 
+                    y_offset = height * row 
                     inst_mirror = "R0"
 
                 and2_offset = [self.wwl_driver.width, y_offset]

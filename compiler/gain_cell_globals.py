@@ -236,6 +236,7 @@ def setup_gain_cell():
         OPTS.dummy_gain_cell = "dummy_" + OPTS.gain_cell
         OPTS.replica_gain_cell = "replica_" + OPTS.gain_cell
         print("OPTS.gain_cell = ", OPTS.gain_cell)
+        print("OPTS.gc_type = ", OPTS.gc_type)
     # See if gain_cell exists
     print("openram.modules." + OPTS.gain_cell)
     c = importlib.import_module("openram.modules." + OPTS.gain_cell)
@@ -467,6 +468,7 @@ def find_exe(check_exe):
     for path in search_path.split(os.pathsep):
         exe = os.path.join(path, check_exe)
         # if it is found, then break and use first version
+        print("search exe=", exe)
         if is_exe(exe):
             return exe
     return None

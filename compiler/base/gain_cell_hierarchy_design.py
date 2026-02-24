@@ -68,7 +68,7 @@ class gain_cell_hierarchy_design(spice, layout):
             self.gds_write("{0}{1}".format(OPTS.openram_temp, tempgds))
             # Final verification option does not allow nets to be connected by label.
             self.drc_errors = verify.run_drc(self.cell_name, tempgds, tempspice, extract=True, final_verification=final_verification)
-            if OPTS.gc_type == "Si":
+            if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                 self.lvs_errors = verify.run_lvs(self.cell_name, tempgds, tempspice, final_verification=final_verification)
 
             # force_check is used to determine decoder height and other things, so we shouldn't fail
@@ -77,7 +77,7 @@ class gain_cell_hierarchy_design(spice, layout):
                 debug.check(self.drc_errors == 0,
                             "DRC failed for {0} with {1} error(s)".format(self.cell_name,
                                                                           self.drc_errors))
-                if OPTS.gc_type == "Si":
+                if OPTS.gc_type == "Si" or OPTS.gc_type == "hybrid":
                     debug.check(self.lvs_errors == 0,
                             "LVS failed for {0} with {1} errors(s)".format(self.cell_name,
                                                                            self.lvs_errors))
@@ -110,7 +110,7 @@ class gain_cell_hierarchy_design(spice, layout):
         # Do not run if disabled in options.
 
         # No layout to check
-        if OPTS.netlist_only or OPTS.gc_type == "OS":
+        if OPTS.netlist_only:
             return
         elif (not OPTS.is_unit_test and OPTS.check_lvsdrc and (OPTS.inline_lvsdrc or final_verification)):
             tempspice = "{}.sp".format(self.cell_name)
