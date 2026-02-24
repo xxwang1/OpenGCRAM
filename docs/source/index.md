@@ -56,15 +56,6 @@ Commercial tools (optional):
     * Fabricable technology
     * Calibre for DRC/LVS
     * Email xxwang1@stanford.edu for access to technology scripts and customized cell designs (You need to have your TSMC NDA signed). 
-* NCSU FreePDK 45nm
-    * Non-fabricable but contains DSM rules
-    * Calibre or klayout for DRC/LVS
-* MOSIS 0.35um (SCN4M\_SUBM)
-    * Fabricable technology
-    * Magic/Netgen or Calibre for DRC/LVS
-* Skywater 130nm (sky130)
-    * Fabricable technology
-    * Magic/Netgen or klayout
 
 
 
