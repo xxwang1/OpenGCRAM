@@ -4,8 +4,7 @@ If you want to support a new technology, you will need to create:
 + a setup script for each technology you want to use
 + a technology directory for each technology with the base cells
 
-We provide two technology examples for [SCMOS] and [FreePDK45]. Each
-specific technology (e.g., [FreePDK45]) should be a subdirectory
+Each specific technology (e.g., [FreePDK45]) should be a subdirectory
 (e.g., `$OPENRAM_TECH/freepdk45`) and include certain folders and files:
 * `gds_lib` folder with all the `.gds` (premade) library cells:
   * `dff.gds`
